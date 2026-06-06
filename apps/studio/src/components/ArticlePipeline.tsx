@@ -1,70 +1,20 @@
-type PipelineItem = {
-  slug: string;
-  title: string;
-  status: "draft" | "ready";
-  updatedAt: string;
-  category: string;
-};
-
-const PIPELINE: PipelineItem[] = [
-  {
-    slug: "draft-outline",
-    title: "Draft outline",
-    status: "draft",
-    updatedAt: "2026-06-05",
-    category: "Uncategorized",
-  },
-  {
-    slug: "release-notes-june",
-    title: "Release notes — June",
-    status: "ready",
-    updatedAt: "2026-06-04",
-    category: "Updates",
-  },
-];
-
 export function ArticlePipeline() {
   return (
     <section className="panel article-pipeline">
       <div className="panel__header">
-        <h2 className="panel__title">Article pipeline</h2>
-        <p className="panel__meta">2 items in workspace</p>
+        <h2 className="panel__title">Articles</h2>
+        <p className="panel__meta">Published files are not listed here yet</p>
       </div>
 
-      <table className="article-pipeline__table">
-        <thead>
-          <tr>
-            <th scope="col">Title</th>
-            <th scope="col">Slug</th>
-            <th scope="col">Category</th>
-            <th scope="col">Updated</th>
-            <th scope="col">Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {PIPELINE.map((item) => (
-            <tr key={item.slug}>
-              <td>{item.title}</td>
-              <td>
-                <code>{item.slug}</code>
-              </td>
-              <td>{item.category}</td>
-              <td>{item.updatedAt}</td>
-              <td>
-                <span
-                  className={
-                    item.status === "ready"
-                      ? "article-pipeline__badge article-pipeline__badge--ready"
-                      : "article-pipeline__badge"
-                  }
-                >
-                  {item.status}
-                </span>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div className="empty-state">
+        <p className="empty-state__title">No tracked articles</p>
+        <p className="empty-state__body">
+          SourceDraft does not sync your GitHub repo into this view in the
+          current MVP. Use <strong>New Article</strong> to write and publish a
+          post. After publishing, check the file in your repository under the
+          configured content directory.
+        </p>
+      </div>
     </section>
   );
 }

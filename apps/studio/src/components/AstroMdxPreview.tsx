@@ -24,7 +24,9 @@ export function AstroMdxPreview({
       <div className="panel__header">
         <h2 className="panel__title">Astro MDX output</h2>
         <p className="panel__meta">
-          {valid ? "@sourcedraft/adapter-astro-mdx" : "Blocked by validation"}
+          {valid
+            ? "Preview of the file that will be committed"
+            : "Fix validation issues to preview output"}
         </p>
       </div>
 

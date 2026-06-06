@@ -23,7 +23,7 @@ export function CommandBar({
         <span className="command-bar__mark">SD</span>
         <div>
           <p className="command-bar__title">SourceDraft Studio</p>
-          <p className="command-bar__subtitle">Git-based MDX publishing</p>
+          <p className="command-bar__subtitle">Markdown / MDX writing workspace</p>
         </div>
       </div>
 
@@ -47,7 +47,7 @@ export function CommandBar({
 
       <div className="command-bar__status">
         <span className="command-bar__status-label">Auth</span>
-        <span className="command-bar__status-value">MVP local session</span>
+        <span className="command-bar__status-value">Signed in</span>
         <button
           type="button"
           className="button button--compact command-bar__logout"

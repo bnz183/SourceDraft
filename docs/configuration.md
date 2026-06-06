@@ -1,5 +1,7 @@
 # Configuration
 
+See also: [Getting started](getting-started.md) · [Non-technical overview](non-technical-overview.md)
+
 SourceDraft splits configuration into two layers:
 
 1. **Project config** — `sourcedraft.config.json` (non-secret, commit-safe)

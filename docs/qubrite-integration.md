@@ -1,7 +1,8 @@
-# QuBrite Integration
+# QuBrite integration example
 
-QuBrite is the first real-world integration target.
+[QuBrite.com](https://qubrite.com) was the first site published with SourceDraft. It uses the same generic config any Astro MDX project would use:
 
-The CMS should publish Astro MDX files into the QuBrite repo through GitHub, using environment variables and adapter configuration.
+- `sourcedraft.config.json` for content paths and categories
+- `.env` for `GITHUB_OWNER`, `GITHUB_REPO`, and `GITHUB_TOKEN`
 
-No QuBrite-specific logic should be hardcoded into the core packages.
+No QuBrite-specific logic belongs in the core packages. Site-specific values stay in config files.

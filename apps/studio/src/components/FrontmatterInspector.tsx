@@ -29,7 +29,7 @@ export function FrontmatterInspector({
     <aside className="panel frontmatter-inspector">
       <div className="panel__header">
         <h2 className="panel__title">Frontmatter</h2>
-        <p className="panel__meta">Universal article schema</p>
+        <p className="panel__meta">Title, dates, category, tags, draft</p>
       </div>
 
       <div className="frontmatter-inspector__grid">

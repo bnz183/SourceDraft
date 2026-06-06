@@ -93,6 +93,13 @@ function App() {
     });
   }, [authenticated]);
 
+  const githubReady = useMemo(
+    () =>
+      studioConfig.githubOwner.trim().length > 0 &&
+      studioConfig.githubRepo.trim().length > 0,
+    [studioConfig.githubOwner, studioConfig.githubRepo],
+  );
+
   const normalizedArticle = useMemo(() => {
     if (!validation.valid) {
       return null;
@@ -204,7 +211,12 @@ function App() {
         {view === "dashboard" && (
           <div className="studio__stack">
             <ArticlePipeline />
-            <AdapterStatus />
+            <AdapterStatus
+              adapter={studioConfig.adapter}
+              githubOwner={studioConfig.githubOwner}
+              githubRepo={studioConfig.githubRepo}
+              contentDir={studioConfig.contentDir}
+            />
           </div>
         )}
 
@@ -226,6 +238,7 @@ function App() {
                 publishing={publishing}
                 publishError={publishError}
                 publishSuccess={publishSuccess}
+                githubReady={githubReady}
                 onPublish={handlePublish}
               />
             </div>
@@ -247,9 +260,16 @@ function App() {
               <div className="panel__header">
                 <h2 className="panel__title">Publishing configuration</h2>
                 <p className="panel__meta">
-                  sourcedraft.config.json + .env (secrets server-side)
+                  Paths and categories from sourcedraft.config.json. GitHub
+                  target from .env.
                 </p>
               </div>
+
+              <p className="settings-panel__note">
+                Publishing requires a GitHub token with write access to the
+                target repository. The token is read only by the server when you
+                publish.
+              </p>
 
               <div className="settings-panel__grid">
                 <label className="field">
@@ -326,7 +346,12 @@ function App() {
               </div>
             </section>
 
-            <AdapterStatus />
+            <AdapterStatus
+              adapter={studioConfig.adapter}
+              githubOwner={studioConfig.githubOwner}
+              githubRepo={studioConfig.githubRepo}
+              contentDir={studioConfig.contentDir}
+            />
           </div>
         )}
       </main>

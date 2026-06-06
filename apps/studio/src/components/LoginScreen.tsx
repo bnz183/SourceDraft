@@ -31,14 +31,19 @@ export function LoginScreen({ configured, onLogin }: LoginScreenProps) {
       <section className="panel login-screen__panel">
         <div className="panel__header">
           <h1 className="panel__title">SourceDraft Studio</h1>
-          <p className="panel__meta">MVP local password auth</p>
+          <p className="panel__meta">Sign in to your local writing workspace</p>
         </div>
 
         <form className="login-screen__form" onSubmit={handleSubmit}>
+          <p className="login-screen__intro">
+            Studio is protected by a server-side password. This MVP setup uses
+            one shared admin password, not user accounts.
+          </p>
+
           {!configured && (
             <p className="login-screen__notice">
-              Set <code>SOURCEDRAFT_ADMIN_PASSWORD</code> in <code>.env</code>{" "}
-              before signing in.
+              Add <code>SOURCEDRAFT_ADMIN_PASSWORD</code> to <code>.env</code>{" "}
+              and restart the API server.
             </p>
           )}
 

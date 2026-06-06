@@ -16,7 +16,7 @@ export function EditorWorkspace({ body, onBodyChange }: EditorWorkspaceProps) {
         value={body}
         onChange={(event) => onBodyChange(event.target.value)}
         spellCheck={false}
-        placeholder="Write article content here..."
+        placeholder="Write Markdown or MDX content. Headings, lists, and code blocks are fine."
         aria-label="Article body"
       />
     </section>

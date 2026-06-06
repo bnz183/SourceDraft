@@ -483,6 +483,13 @@ select.field__input {
   padding: 12px;
 }
 
+.login-screen__intro {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
 .login-screen__notice {
   margin: 0;
   font-size: 12px;
@@ -516,10 +523,45 @@ select.field__input {
   align-items: flex-end;
 }
 
+.publish-gate__hint {
+  margin: 0;
+  padding: 12px 12px 0;
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
 .publish-gate__actions {
   display: flex;
   gap: 8px;
   padding: 12px;
+}
+
+.empty-state {
+  padding: 16px 12px 20px;
+}
+
+.empty-state__title {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.empty-state__body {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.55;
+  max-width: 62ch;
+}
+
+.settings-panel__note {
+  margin: 0;
+  padding: 0 12px 12px;
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  border-bottom: 1px solid var(--border);
 }
 
 .publish-gate__message {

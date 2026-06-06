@@ -1,48 +1,120 @@
 # SourceDraft
 
-SourceDraft is an open-source Git-based CMS for Markdown and MDX publishing.
+SourceDraft is a free, open-source writing dashboard for Markdown and MDX blogs. It helps you draft posts, check metadata, preview MDX output, and publish files to a GitHub repository that powers a static site.
 
-It is designed for static blogs, technical publications, and writers who want a clean publishing workflow without a heavy WordPress-style backend.
+SourceDraft started as an internal publishing tool for [QuBrite.com](https://qubrite.com) and is being released as a free open-source project for other static-site publishers.
 
-## Current goal
+## What is SourceDraft?
 
-Build a portable CMS with:
+SourceDraft is not a hosted CMS and not WordPress. It is a small local Studio plus a publishing pipeline:
 
-- Universal article schema
-- Astro MDX adapter first
-- GitHub publishing
-- Studio editor UI
-- Adapter-based architecture for future platforms
+1. Write an article in the browser
+2. Validate title, slug, dates, category, and body
+3. Preview the MDX file SourceDraft will create
+4. Publish the file to your GitHub repo with one action
 
-## Configuration
+Your site still builds the way it already does (Astro, or another static generator). SourceDraft only writes content into the repo.
 
-SourceDraft uses two configuration layers:
+## Who is this for?
 
-1. **`sourcedraft.config.json`** — project settings (adapter, paths, categories)
-2. **`.env`** — secrets and optional overrides (`GITHUB_TOKEN`, `GITHUB_OWNER`, `GITHUB_REPO`)
+**Writers and bloggers** who use a Git-backed static site and want a focused editor instead of jumping between frontmatter, file paths, and Git commands.
 
-Copy the example config:
+**Developers** who maintain Markdown/MDX publications and want a portable schema, adapters, and a path to more publishing targets later.
+
+**Not a fit (yet)** if you need multi-user accounts, media uploads inside the CMS, in-browser Git history, or a fully hosted backend.
+
+## Quickstart
+
+Requirements: Node.js 22+, pnpm 11+
 
 ```bash
+git clone <your-fork-url>
+cd sourcedraft
+pnpm install
+
 cp sourcedraft.config.example.json sourcedraft.config.json
-```
-
-Copy environment variables:
-
-```bash
 cp .env.example .env
 ```
 
-See [docs/configuration.md](docs/configuration.md) for precedence, field reference, and Studio setup.
+Edit `.env` with at least:
 
-## Planned adapters
+```env
+SOURCEDRAFT_ADMIN_PASSWORD=choose-a-local-password
+GITHUB_TOKEN=your-github-token
+GITHUB_OWNER=your-github-username-or-org
+GITHUB_REPO=your-site-repo
+```
 
-- Astro MDX
-- Next.js MDX
-- Hugo Markdown
-- WordPress REST API
-- Ghost API
+Start Studio:
 
-## Status
+```bash
+pnpm dev
+```
 
-Early MVP.
+Open the local Studio URL, sign in, go to **New Article**, fill in the form, preview the MDX output, and publish.
+
+Publishing writes a `.mdx` file into the path defined by `contentDir` in your config (default: `src/content/blog`).
+
+## Configuration
+
+SourceDraft uses two layers:
+
+| Layer | File | Holds |
+|-------|------|-------|
+| Project config | `sourcedraft.config.json` | Adapter, content paths, categories |
+| Secrets | `.env` | Password, GitHub token, repo target |
+
+Example project config:
+
+```json
+{
+  "adapter": "astro-mdx",
+  "contentDir": "src/content/blog",
+  "mediaDir": "src/assets/images",
+  "defaultBranch": "main",
+  "categories": ["Guides", "Notes", "Reviews", "Tutorials", "Reference"]
+}
+```
+
+See [docs/configuration.md](docs/configuration.md) for precedence and overrides.
+
+## Environment variables
+
+| Variable | Required | Purpose |
+|----------|----------|---------|
+| `SOURCEDRAFT_ADMIN_PASSWORD` | Yes | Protects Studio (server-side check) |
+| `GITHUB_TOKEN` | Yes | Publishes files via GitHub API (server-side only) |
+| `GITHUB_OWNER` | Yes | Repository owner |
+| `GITHUB_REPO` | Yes | Repository name |
+| `GITHUB_BRANCH` | No | Target branch (default: `main`) |
+| `CMS_CONTENT_DIR` | No | Overrides `contentDir` from config |
+| `CMS_MEDIA_DIR` | No | Overrides `mediaDir` from config |
+| `CMS_ADAPTER` | No | Overrides `adapter` from config |
+
+Never commit `.env`. The browser never receives your GitHub token or admin password.
+
+## Current status
+
+SourceDraft is an early MVP. It works for single-editor local publishing to GitHub, with the Astro MDX adapter.
+
+Known limitations:
+
+- Local password auth only (no OAuth or user accounts)
+- No image upload inside Studio
+- No article list synced from GitHub yet
+- One adapter shipped: `astro-mdx`
+- Sessions reset when the API server restarts
+
+See [docs/project-status.md](docs/project-status.md) for detail.
+
+## Documentation
+
+- [Getting started](docs/getting-started.md) — setup walkthrough
+- [Non-technical overview](docs/non-technical-overview.md) — for bloggers
+- [Configuration](docs/configuration.md) — config file and env reference
+- [Architecture](docs/architecture.md) — how the pieces connect
+- [Project status](docs/project-status.md) — MVP scope and roadmap context
+
+## License
+
+MIT
