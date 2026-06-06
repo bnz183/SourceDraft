@@ -10,6 +10,9 @@ importers:
 
   apps/studio:
     dependencies:
+      '@sourcedraft/adapter-astro-mdx':
+        specifier: workspace:*
+        version: link:../../packages/adapter-astro-mdx
       '@sourcedraft/core':
         specifier: workspace:*
         version: link:../../packages/core

@@ -4,14 +4,15 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "predev": "pnpm --filter @sourcedraft/core build",
-    "prebuild": "pnpm --filter @sourcedraft/core build",
+    "predev": "pnpm --filter @sourcedraft/core --filter @sourcedraft/adapter-astro-mdx build",
+    "prebuild": "pnpm --filter @sourcedraft/core --filter @sourcedraft/adapter-astro-mdx build",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@sourcedraft/adapter-astro-mdx": "workspace:*",
     "@sourcedraft/core": "workspace:*",
     "react": "^19.2.6",
     "react-dom": "^19.2.6"

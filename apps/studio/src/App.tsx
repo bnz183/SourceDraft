@@ -5,9 +5,8 @@ import { ArticlePipeline } from "./components/ArticlePipeline";
 import { CommandBar } from "./components/CommandBar";
 import { EditorWorkspace } from "./components/EditorWorkspace";
 import { FrontmatterInspector } from "./components/FrontmatterInspector";
-import { FrontmatterPreview } from "./components/FrontmatterPreview";
+import { AstroMdxPreview } from "./components/AstroMdxPreview";
 import { PublishGate } from "./components/PublishGate";
-import { ValidationPanel } from "./components/ValidationPanel";
 import {
   createInitialFormState,
   formStateToArticleInput,
@@ -102,17 +101,12 @@ function App() {
               {fieldErrors.body && (
                 <p className="editor-workspace__error">{fieldErrors.body}</p>
               )}
-              <FrontmatterPreview form={form} />
-              <ValidationPanel
+              <AstroMdxPreview
                 valid={validation.valid}
                 issues={validation.issues}
+                article={normalizedArticle}
               />
               <PublishGate ready={validation.valid} />
-              {normalizedArticle && (
-                <p className="studio__normalized-meta">
-                  Normalized slug: <code>{normalizedArticle.slug}</code>
-                </p>
-              )}
             </div>
             <FrontmatterInspector
               values={form}

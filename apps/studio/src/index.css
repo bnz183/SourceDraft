@@ -383,19 +383,49 @@ select.field__input:focus {
   color: var(--danger);
 }
 
-.frontmatter-preview__code {
+.mdx-output__content {
+  display: flex;
+  flex-direction: column;
+}
+
+.mdx-output__path {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-raised);
+}
+
+.mdx-output__path-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+  flex-shrink: 0;
+}
+
+.mdx-output__path code {
+  font-size: 12px;
+  color: var(--accent);
+}
+
+.mdx-output__code {
   margin: 0;
   padding: 12px;
   overflow: auto;
-  max-height: 240px;
+  max-height: 320px;
   background: var(--bg);
-  border-top: 1px solid var(--border);
   font-family: var(--mono);
   font-size: 12px;
   line-height: 1.5;
   color: var(--text-muted);
   white-space: pre-wrap;
   word-break: break-word;
+}
+
+.mdx-output__issues {
+  border-top: none;
 }
 
 .validation-panel__ok {
@@ -428,14 +458,6 @@ select.field__input:focus {
   font-size: 11px;
   color: var(--danger);
   text-transform: lowercase;
-}
-
-.studio__normalized-meta {
-  margin: 0;
-  padding: 0 2px;
-  font-size: 11px;
-  color: var(--text-dim);
-  font-family: var(--mono);
 }
 
 select.field__input {
