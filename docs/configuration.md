@@ -62,6 +62,7 @@ CMS_ADAPTER=astro-mdx
 
 | Variable | Required | Purpose |
 |----------|----------|---------|
+| `SOURCEDRAFT_ADMIN_PASSWORD` | Yes (Studio) | Local MVP password for Studio access |
 | `GITHUB_TOKEN` | Yes | GitHub API token (server-side only) |
 | `GITHUB_OWNER` | Yes | Repository owner |
 | `GITHUB_REPO` | Yes | Repository name |

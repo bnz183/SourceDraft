@@ -22,6 +22,7 @@ export async function publishArticle(
 ): Promise<PublishApiResponse> {
   const response = await fetch("/api/publish", {
     method: "POST",
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
     },

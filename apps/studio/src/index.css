@@ -464,6 +464,58 @@ select.field__input {
   cursor: pointer;
 }
 
+.login-screen {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: var(--bg);
+}
+
+.login-screen__panel {
+  width: min(100%, 420px);
+}
+
+.login-screen__form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+}
+
+.login-screen__notice {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.login-screen__error {
+  margin: 0;
+  font-size: 12px;
+  color: var(--danger);
+  font-family: var(--mono);
+}
+
+.login-screen__submit {
+  align-self: flex-start;
+}
+
+.login-screen__loading {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-dim);
+  font-family: var(--mono);
+}
+
+.command-bar__logout {
+  margin-top: 6px;
+}
+
+.command-bar__status {
+  align-items: flex-end;
+}
+
 .publish-gate__actions {
   display: flex;
   gap: 8px;

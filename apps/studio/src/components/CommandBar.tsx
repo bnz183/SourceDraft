@@ -3,6 +3,7 @@ import type { View } from "../types/view";
 type CommandBarProps = {
   currentView: View;
   onViewChange: (view: View) => void;
+  onLogout: () => void;
 };
 
 const NAV_ITEMS: { id: View; label: string }[] = [
@@ -11,7 +12,11 @@ const NAV_ITEMS: { id: View; label: string }[] = [
   { id: "settings", label: "Settings" },
 ];
 
-export function CommandBar({ currentView, onViewChange }: CommandBarProps) {
+export function CommandBar({
+  currentView,
+  onViewChange,
+  onLogout,
+}: CommandBarProps) {
   return (
     <header className="command-bar">
       <div className="command-bar__brand">
@@ -41,8 +46,15 @@ export function CommandBar({ currentView, onViewChange }: CommandBarProps) {
       </nav>
 
       <div className="command-bar__status">
-        <span className="command-bar__status-label">Session</span>
-        <span className="command-bar__status-value">Local draft</span>
+        <span className="command-bar__status-label">Auth</span>
+        <span className="command-bar__status-value">MVP local session</span>
+        <button
+          type="button"
+          className="button button--compact command-bar__logout"
+          onClick={onLogout}
+        >
+          Logout
+        </button>
       </div>
     </header>
   );

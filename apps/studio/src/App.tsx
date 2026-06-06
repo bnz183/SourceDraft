@@ -6,7 +6,13 @@ import { CommandBar } from "./components/CommandBar";
 import { EditorWorkspace } from "./components/EditorWorkspace";
 import { FrontmatterInspector } from "./components/FrontmatterInspector";
 import { AstroMdxPreview } from "./components/AstroMdxPreview";
+import { LoginScreen } from "./components/LoginScreen";
 import { PublishGate } from "./components/PublishGate";
+import {
+  fetchAuthStatus,
+  login as loginToStudio,
+  logout as logoutFromStudio,
+} from "./lib/auth";
 import {
   createInitialFormState,
   formStateToArticleInput,
@@ -34,6 +40,9 @@ function issuesByField(
 }
 
 function App() {
+  const [authChecked, setAuthChecked] = useState(false);
+  const [authenticated, setAuthenticated] = useState(false);
+  const [authConfigured, setAuthConfigured] = useState(false);
   const [view, setView] = useState<View>("dashboard");
   const [studioConfig, setStudioConfig] = useState<StudioConfig>(
     FALLBACK_STUDIO_CONFIG,
@@ -57,6 +66,18 @@ function App() {
   );
 
   useEffect(() => {
+    fetchAuthStatus().then((status) => {
+      setAuthConfigured(status.configured);
+      setAuthenticated(status.authenticated);
+      setAuthChecked(true);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!authenticated) {
+      return;
+    }
+
     fetchStudioConfig().then((config) => {
       setStudioConfig(config);
       setForm((current) => {
@@ -70,7 +91,7 @@ function App() {
         };
       });
     });
-  }, []);
+  }, [authenticated]);
 
   const normalizedArticle = useMemo(() => {
     if (!validation.valid) {
@@ -112,6 +133,21 @@ function App() {
     setForm((current) => ({ ...current, slug: slugFromTitle(current.title) }));
   }
 
+  async function handleLogin(password: string) {
+    const result = await loginToStudio(password);
+    if (result.ok) {
+      setAuthenticated(true);
+    }
+    return result;
+  }
+
+  async function handleLogout() {
+    await logoutFromStudio();
+    setAuthenticated(false);
+    setPublishError(null);
+    setPublishSuccess(null);
+  }
+
   async function handlePublish() {
     if (!validation.valid) {
       return;
@@ -142,9 +178,27 @@ function App() {
     }
   }
 
+  if (!authChecked) {
+    return (
+      <div className="login-screen">
+        <p className="login-screen__loading">Checking session...</p>
+      </div>
+    );
+  }
+
+  if (!authenticated) {
+    return (
+      <LoginScreen configured={authConfigured} onLogin={handleLogin} />
+    );
+  }
+
   return (
     <div className="studio">
-      <CommandBar currentView={view} onViewChange={setView} />
+      <CommandBar
+        currentView={view}
+        onViewChange={setView}
+        onLogout={handleLogout}
+      />
 
       <main className="studio__main">
         {view === "dashboard" && (

@@ -20,7 +20,7 @@ export const FALLBACK_STUDIO_CONFIG: StudioConfig = {
 
 export async function fetchStudioConfig(): Promise<StudioConfig> {
   try {
-    const response = await fetch("/api/config");
+    const response = await fetch("/api/config", { credentials: "include" });
     if (!response.ok) {
       return FALLBACK_STUDIO_CONFIG;
     }
