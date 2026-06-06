@@ -107,10 +107,15 @@ Known limitations:
 
 See [docs/project-status.md](docs/project-status.md) for detail.
 
+## Examples
+
+- [examples/astro-blog](examples/astro-blog/) — **integration example only** (folder layout + sample MDX + config; not a runnable Astro site)
+
 ## Documentation
 
 - [Getting started](docs/getting-started.md) — setup walkthrough
 - [Non-technical overview](docs/non-technical-overview.md) — for bloggers
+- [Astro integration example](docs/astro-blog-example.md) — folder layout for an Astro MDX blog (not a starter site)
 - [Configuration](docs/configuration.md) — config file and env reference
 - [Architecture](docs/architecture.md) — how the pieces connect
 - [Project status](docs/project-status.md) — MVP scope and roadmap context

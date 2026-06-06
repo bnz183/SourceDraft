@@ -76,3 +76,5 @@ Open your repository on GitHub and confirm the new `.mdx` file appears under `co
 | Wrong file path | Check `contentDir` in `sourcedraft.config.json` or `CMS_CONTENT_DIR` |
 
 For a plain-language overview, see [non-technical-overview.md](non-technical-overview.md).
+
+For Astro users: [examples/astro-blog](../examples/astro-blog/) is a **folder layout integration example** — not a runnable Astro app. It shows where published files go and what they look like. See [astro-blog-example.md](astro-blog-example.md).
