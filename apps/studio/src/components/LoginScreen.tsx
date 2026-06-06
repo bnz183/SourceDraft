@@ -36,8 +36,8 @@ export function LoginScreen({ configured, onLogin }: LoginScreenProps) {
 
         <form className="login-screen__form" onSubmit={handleSubmit}>
           <p className="login-screen__intro">
-            Studio is protected by a server-side password. This MVP setup uses
-            one shared admin password, not user accounts.
+            One shared admin password, checked on the server. There are no user
+            accounts in this MVP.
           </p>
 
           {!configured && (

@@ -1,15 +1,32 @@
 # Configuration
 
-See also: [Getting started](getting-started.md) · [Non-technical overview](non-technical-overview.md)
+See also: [Getting started](getting-started.md) · [GitHub publishing](github-publishing.md) · [Non-technical overview](non-technical-overview.md)
 
-SourceDraft splits configuration into two layers:
+## Secrets vs project settings
 
-1. **Project config** — `sourcedraft.config.json` (non-secret, commit-safe)
-2. **Environment variables** — `.env` (secrets and optional overrides)
+SourceDraft uses two files on purpose:
 
-## Project config
+**`sourcedraft.config.json`** — shareable project settings
 
-Copy the example file at the repository root:
+- Content paths (`contentDir`, `mediaDir`)
+- Adapter name (`astro-mdx`)
+- Category list for Studio
+- Default branch name when `GITHUB_BRANCH` is unset
+
+Safe to commit. Copy from `sourcedraft.config.example.json` and adjust for your site.
+
+**`.env`** — private values
+
+- `SOURCEDRAFT_ADMIN_PASSWORD` — Studio login
+- `GITHUB_TOKEN` — publish permission
+- `GITHUB_OWNER`, `GITHUB_REPO` — which repository receives files
+- Optional overrides: `GITHUB_BRANCH`, `CMS_CONTENT_DIR`, `CMS_MEDIA_DIR`, `CMS_ADAPTER`
+
+Never commit `.env`. The browser never receives these values.
+
+Think of it this way: **config describes your site layout; env proves who you are and which repo to write to.**
+
+## Project config file
 
 ```bash
 cp sourcedraft.config.example.json sourcedraft.config.json
@@ -30,24 +47,19 @@ Example:
 | Field | Purpose |
 |-------|---------|
 | `adapter` | Publishing adapter (`astro-mdx` today) |
-| `contentDir` | Target directory for generated content files |
-| `mediaDir` | Expected media path for hero images and assets |
-| `defaultBranch` | Default Git branch when `GITHUB_BRANCH` is unset |
-| `categories` | Category options shown in Studio |
+| `contentDir` | Directory for generated `.mdx` files |
+| `mediaDir` | Expected path prefix for hero images |
+| `defaultBranch` | Branch when `GITHUB_BRANCH` is unset |
+| `categories` | Options in the Studio category dropdown |
 
-SourceDraft looks for `sourcedraft.config.json` in:
+SourceDraft searches for `sourcedraft.config.json` in the working directory, up to three levels up (monorepo-friendly), or at `SOURCEDRAFT_CONFIG`.
 
-- The current working directory
-- Two and three levels above (monorepo-friendly)
-- A custom path via `SOURCEDRAFT_CONFIG`
-
-If no file is found, built-in defaults are used.
+Missing file → built-in defaults matching the example above.
 
 ## Environment variables
 
-Keep secrets and deployment-specific values in `.env`:
-
 ```env
+SOURCEDRAFT_ADMIN_PASSWORD=
 GITHUB_TOKEN=
 GITHUB_OWNER=
 GITHUB_REPO=
@@ -57,30 +69,32 @@ GITHUB_BRANCH=main
 Optional overrides:
 
 ```env
-CMS_CONTENT_DIR=src/content/blog
-CMS_MEDIA_DIR=src/assets/images
-CMS_ADAPTER=astro-mdx
+CMS_CONTENT_DIR=
+CMS_MEDIA_DIR=
+CMS_ADAPTER=
 ```
 
 | Variable | Required | Purpose |
 |----------|----------|---------|
-| `SOURCEDRAFT_ADMIN_PASSWORD` | Yes (Studio) | Local MVP password for Studio access |
-| `GITHUB_TOKEN` | Yes | GitHub API token (server-side only) |
-| `GITHUB_OWNER` | Yes | Repository owner |
-| `GITHUB_REPO` | Yes | Repository name |
-| `GITHUB_BRANCH` | No | Overrides `defaultBranch` from project config |
-| `CMS_CONTENT_DIR` | No | Overrides `contentDir` from project config |
-| `CMS_MEDIA_DIR` | No | Overrides `mediaDir` from project config |
-| `CMS_ADAPTER` | No | Overrides `adapter` from project config |
-
-Never commit `.env`. Never expose `GITHUB_TOKEN` to browser code.
+| `SOURCEDRAFT_ADMIN_PASSWORD` | Yes for Studio | Server-side login password |
+| `GITHUB_TOKEN` | Yes to publish | GitHub API token (server only) |
+| `GITHUB_OWNER` | Yes to publish | Repository owner |
+| `GITHUB_REPO` | Yes to publish | Repository name |
+| `GITHUB_BRANCH` | No | Overrides `defaultBranch` |
+| `CMS_CONTENT_DIR` | No | Overrides `contentDir` |
+| `CMS_MEDIA_DIR` | No | Overrides `mediaDir` |
+| `CMS_ADAPTER` | No | Overrides `adapter` |
 
 ## Precedence
 
-For non-secret publishing settings:
+Non-secret settings:
 
 ```
-environment override → sourcedraft.config.json → built-in defaults
+.env override → sourcedraft.config.json → built-in defaults
 ```
 
-Secrets always come from environment variables.
+Secrets:
+
+```
+.env only (never in sourcedraft.config.json)
+```

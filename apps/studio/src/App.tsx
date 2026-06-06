@@ -43,7 +43,7 @@ function App() {
   const [authChecked, setAuthChecked] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
   const [authConfigured, setAuthConfigured] = useState(false);
-  const [view, setView] = useState<View>("dashboard");
+  const [view, setView] = useState<View>("overview");
   const [studioConfig, setStudioConfig] = useState<StudioConfig>(
     FALLBACK_STUDIO_CONFIG,
   );
@@ -208,7 +208,7 @@ function App() {
       />
 
       <main className="studio__main">
-        {view === "dashboard" && (
+        {view === "overview" && (
           <div className="studio__stack">
             <ArticlePipeline />
             <AdapterStatus

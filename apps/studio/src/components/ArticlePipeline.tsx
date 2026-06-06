@@ -3,7 +3,7 @@ export function ArticlePipeline() {
     <section className="panel article-pipeline">
       <div className="panel__header">
         <h2 className="panel__title">Articles</h2>
-        <p className="panel__meta">Published files are not listed here yet</p>
+        <p className="panel__meta">GitHub sync not available in this MVP</p>
       </div>
 
       <div className="empty-state">

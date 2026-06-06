@@ -1,13 +1,17 @@
 # Astro integration example
 
-The [examples/astro-blog](../examples/astro-blog/) directory is a **minimal integration example**. It is not a complete Astro website you can run or deploy from this repo.
+[examples/astro-blog](../examples/astro-blog/) is a **folder layout example**. It is not a website you can run from this repository.
 
-It shows:
+It includes:
 
-- the folder structure SourceDraft expects (`src/content/blog/`)
-- a sample MDX file after publish
-- a `sourcedraft.config.json` aligned with Astro MDX
+- `src/content/blog/` — where SourceDraft writes `.mdx` files
+- A sample published post
+- `sourcedraft.config.json` aligned with Astro MDX
 
-Read [examples/astro-blog/README.md](../examples/astro-blog/README.md) for plain-language steps on what to copy into your own Astro blog repository.
+Read [examples/astro-blog/README.md](../examples/astro-blog/README.md) for what to copy into your own Astro blog repo.
 
-For first-time SourceDraft setup, see [getting-started.md](getting-started.md).
+Related:
+
+- [getting-started.md](getting-started.md) — install and first publish
+- [github-publishing.md](github-publishing.md) — how commits reach GitHub
+- [configuration.md](configuration.md) — config file vs `.env`

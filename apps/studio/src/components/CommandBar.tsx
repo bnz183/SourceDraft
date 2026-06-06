@@ -7,7 +7,7 @@ type CommandBarProps = {
 };
 
 const NAV_ITEMS: { id: View; label: string }[] = [
-  { id: "dashboard", label: "Dashboard" },
+  { id: "overview", label: "Overview" },
   { id: "new-article", label: "New Article" },
   { id: "settings", label: "Settings" },
 ];

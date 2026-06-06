@@ -1,8 +1,8 @@
 # Getting started
 
-This guide assumes you already have a static site repo on GitHub that reads Markdown or MDX content from a folder such as `src/content/blog`.
+You need a GitHub repository for your **site** (for example an Astro blog) that reads posts from a folder such as `src/content/blog`.
 
-## 1. Install
+## 1. Install SourceDraft
 
 ```bash
 git clone <your-fork-url>
@@ -10,21 +10,19 @@ cd sourcedraft
 pnpm install
 ```
 
-## 2. Project config
+## 2. Project settings (`sourcedraft.config.json`)
 
 ```bash
 cp sourcedraft.config.example.json sourcedraft.config.json
 ```
 
-Adjust paths and categories to match your site. The defaults suit a typical Astro content collection layout.
+Edit paths and categories to match your site. These values are safe to commit.
 
-## 3. Environment variables
+## 3. Secrets (`.env`)
 
 ```bash
 cp .env.example .env
 ```
-
-Fill in `.env`:
 
 ```env
 SOURCEDRAFT_ADMIN_PASSWORD=your-local-studio-password
@@ -34,11 +32,16 @@ GITHUB_REPO=your-site-repo
 GITHUB_BRANCH=main
 ```
 
+| File | Holds |
+|------|--------|
+| `sourcedraft.config.json` | `contentDir`, categories, adapter |
+| `.env` | Password, GitHub token, repo owner/name |
+
+See [configuration.md](configuration.md) for the full split.
+
 ### GitHub token
 
-Create a fine-grained or classic personal access token with permission to read and write contents in the target repository. SourceDraft uses it only on the server when you click **Publish to GitHub**.
-
-If owner, repo, or token is missing, publishing will fail with a clear error.
+Create a token with permission to read and write **contents** in the target repository. SourceDraft uses it on the server when you publish — not in the browser.
 
 ## 4. Run Studio
 
@@ -46,35 +49,35 @@ If owner, repo, or token is missing, publishing will fail with a clear error.
 pnpm dev
 ```
 
-This starts:
-
-- the Studio UI (Vite)
-- the publish API (Express on port `8787` by default)
+Starts the editor and publish API (default API port `8787`). Use this command, not `dev:web` alone, or publish will fail.
 
 Sign in with `SOURCEDRAFT_ADMIN_PASSWORD`.
 
 ## 5. Write and publish
 
-1. Open **New Article**
-2. Enter title, description, dates, category, tags, and body
-3. Check the MDX preview and output path
-4. Click **Publish to GitHub**
+1. **New Article** — fill in the form
+2. Check MDX preview and output path
+3. **Publish to GitHub**
 
-SourceDraft validates the article, converts it to MDX, and commits the file to your configured branch.
+SourceDraft validates, builds MDX, and commits to `contentDir/<slug>.mdx`.
 
-## 6. Verify on GitHub
+How that commit works: [github-publishing.md](github-publishing.md)
 
-Open your repository on GitHub and confirm the new `.mdx` file appears under `contentDir`. Your static site build step (CI, local build, or host deploy) picks it up from there.
+## 6. Verify
+
+Open your site repo on GitHub and confirm the new file. Run your usual site build or wait for CI.
+
+## Astro layout example
+
+[examples/astro-blog](../examples/astro-blog/) shows expected folders and a sample MDX file. It is an integration reference, not a complete Astro app.
 
 ## Troubleshooting
 
 | Problem | Likely cause |
 |---------|----------------|
-| Cannot sign in | `SOURCEDRAFT_ADMIN_PASSWORD` missing in `.env` |
-| Publish API unreachable | API server not running; use `pnpm dev` not `pnpm dev:web` alone |
-| GitHub 401/403 | Invalid or under-scoped `GITHUB_TOKEN` |
-| Wrong file path | Check `contentDir` in `sourcedraft.config.json` or `CMS_CONTENT_DIR` |
+| Cannot sign in | `SOURCEDRAFT_ADMIN_PASSWORD` missing; restart API after editing `.env` |
+| Publish API unreachable | Run `pnpm dev`, not UI-only |
+| GitHub 401 / 403 | Token scope or wrong owner/repo |
+| Wrong file path | `contentDir` in config |
 
-For a plain-language overview, see [non-technical-overview.md](non-technical-overview.md).
-
-For Astro users: [examples/astro-blog](../examples/astro-blog/) is a **folder layout integration example** — not a runnable Astro app. It shows where published files go and what they look like. See [astro-blog-example.md](astro-blog-example.md).
+Plain-language intro: [non-technical-overview.md](non-technical-overview.md)

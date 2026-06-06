@@ -1,20 +1,21 @@
 # Contributing
 
-SourceDraft is early-stage software. Keep changes small, typed, and focused.
+SourceDraft is early-stage. Prefer small, typed changes over large refactors.
 
 ## Principles
 
-- Universal article schema in core packages
-- Adapters for publishing targets, not site-specific hardcoding
-- No generic SaaS dashboard patterns or placeholder UI
-- Secrets stay server-side
+- Universal article schema in `@sourcedraft/core`
+- Site-specific values in config files, not hardcoded in packages
+- No generic SaaS UI patterns, fake metrics, or placeholder screens
+- Secrets only in server code and `.env`
 
 ## Docs
 
-Before opening a PR, check whether user-facing behavior needs updates in:
+Update user-facing docs when behavior changes:
 
 - [README.md](README.md)
 - [docs/getting-started.md](docs/getting-started.md)
+- [docs/github-publishing.md](docs/github-publishing.md)
 - [docs/configuration.md](docs/configuration.md)
 - [docs/project-status.md](docs/project-status.md)
 
@@ -25,4 +26,4 @@ pnpm install
 pnpm dev
 ```
 
-Studio runs the UI and publish API together via `apps/studio`.
+Runs Studio and the publish API from the repo root.
