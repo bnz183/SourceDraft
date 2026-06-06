@@ -13,6 +13,7 @@ import {
   slugFromTitle,
   type ArticleFormState,
 } from "./lib/articleForm";
+import { publishArticle as publishArticleToGitHub } from "./lib/publish";
 import type { View } from "./types/view";
 
 function issuesByField(
@@ -31,6 +32,9 @@ function App() {
   const [view, setView] = useState<View>("dashboard");
   const [form, setForm] = useState<ArticleFormState>(createInitialFormState);
   const [slugAuto, setSlugAuto] = useState(true);
+  const [publishing, setPublishing] = useState(false);
+  const [publishError, setPublishError] = useState<string | null>(null);
+  const [publishSuccess, setPublishSuccess] = useState<string | null>(null);
 
   const articleInput = useMemo(() => formStateToArticleInput(form), [form]);
   const validation = useMemo(
@@ -82,6 +86,36 @@ function App() {
     setForm((current) => ({ ...current, slug: slugFromTitle(current.title) }));
   }
 
+  async function handlePublish() {
+    if (!validation.valid) {
+      return;
+    }
+
+    setPublishing(true);
+    setPublishError(null);
+    setPublishSuccess(null);
+
+    try {
+      const result = await publishArticleToGitHub(articleInput);
+
+      if (!result.ok) {
+        const issueSummary =
+          result.issues && result.issues.length > 0
+            ? ` ${result.issues[0]?.message}`
+            : "";
+        setPublishError(`${result.error}${issueSummary}`);
+        return;
+      }
+
+      const action = result.created ? "Created" : "Updated";
+      setPublishSuccess(`${action} ${result.path} (${result.commitSha.slice(0, 7)})`);
+    } catch {
+      setPublishError("Could not reach the publish API. Is the server running?");
+    } finally {
+      setPublishing(false);
+    }
+  }
+
   return (
     <div className="studio">
       <CommandBar currentView={view} onViewChange={setView} />
@@ -106,7 +140,13 @@ function App() {
                 issues={validation.issues}
                 article={normalizedArticle}
               />
-              <PublishGate ready={validation.valid} />
+              <PublishGate
+                ready={validation.valid}
+                publishing={publishing}
+                publishError={publishError}
+                publishSuccess={publishSuccess}
+                onPublish={handlePublish}
+              />
             </div>
             <FrontmatterInspector
               values={form}

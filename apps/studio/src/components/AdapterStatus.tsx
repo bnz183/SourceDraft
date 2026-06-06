@@ -7,7 +7,7 @@ type StatusRow = {
 const ROWS: StatusRow[] = [
   { label: "Adapter", value: "astro-mdx", state: "ok" },
   { label: "Publisher", value: "github-publisher", state: "idle" },
-  { label: "GitHub", value: "Not connected", state: "off" },
+  { label: "GitHub", value: "Server env", state: "idle" },
   { label: "Auth", value: "Not configured", state: "off" },
 ];
 

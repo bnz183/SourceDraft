@@ -470,6 +470,21 @@ select.field__input {
   padding: 12px;
 }
 
+.publish-gate__message {
+  margin: 0;
+  padding: 0 12px 12px;
+  font-size: 12px;
+  font-family: var(--mono);
+}
+
+.publish-gate__message--error {
+  color: var(--danger);
+}
+
+.publish-gate__message--success {
+  color: var(--ok);
+}
+
 .button {
   border: 1px solid var(--border-strong);
   background: var(--bg-raised);
