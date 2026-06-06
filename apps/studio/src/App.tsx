@@ -1,82 +1,86 @@
+import { normalizeArticle, validateArticle } from "@sourcedraft/core";
 import { useMemo, useState } from "react";
 import { AdapterStatus } from "./components/AdapterStatus";
 import { ArticlePipeline } from "./components/ArticlePipeline";
 import { CommandBar } from "./components/CommandBar";
 import { EditorWorkspace } from "./components/EditorWorkspace";
-import {
-  FrontmatterInspector,
-  type FrontmatterState,
-} from "./components/FrontmatterInspector";
+import { FrontmatterInspector } from "./components/FrontmatterInspector";
+import { FrontmatterPreview } from "./components/FrontmatterPreview";
 import { PublishGate } from "./components/PublishGate";
+import { ValidationPanel } from "./components/ValidationPanel";
+import {
+  createInitialFormState,
+  formStateToArticleInput,
+  slugFromTitle,
+  type ArticleFormState,
+} from "./lib/articleForm";
 import type { View } from "./types/view";
 
-const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-
-const INITIAL_FRONTMATTER: FrontmatterState = {
-  title: "",
-  slug: "",
-  description: "",
-  pubDate: "2026-06-06",
-  updatedDate: "",
-  category: "",
-  tags: "",
-  draft: true,
-  heroImage: "",
-};
-
-function isSlugValid(slug: string): boolean {
-  return slug.length > 0 && SLUG_PATTERN.test(slug);
+function issuesByField(
+  issues: { field: string; message: string }[],
+): Record<string, string> {
+  const map: Record<string, string> = {};
+  for (const issue of issues) {
+    if (map[issue.field] === undefined) {
+      map[issue.field] = issue.message;
+    }
+  }
+  return map;
 }
 
 function App() {
   const [view, setView] = useState<View>("dashboard");
-  const [body, setBody] = useState("");
-  const [frontmatter, setFrontmatter] =
-    useState<FrontmatterState>(INITIAL_FRONTMATTER);
+  const [form, setForm] = useState<ArticleFormState>(createInitialFormState);
+  const [slugAuto, setSlugAuto] = useState(true);
 
-  const publishChecks = useMemo(
-    () => [
-      {
-        id: "title",
-        label: "Title is set",
-        passed: frontmatter.title.trim().length > 0,
-      },
-      {
-        id: "slug",
-        label: "Slug is URL-safe",
-        passed: isSlugValid(frontmatter.slug.trim()),
-      },
-      {
-        id: "description",
-        label: "Description is set",
-        passed: frontmatter.description.trim().length > 0,
-      },
-      {
-        id: "pubDate",
-        label: "Publication date is set",
-        passed: frontmatter.pubDate.trim().length > 0,
-      },
-      {
-        id: "category",
-        label: "Category is set",
-        passed: frontmatter.category.trim().length > 0,
-      },
-      {
-        id: "body",
-        label: "Body content is set",
-        passed: body.trim().length > 0,
-      },
-    ],
-    [frontmatter, body],
+  const articleInput = useMemo(() => formStateToArticleInput(form), [form]);
+  const validation = useMemo(
+    () => validateArticle(articleInput),
+    [articleInput],
+  );
+  const fieldErrors = useMemo(
+    () => issuesByField(validation.issues),
+    [validation.issues],
   );
 
-  const publishReady = publishChecks.every((check) => check.passed);
+  const normalizedArticle = useMemo(() => {
+    if (!validation.valid) {
+      return null;
+    }
 
-  function handleFrontmatterChange(
-    field: keyof FrontmatterState,
+    try {
+      return normalizeArticle(articleInput);
+    } catch {
+      return null;
+    }
+  }, [articleInput, validation.valid]);
+
+  function handleFieldChange(
+    field: keyof ArticleFormState,
     value: string | boolean,
   ) {
-    setFrontmatter((current) => ({ ...current, [field]: value }));
+    setForm((current) => {
+      const next = { ...current, [field]: value };
+
+      if (field === "title" && slugAuto && typeof value === "string") {
+        next.slug = slugFromTitle(value);
+      }
+
+      return next;
+    });
+  }
+
+  function handleBodyChange(body: string) {
+    setForm((current) => ({ ...current, body }));
+  }
+
+  function handleSlugManualEdit() {
+    setSlugAuto(false);
+  }
+
+  function handleSlugResync() {
+    setSlugAuto(true);
+    setForm((current) => ({ ...current, slug: slugFromTitle(current.title) }));
   }
 
   return (
@@ -94,12 +98,29 @@ function App() {
         {view === "new-article" && (
           <div className="studio__editor-layout">
             <div className="studio__editor-column">
-              <EditorWorkspace body={body} onBodyChange={setBody} />
-              <PublishGate checks={publishChecks} ready={publishReady} />
+              <EditorWorkspace body={form.body} onBodyChange={handleBodyChange} />
+              {fieldErrors.body && (
+                <p className="editor-workspace__error">{fieldErrors.body}</p>
+              )}
+              <FrontmatterPreview form={form} />
+              <ValidationPanel
+                valid={validation.valid}
+                issues={validation.issues}
+              />
+              <PublishGate ready={validation.valid} />
+              {normalizedArticle && (
+                <p className="studio__normalized-meta">
+                  Normalized slug: <code>{normalizedArticle.slug}</code>
+                </p>
+              )}
             </div>
             <FrontmatterInspector
-              values={frontmatter}
-              onChange={handleFrontmatterChange}
+              values={form}
+              fieldErrors={fieldErrors}
+              slugAuto={slugAuto}
+              onChange={handleFieldChange}
+              onSlugManualEdit={handleSlugManualEdit}
+              onSlugResync={handleSlugResync}
             />
           </div>
         )}
