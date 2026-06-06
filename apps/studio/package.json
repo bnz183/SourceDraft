@@ -4,8 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "predev": "pnpm --filter @sourcedraft/core --filter @sourcedraft/adapter-astro-mdx --filter @sourcedraft/github-publisher build",
-    "prebuild": "pnpm --filter @sourcedraft/core --filter @sourcedraft/adapter-astro-mdx --filter @sourcedraft/github-publisher build",
+    "predev": "pnpm --filter @sourcedraft/core --filter @sourcedraft/adapter-astro-mdx --filter @sourcedraft/github-publisher --filter @sourcedraft/config build",
+    "prebuild": "pnpm --filter @sourcedraft/core --filter @sourcedraft/adapter-astro-mdx --filter @sourcedraft/github-publisher --filter @sourcedraft/config build",
     "dev": "concurrently -n web,api -c blue,gray \"vite\" \"tsx watch server/index.ts\"",
     "dev:web": "vite",
     "dev:server": "tsx watch server/index.ts",
@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@sourcedraft/adapter-astro-mdx": "workspace:*",
+    "@sourcedraft/config": "workspace:*",
     "@sourcedraft/core": "workspace:*",
     "@sourcedraft/github-publisher": "workspace:*",
     "dotenv": "^16.5.0",

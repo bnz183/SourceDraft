@@ -13,6 +13,9 @@ importers:
       '@sourcedraft/adapter-astro-mdx':
         specifier: workspace:*
         version: link:../../packages/adapter-astro-mdx
+      '@sourcedraft/config':
+        specifier: workspace:*
+        version: link:../../packages/config
       '@sourcedraft/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -84,6 +87,15 @@ importers:
         specifier: workspace:*
         version: link:../core
     devDependencies:
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+
+  packages/config:
+    devDependencies:
+      '@types/node':
+        specifier: ^22.15.30
+        version: 22.19.19
       typescript:
         specifier: ^5.8.3
         version: 5.9.3

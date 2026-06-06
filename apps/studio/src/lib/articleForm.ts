@@ -14,22 +14,16 @@ export type ArticleFormState = {
   body: string;
 };
 
-export const CATEGORY_OPTIONS = [
-  "Guides",
-  "Notes",
-  "Reviews",
-  "Tutorials",
-  "Reference",
-] as const;
-
-export function createInitialFormState(): ArticleFormState {
+export function createInitialFormState(
+  defaultCategory = "Guides",
+): ArticleFormState {
   return {
     title: "",
     slug: "",
     description: "",
     pubDate: new Date().toISOString().slice(0, 10),
     updatedDate: "",
-    category: CATEGORY_OPTIONS[0],
+    category: defaultCategory,
     tags: "",
     draft: true,
     heroImage: "",

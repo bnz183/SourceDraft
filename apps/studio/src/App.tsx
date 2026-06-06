@@ -1,5 +1,5 @@
 import { normalizeArticle, validateArticle } from "@sourcedraft/core";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AdapterStatus } from "./components/AdapterStatus";
 import { ArticlePipeline } from "./components/ArticlePipeline";
 import { CommandBar } from "./components/CommandBar";
@@ -14,6 +14,11 @@ import {
   type ArticleFormState,
 } from "./lib/articleForm";
 import { publishArticle as publishArticleToGitHub } from "./lib/publish";
+import {
+  FALLBACK_STUDIO_CONFIG,
+  fetchStudioConfig,
+  type StudioConfig,
+} from "./lib/studioConfig";
 import type { View } from "./types/view";
 
 function issuesByField(
@@ -30,7 +35,12 @@ function issuesByField(
 
 function App() {
   const [view, setView] = useState<View>("dashboard");
-  const [form, setForm] = useState<ArticleFormState>(createInitialFormState);
+  const [studioConfig, setStudioConfig] = useState<StudioConfig>(
+    FALLBACK_STUDIO_CONFIG,
+  );
+  const [form, setForm] = useState<ArticleFormState>(() =>
+    createInitialFormState(FALLBACK_STUDIO_CONFIG.categories[0]),
+  );
   const [slugAuto, setSlugAuto] = useState(true);
   const [publishing, setPublishing] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
@@ -45,6 +55,22 @@ function App() {
     () => issuesByField(validation.issues),
     [validation.issues],
   );
+
+  useEffect(() => {
+    fetchStudioConfig().then((config) => {
+      setStudioConfig(config);
+      setForm((current) => {
+        if (current.title.length > 0 || current.body.length > 0) {
+          return current;
+        }
+
+        return {
+          ...createInitialFormState(config.categories[0] ?? "Guides"),
+          slug: current.slug,
+        };
+      });
+    });
+  }, []);
 
   const normalizedArticle = useMemo(() => {
     if (!validation.valid) {
@@ -139,6 +165,7 @@ function App() {
                 valid={validation.valid}
                 issues={validation.issues}
                 article={normalizedArticle}
+                contentDir={studioConfig.contentDir}
               />
               <PublishGate
                 ready={validation.valid}
@@ -150,6 +177,7 @@ function App() {
             </div>
             <FrontmatterInspector
               values={form}
+              categories={studioConfig.categories}
               fieldErrors={fieldErrors}
               slugAuto={slugAuto}
               onChange={handleFieldChange}
@@ -164,7 +192,9 @@ function App() {
             <section className="panel settings-panel">
               <div className="panel__header">
                 <h2 className="panel__title">Publishing configuration</h2>
-                <p className="panel__meta">Stored locally until backend wiring</p>
+                <p className="panel__meta">
+                  sourcedraft.config.json + .env (secrets server-side)
+                </p>
               </div>
 
               <div className="settings-panel__grid">
@@ -173,7 +203,7 @@ function App() {
                   <input
                     className="field__input field__input--mono"
                     type="text"
-                    defaultValue="src/content/blog"
+                    value={studioConfig.contentDir}
                     readOnly
                   />
                 </label>
@@ -183,7 +213,7 @@ function App() {
                   <input
                     className="field__input field__input--mono"
                     type="text"
-                    defaultValue="astro-mdx"
+                    value={studioConfig.adapter}
                     readOnly
                   />
                 </label>
@@ -193,8 +223,9 @@ function App() {
                   <input
                     className="field__input field__input--mono"
                     type="text"
-                    placeholder="owner"
-                    disabled
+                    value={studioConfig.githubOwner}
+                    placeholder="Set GITHUB_OWNER in .env"
+                    readOnly
                   />
                 </label>
 
@@ -203,8 +234,9 @@ function App() {
                   <input
                     className="field__input field__input--mono"
                     type="text"
-                    placeholder="repo"
-                    disabled
+                    value={studioConfig.githubRepo}
+                    placeholder="Set GITHUB_REPO in .env"
+                    readOnly
                   />
                 </label>
 
@@ -213,8 +245,8 @@ function App() {
                   <input
                     className="field__input field__input--mono"
                     type="text"
-                    defaultValue="main"
-                    disabled
+                    value={studioConfig.defaultBranch}
+                    readOnly
                   />
                 </label>
 
@@ -223,7 +255,17 @@ function App() {
                   <input
                     className="field__input field__input--mono"
                     type="text"
-                    defaultValue="src/assets/images"
+                    value={studioConfig.mediaDir}
+                    readOnly
+                  />
+                </label>
+
+                <label className="field field--full">
+                  <span className="field__label">Categories</span>
+                  <input
+                    className="field__input field__input--mono"
+                    type="text"
+                    value={studioConfig.categories.join(", ")}
                     readOnly
                   />
                 </label>

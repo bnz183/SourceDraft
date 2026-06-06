@@ -1,7 +1,8 @@
-import { CATEGORY_OPTIONS, type ArticleFormState } from "../lib/articleForm";
+import type { ArticleFormState } from "../lib/articleForm";
 
 type FrontmatterInspectorProps = {
   values: ArticleFormState;
+  categories: string[];
   fieldErrors: Record<string, string>;
   slugAuto: boolean;
   onChange: (field: keyof ArticleFormState, value: string | boolean) => void;
@@ -11,6 +12,7 @@ type FrontmatterInspectorProps = {
 
 export function FrontmatterInspector({
   values,
+  categories,
   fieldErrors,
   slugAuto,
   onChange,
@@ -127,7 +129,7 @@ export function FrontmatterInspector({
             value={values.category}
             onChange={(event) => onChange("category", event.target.value)}
           >
-            {CATEGORY_OPTIONS.map((category) => (
+            {categories.map((category) => (
               <option key={category} value={category}>
                 {category}
               </option>

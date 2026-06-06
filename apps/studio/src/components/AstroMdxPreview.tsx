@@ -1,21 +1,21 @@
 import { getAstroMdxPath, toAstroMdx } from "@sourcedraft/adapter-astro-mdx";
 import type { Article, ValidationIssue } from "@sourcedraft/core";
-import { DEFAULT_CONTENT_DIR } from "../lib/adapterConfig";
-
 type AstroMdxPreviewProps = {
   valid: boolean;
   issues: ValidationIssue[];
   article: Article | null;
+  contentDir: string;
 };
 
 export function AstroMdxPreview({
   valid,
   issues,
   article,
+  contentDir,
 }: AstroMdxPreviewProps) {
   const outputPath =
     valid && article
-      ? getAstroMdxPath(article, { contentDir: DEFAULT_CONTENT_DIR })
+      ? getAstroMdxPath(article, { contentDir })
       : null;
   const mdxOutput = valid && article ? toAstroMdx(article) : null;
 
