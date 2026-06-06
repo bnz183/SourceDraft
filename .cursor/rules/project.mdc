@@ -1,0 +1,20 @@
+---
+description: SourceDraft CMS project rules
+alwaysApply: true
+---
+
+This is an open-source Git-based CMS for Markdown/MDX publishing.
+
+Do not build a generic SaaS dashboard.
+Do not hardcode QuBrite-specific logic into the core.
+Do not expose tokens or secrets in browser code.
+Do not create fake analytics, fake charts, fake placeholder features, or generic dashboard bloat.
+Do not add unnecessary comments explaining obvious code.
+Do not refactor unrelated files.
+Use a universal article schema.
+Use adapters for publishing targets.
+First adapter: Astro MDX.
+Future adapters: Next.js MDX, Hugo Markdown, WordPress API, and Ghost API.
+Keep code typed, small, readable, and testable.
+Every module should have a clear purpose.
+Prefer boring reliable code over clever abstractions.
