@@ -5,8 +5,8 @@ You need a GitHub repository for your **site** (for example an Astro blog) that 
 ## 1. Install SourceDraft
 
 ```bash
-git clone <your-fork-url>
-cd sourcedraft
+git clone https://github.com/bnz183/SourceDraft.git
+cd SourceDraft
 pnpm install
 ```
 

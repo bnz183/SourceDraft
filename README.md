@@ -54,8 +54,8 @@ Details: [docs/github-publishing.md](docs/github-publishing.md)
 Requirements: Node.js 22+, pnpm 11+
 
 ```bash
-git clone <your-fork-url>
-cd sourcedraft
+git clone https://github.com/bnz183/SourceDraft.git
+cd SourceDraft
 pnpm install
 
 cp sourcedraft.config.example.json sourcedraft.config.json
@@ -80,6 +80,26 @@ pnpm dev
 Sign in, open **New Article**, preview the MDX, publish. The file lands at `contentDir/<slug>.mdx` (default: `src/content/blog/`).
 
 Full walkthrough: [docs/getting-started.md](docs/getting-started.md)
+
+## Beginner path
+
+If someone technical already installed SourceDraft and pointed it at your blog repository, you only need:
+
+1. The Studio address (usually `http://localhost:5173` on their machine)
+2. The admin password they set in `.env`
+3. Your site’s category list (from `sourcedraft.config.json`)
+
+Then: sign in → **New Article** → fill in title, description, date, category, tags, and body → check the MDX preview → **Publish to GitHub**. Your post appears as a file in the blog repo; the normal site build deploys it.
+
+You do not edit GitHub by hand or run terminal commands for each post. If publish is disabled, ask your technical contact to check `.env` (GitHub token and repo) and that Studio is running with `pnpm dev`.
+
+Plain-language guide: [docs/non-technical-overview.md](docs/non-technical-overview.md)
+
+## Security note
+
+MVP password auth is intended for local/private use. Do not expose Studio publicly without HTTPS, stronger auth, and deployment hardening.
+
+Details: [docs/security.md](docs/security.md)
 
 ## Configuration: two files, two jobs
 
@@ -110,4 +130,4 @@ Reference: [docs/configuration.md](docs/configuration.md)
 
 ## License
 
-MIT
+[MIT](LICENSE)

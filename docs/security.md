@@ -21,6 +21,10 @@ Do not import `@sourcedraft/github-publisher` in browser code.
 
 ## Studio auth (MVP)
 
-Single shared password, in-memory sessions. Suitable for local or trusted single-editor use — not a multi-tenant production auth system yet.
+Single shared password, in-memory sessions.
+
+**MVP password auth is intended for local/private use. Do not expose Studio publicly without HTTPS, stronger auth, and deployment hardening.**
+
+This is not a multi-tenant production auth system yet.
 
 Report security concerns privately; do not include live tokens in reports.
