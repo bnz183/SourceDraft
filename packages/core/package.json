@@ -1,0 +1,23 @@
+{
+  "name": "@sourcedraft/core",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Universal article schema and validation for SourceDraft.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  }
+}
