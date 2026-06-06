@@ -1,0 +1,22 @@
+{
+  "name": "sourcedraft",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Open-source Git-based CMS for Markdown and MDX publishing.",
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm --filter studio dev",
+    "build": "pnpm -r build",
+    "check": "pnpm -r check",
+    "lint": "pnpm -r lint"
+  },
+  "keywords": [
+    "cms",
+    "markdown",
+    "mdx",
+    "astro",
+    "static-site-generator",
+    "git-based-cms"
+  ],
+  "license": "MIT"
+}
