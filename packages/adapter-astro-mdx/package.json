@@ -1,0 +1,26 @@
+{
+  "name": "@sourcedraft/adapter-astro-mdx",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Convert SourceDraft articles into Astro MDX files.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@sourcedraft/core": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  }
+}
