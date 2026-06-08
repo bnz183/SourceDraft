@@ -61,4 +61,18 @@ describe("content quality metrics", () => {
       result.warnings.every((warning) => !/rank|google|seo score/iu.test(warning.message)),
     );
   });
+
+  it("warns about multiple H1 headings and missing subheadings", () => {
+    const result = analyzeContentQuality(
+      {
+        title: "Post",
+        description: "Summary",
+        body: "# One\n\n# Two",
+        heroImage: "/images/cover.png",
+      },
+      [],
+    );
+
+    assert.ok(result.warnings.some((warning) => warning.id === "multiple-h1"));
+  });
 });

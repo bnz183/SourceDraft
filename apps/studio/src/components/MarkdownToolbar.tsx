@@ -1,4 +1,5 @@
-import type { KeyboardEvent, RefObject } from "react";
+import { useState, type KeyboardEvent, type RefObject } from "react";
+import type { PostSummary } from "../lib/posts.js";
 import {
   actionForShortcut,
   applyMarkdownAction,
@@ -6,6 +7,7 @@ import {
   selectionFromTextarea,
   type MarkdownAction,
 } from "../lib/markdownEditor.js";
+import { InternalLinkPicker } from "./InternalLinkPicker.js";
 
 type ToolbarButton = {
   action: MarkdownAction;
@@ -64,6 +66,8 @@ type MarkdownToolbarProps = {
   bodyFieldId: string;
   latestImagePath: string | null;
   imageAlt: string;
+  posts: PostSummary[];
+  editingPath: string | null;
   textareaRef: RefObject<HTMLTextAreaElement | null>;
   onBodyChange: (body: string) => void;
 };
@@ -73,9 +77,14 @@ export function MarkdownToolbar({
   bodyFieldId,
   latestImagePath,
   imageAlt,
+  posts,
+  editingPath,
   textareaRef,
   onBodyChange,
 }: MarkdownToolbarProps) {
+  const [internalLinkOpen, setInternalLinkOpen] = useState(false);
+  const [savedSelection, setSavedSelection] = useState({ start: 0, end: 0 });
+
   function runAction(action: MarkdownAction) {
     const textarea = textareaRef.current;
     if (!textarea) {
@@ -112,30 +121,67 @@ export function MarkdownToolbar({
     });
   }
 
+  function openInternalLinkPicker() {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      setSavedSelection(selectionFromTextarea(textarea));
+    }
+    setInternalLinkOpen(true);
+  }
+
   return (
-    <div
-      className="editor-toolbar"
-      role="toolbar"
-      aria-label="Markdown formatting"
-      aria-controls={bodyFieldId}
-    >
-      {TOOLBAR_BUTTONS.map((button) => (
+    <div className="editor-toolbar-wrap">
+      <div
+        className="editor-toolbar"
+        role="toolbar"
+        aria-label="Markdown formatting"
+        aria-controls={bodyFieldId}
+      >
+        {TOOLBAR_BUTTONS.map((button) => (
+          <button
+            key={button.action}
+            type="button"
+            className="editor-toolbar__button"
+            aria-label={button.ariaLabel}
+            title={button.label}
+            onMouseDown={(event) => {
+              event.preventDefault();
+            }}
+            onClick={() => {
+              runAction(button.action);
+            }}
+          >
+            <span aria-hidden="true">{button.text}</span>
+          </button>
+        ))}
         <button
-          key={button.action}
           type="button"
           className="editor-toolbar__button"
-          aria-label={button.ariaLabel}
-          title={button.label}
+          aria-label="Insert internal link"
+          title="Internal link"
+          aria-expanded={internalLinkOpen}
           onMouseDown={(event) => {
             event.preventDefault();
           }}
-          onClick={() => {
-            runAction(button.action);
-          }}
+          onClick={openInternalLinkPicker}
         >
-          <span aria-hidden="true">{button.text}</span>
+          <span aria-hidden="true">Internal</span>
         </button>
-      ))}
+      </div>
+
+      {internalLinkOpen && (
+        <InternalLinkPicker
+          posts={posts}
+          editingPath={editingPath}
+          body={body}
+          selection={savedSelection}
+          textareaRef={textareaRef}
+          onBodyChange={onBodyChange}
+          onClose={() => {
+            setInternalLinkOpen(false);
+          }}
+        />
+      )}
     </div>
   );
 }

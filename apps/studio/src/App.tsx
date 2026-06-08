@@ -449,6 +449,7 @@ function App() {
               editingPath={editingPath}
               draft={form.draft}
               latestImagePath={latestUploadedImagePath}
+              posts={posts}
               fieldErrors={fieldErrors}
               onTitleChange={(value) => handleFieldChange("title", value)}
               onDescriptionChange={(value) =>

@@ -1,4 +1,5 @@
 import type { ValidationIssue } from "@sourcedraft/core";
+import { analyzeDocumentOutline } from "./documentOutline.js";
 
 export type ContentQualityInput = {
   title: string;
@@ -46,8 +47,6 @@ const MARKDOWN_LINK_PATTERN =
 const MARKDOWN_IMAGE_PATTERN =
   /!\[([^\]]*)\]\(([^)\s]+)(?:\s+"[^"]*")?\)/gu;
 
-const ATX_HEADING_PATTERN = /^#{1,6}\s+\S/m;
-
 export function countWords(text: string): number {
   const trimmed = text.trim();
   if (trimmed.length === 0) {
@@ -66,7 +65,7 @@ export function estimateReadingTimeMinutes(wordCount: number): number {
 }
 
 export function hasMarkdownHeading(body: string): boolean {
-  return ATX_HEADING_PATTERN.test(body);
+  return analyzeDocumentOutline(body).headings.length > 0;
 }
 
 function isExternalUrl(url: string): boolean {
@@ -184,6 +183,27 @@ export function buildContentQualityWarnings(
       id: "heading-missing",
       kind: "info",
       message: "Body has no Markdown heading (# syntax).",
+    });
+  }
+
+  const outline = analyzeDocumentOutline(input.body);
+  if (outline.h1Count > 1) {
+    warnings.push({
+      id: "multiple-h1",
+      kind: "info",
+      message: `Body has ${outline.h1Count} H1 headings. One title-level heading is usually enough.`,
+    });
+  }
+
+  if (
+    metrics.wordCount > 0 &&
+    outline.headings.length > 0 &&
+    !outline.hasSubheading
+  ) {
+    warnings.push({
+      id: "no-subheadings",
+      kind: "info",
+      message: "Body has headings but no H2 or H3 sections.",
     });
   }
 

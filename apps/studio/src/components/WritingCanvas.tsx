@@ -1,4 +1,6 @@
 import { useId, useRef } from "react";
+import type { PostSummary } from "../lib/posts";
+import { DocumentOutline } from "./DocumentOutline";
 import {
   handleMarkdownShortcut,
   MarkdownToolbar,
@@ -11,6 +13,7 @@ type WritingCanvasProps = {
   editingPath: string | null;
   draft: boolean;
   latestImagePath: string | null;
+  posts: PostSummary[];
   fieldErrors: Record<string, string>;
   onTitleChange: (value: string) => void;
   onDescriptionChange: (value: string) => void;
@@ -24,6 +27,7 @@ export function WritingCanvas({
   editingPath,
   draft,
   latestImagePath,
+  posts,
   fieldErrors,
   onTitleChange,
   onDescriptionChange,
@@ -89,6 +93,8 @@ export function WritingCanvas({
           bodyFieldId={bodyFieldId}
           latestImagePath={latestImagePath}
           imageAlt={title.trim() || "Image"}
+          posts={posts}
+          editingPath={editingPath}
           textareaRef={bodyRef}
           onBodyChange={onBodyChange}
         />
@@ -119,6 +125,8 @@ export function WritingCanvas({
           </p>
         )}
       </div>
+
+      <DocumentOutline body={body} textareaRef={bodyRef} />
     </div>
   );
 }

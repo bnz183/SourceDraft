@@ -544,6 +544,18 @@ code {
   background: var(--bg-raised);
 }
 
+.editor-toolbar-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-raised);
+}
+
+.editor-toolbar-wrap .editor-toolbar {
+  border-bottom: none;
+}
+
 .editor-toolbar__button {
   min-width: 32px;
   padding: 4px 8px;
@@ -611,6 +623,203 @@ code {
 .writing-canvas__body-error {
   margin: 0;
   padding: 0 16px 12px;
+}
+
+.document-outline {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-panel);
+}
+
+.document-outline__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.document-outline__title {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.document-outline__body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.document-outline__empty {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.document-outline__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.document-outline__item {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  color: var(--text);
+}
+
+.document-outline__item:hover {
+  background: var(--bg);
+  border-color: var(--border);
+}
+
+.document-outline__item--h2 {
+  padding-left: 18px;
+}
+
+.document-outline__item--h3 {
+  padding-left: 30px;
+}
+
+.document-outline__level {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+
+.document-outline__text {
+  font-size: var(--text-xs);
+  line-height: 1.4;
+}
+
+.document-outline__warning {
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #e8d4a8;
+  background: #fffaf0;
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+.internal-link-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0 12px 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+}
+
+.internal-link-picker__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.internal-link-picker__title {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.internal-link-picker__search {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.internal-link-picker__search-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+}
+
+.internal-link-picker__search-input {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg-panel);
+  font-size: var(--text-xs);
+}
+
+.internal-link-picker__hint,
+.internal-link-picker__empty {
+  margin: 0;
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+.internal-link-picker__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.internal-link-picker__item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg-panel);
+  text-align: left;
+  cursor: pointer;
+  color: var(--text);
+}
+
+.internal-link-picker__item:hover {
+  border-color: var(--accent-muted);
+  background: #f7faff;
+}
+
+.internal-link-picker__item-title {
+  font-size: var(--text-xs);
+  font-weight: 500;
+}
+
+.internal-link-picker__item-meta {
+  font-size: 10px;
+  color: var(--text-dim);
+}
+
+.internal-link-picker__item-path {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
 }
 
 /* ——— Post details panel ——— */
