@@ -1,7 +1,8 @@
 {
   "adapter": "astro-mdx",
   "contentDir": "src/content/blog",
-  "mediaDir": "src/assets/images",
+  "mediaDir": "public/images",
+  "publicMediaPath": "/images",
   "defaultBranch": "main",
   "categories": ["Guides", "Notes", "Reviews", "Tutorials", "Reference"]
 }

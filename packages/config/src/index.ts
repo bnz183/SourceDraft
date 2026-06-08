@@ -8,3 +8,9 @@ export {
   DEFAULT_SOURCEDRAFT_CONFIG,
   type SourceDraftConfig,
 } from "./types.js";
+
+export {
+  derivePublicMediaPath,
+  joinPublicMediaPath,
+  normalizePublicMediaPath,
+} from "./publicMediaPath.js";

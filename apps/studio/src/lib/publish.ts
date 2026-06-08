@@ -1,11 +1,20 @@
 import type { ArticleInput } from "@sourcedraft/core";
 
+export type DeployHookResult = {
+  triggered: boolean;
+  ok: boolean;
+  status?: number;
+  message: string;
+};
+
 export type PublishApiSuccess = {
   ok: true;
   path: string;
   created: boolean;
   sha: string;
   commitSha: string;
+  remoteId?: string;
+  deployHook?: DeployHookResult;
 };
 
 export type PublishApiError = {
@@ -40,7 +49,11 @@ export async function publishArticle(
 
   if (!response.ok || !data.ok) {
     return data.ok
-      ? { ok: false, error: "Publish failed." }
+      ? {
+          ok: false,
+          error:
+            "Publish to GitHub failed. Check token, owner/repo, and contentDir.",
+        }
       : data;
   }
 

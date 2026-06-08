@@ -1,6 +1,8 @@
 # Getting started
 
-You need a GitHub repository for your **site** (for example an Astro blog) that reads posts from a folder such as `src/content/blog`.
+You need a target for published content — usually a Git repository for your **site** (for example an Astro blog reading `src/content/blog`), or a WordPress/Ghost site for API publishing.
+
+**Fast path:** copy a recipe from [quickstart-recipes.md](quickstart-recipes.md) (Astro+GitHub, Hugo+GitLab, WordPress, Cloudinary, deploy hooks, …).
 
 ## 1. Install SourceDraft
 
@@ -10,24 +12,43 @@ cd SourceDraft
 pnpm install
 ```
 
-## 2. Project settings (`sourcedraft.config.json`)
+## 2. Configure SourceDraft
+
+**Recommended — setup wizard**
+
+```bash
+pnpm setup
+```
+
+The wizard asks which adapter, publisher, and media provider you use, then creates `sourcedraft.config.json` and `.env` with plain-language prompts. Existing `.env` values are kept unless you choose to overwrite them. See [setup-wizard.md](setup-wizard.md).
+
+**Manual — copy example files**
 
 ```bash
 cp sourcedraft.config.example.json sourcedraft.config.json
+cp .env.example .env
 ```
 
 Edit paths, adapter, and categories to match your site. These values are safe to commit.
 
-Use `astro-mdx` for `.mdx` output or `markdown` for `.md` output. See [adapters.md](adapters.md).
+Pick an adapter for your stack (`astro-mdx`, `nextjs-mdx`, `hugo-markdown`, …). See the [adapters compatibility matrix](adapters.md#compatibility-matrix).
+
+Set `publisher` to `github`, `gitlab`, `bitbucket`, `wordpress`, or `ghost`. See [publishers.md](publishers.md).
+
+Validate anytime:
+
+```bash
+pnpm validate:config
+```
 
 ## 3. Secrets (`.env`)
 
-```bash
-cp .env.example .env
-```
+If you used `pnpm setup`, skip copying `.env` — the wizard already wrote it. Otherwise:
 
 ```env
 SOURCEDRAFT_ADMIN_PASSWORD=your-local-studio-password
+# Optional: force demo mode (no GitHub commits)
+# SOURCEDRAFT_DEMO_MODE=true
 GITHUB_TOKEN=ghp_...
 GITHUB_OWNER=your-username-or-org
 GITHUB_REPO=your-site-repo
@@ -36,8 +57,8 @@ GITHUB_BRANCH=main
 
 | File | Holds |
 |------|--------|
-| `sourcedraft.config.json` | `contentDir`, `mediaDir`, categories, adapter |
-| `.env` | Password, GitHub token, repo owner/name |
+| `sourcedraft.config.json` | `contentDir`, `mediaDir`, `publicMediaPath`, categories, `adapter`, `publisher` |
+| `.env` | Password, publisher credentials, optional `CMS_MEDIA_PROVIDER`, deploy hook |
 
 See [configuration.md](configuration.md) for the full split.
 
@@ -57,16 +78,58 @@ Sign in with `SOURCEDRAFT_ADMIN_PASSWORD`.
 
 **MVP password auth is intended for local/private use.** Do not expose Studio on the public internet without extra hardening.
 
+## Demo mode (no GitHub required)
+
+Use demo mode to explore Studio before connecting a repository:
+
+1. **Environment flag:** set `SOURCEDRAFT_DEMO_MODE=true` in `.env` and restart the API, or
+2. **Opt-in:** leave `GITHUB_TOKEN`, `GITHUB_OWNER`, and `GITHUB_REPO` unset and click **Explore demo mode** on the sign-in screen.
+
+Demo mode provides sample posts from repository fixtures, local editing, simulated media upload paths, and simulated publish success. A banner reads: **Demo mode — no GitHub commits are made**. Session edits are temporary; restarting the API reloads the same seed content. See [demo-mode.md](demo-mode.md).
+
+Demo mode never sends your GitHub token to the browser and never commits to GitHub, even if credentials are present while `SOURCEDRAFT_DEMO_MODE=true`.
+
+## Setup health
+
+Open **Settings** in Studio. The **Setup health** section shows booleans for admin password, GitHub owner/repo, server-side token presence (never the value), content/media paths, adapter, and demo mode status. It suggests a next action when setup is incomplete.
+
+The publish API also exposes `GET /api/health/setup` (authenticated) with the same safe diagnostics.
+
 ## 5. Write and publish
 
-1. **Overview** — see existing posts from GitHub; click **Edit**, or use **New Article**
-2. Fill in the form; upload images under **Hero image** if needed ([media.md](media.md))
+1. **Posts** sidebar — open an existing post, or click **New post**
+2. Fill title and description in the center canvas; set slug, dates, and category in **Post details**; upload a cover image if needed ([media.md](media.md))
 3. Check the Markdown or MDX preview and output path
-4. **Publish to GitHub**
+4. **Publish** — button label reflects your publisher (for example **Publish to GitHub**)
 
-SourceDraft validates, builds the file with your adapter, and commits to `contentDir/<slug>.mdx` or `.md`.
+SourceDraft validates, renders with your adapter, and sends to the configured publisher (git commit or remote CMS API).
 
-How that commit works: [github-publishing.md](github-publishing.md)
+Git publishers: [git-publishers.md](git-publishers.md) · GitHub: [github-publishing.md](github-publishing.md) · WordPress: [wordpress.md](wordpress.md) · Ghost: [ghost.md](ghost.md)
+
+## Smoke tests (Playwright)
+
+Browser smoke tests run against demo mode — no live GitHub credentials required:
+
+```bash
+pnpm exec playwright install chromium   # first time only
+pnpm test:e2e
+```
+
+From `apps/studio`, use the same commands. CI runs `pnpm test:e2e` after build and unit tests on every push/PR to `main`.
+
+These tests cover sign-in/demo entry, post list, editor, toolbar, autosave status, media library, content quality, setup health, and simulated publish.
+
+Regenerate README screenshots (writes to `docs/assets/`):
+
+```bash
+pnpm screenshots:generate
+```
+
+Unit tests (default):
+
+```bash
+pnpm test
+```
 
 ## 6. Verify
 
@@ -86,5 +149,6 @@ Open your site repo on GitHub and confirm the new file (and any uploaded images 
 | Wrong file path | `contentDir` in config |
 | Upload rejected | File type or 5 MB limit; see [media.md](media.md) |
 | Empty post list | Wrong repo in `.env` or no `.md`/`.mdx` in `contentDir` |
+| Demo only | GitHub not configured or `SOURCEDRAFT_DEMO_MODE=true` — expected; configure GitHub for real publish |
 
 Plain-language intro: [non-technical-overview.md](non-technical-overview.md)

@@ -1,11 +1,18 @@
 import { randomBytes, timingSafeEqual } from "node:crypto";
 import type { NextFunction, Request, Response } from "express";
+import {
+  isDemoModeAvailable,
+  isDemoModeForced,
+  isPublisherConfigured,
+} from "./demoMode.js";
 
 const SESSION_COOKIE = "sourcedraft_session";
+/** 24 hours — in-memory MVP sessions, not durable account auth. */
 const SESSION_TTL_MS = 24 * 60 * 60 * 1000;
 
 type SessionRecord = {
   expiresAt: number;
+  demo?: boolean;
 };
 
 const sessions = new Map<string, SessionRecord>();
@@ -37,19 +44,53 @@ function readCookie(req: Request, name: string): string | null {
   return null;
 }
 
-function setSessionCookie(res: Response, token: string): void {
-  const maxAge = Math.floor(SESSION_TTL_MS / 1000);
-  res.setHeader(
-    "Set-Cookie",
-    `${SESSION_COOKIE}=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${maxAge}`,
-  );
+export function isSecureCookieEnvironment(req: Request): boolean {
+  const explicit = process.env.STUDIO_SECURE_COOKIES?.trim().toLowerCase();
+  if (explicit === "true") {
+    return true;
+  }
+  if (explicit === "false") {
+    return false;
+  }
+
+  const forwardedProto = req.headers["x-forwarded-proto"];
+  if (typeof forwardedProto === "string") {
+    const proto = forwardedProto.split(",")[0]?.trim().toLowerCase();
+    if (proto === "https") {
+      return true;
+    }
+  }
+
+  return process.env.NODE_ENV === "production";
 }
 
-function clearSessionCookie(res: Response): void {
-  res.setHeader(
-    "Set-Cookie",
-    `${SESSION_COOKIE}=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0`,
-  );
+function buildSessionCookie(
+  value: string,
+  maxAge: number,
+  req: Request,
+): string {
+  const parts = [
+    `${SESSION_COOKIE}=${encodeURIComponent(value)}`,
+    "Path=/",
+    "HttpOnly",
+    "SameSite=Lax",
+    `Max-Age=${maxAge}`,
+  ];
+
+  if (isSecureCookieEnvironment(req)) {
+    parts.push("Secure");
+  }
+
+  return parts.join("; ");
+}
+
+function setSessionCookie(req: Request, res: Response, token: string): void {
+  const maxAge = Math.floor(SESSION_TTL_MS / 1000);
+  res.setHeader("Set-Cookie", buildSessionCookie(token, maxAge, req));
+}
+
+function clearSessionCookie(req: Request, res: Response): void {
+  res.setHeader("Set-Cookie", buildSessionCookie("", 0, req));
 }
 
 function purgeExpiredSessions(): void {
@@ -81,10 +122,13 @@ export function verifyPassword(password: string): boolean {
   return timingSafeEqual(provided, target);
 }
 
-export function createSession(): string {
+export function createSession(options?: { demo?: boolean }): string {
   purgeExpiredSessions();
   const token = randomBytes(32).toString("hex");
-  sessions.set(token, { expiresAt: Date.now() + SESSION_TTL_MS });
+  sessions.set(token, {
+    expiresAt: Date.now() + SESSION_TTL_MS,
+    demo: options?.demo === true,
+  });
   return token;
 }
 
@@ -117,8 +161,41 @@ export function getSessionToken(req: Request): string | null {
   return readCookie(req, SESSION_COOKIE);
 }
 
+export function isDemoSession(token: string | null): boolean {
+  if (!token) {
+    return false;
+  }
+
+  purgeExpiredSessions();
+  const session = sessions.get(token);
+  return session?.demo === true;
+}
+
+export function isRequestDemoSession(req: Request): boolean {
+  if (isDemoModeForced() || !isPublisherConfigured()) {
+    return true;
+  }
+
+  return isDemoSession(getSessionToken(req));
+}
+
+export function isAuthenticatedDemoActive(req: Request): boolean {
+  const token = getSessionToken(req);
+  if (!isSessionValid(token)) {
+    return false;
+  }
+
+  return isRequestDemoSession(req);
+}
+
 export function requireAuth(req: Request, res: Response, next: NextFunction): void {
-  if (!isAuthConfigured()) {
+  const token = getSessionToken(req);
+  if (isSessionValid(token)) {
+    next();
+    return;
+  }
+
+  if (!isAuthConfigured() && !isDemoModeAvailable()) {
     res.status(500).json({
       ok: false,
       error: "SOURCEDRAFT_ADMIN_PASSWORD is not configured.",
@@ -126,16 +203,14 @@ export function requireAuth(req: Request, res: Response, next: NextFunction): vo
     return;
   }
 
-  const token = getSessionToken(req);
-  if (!isSessionValid(token)) {
-    res.status(401).json({ ok: false, error: "Authentication required." });
-    return;
-  }
-
-  next();
+  res.status(401).json({ ok: false, error: "Authentication required." });
 }
 
-export function login(password: string, res: Response): { ok: boolean; error?: string } {
+export function login(
+  req: Request,
+  password: string,
+  res: Response,
+): { ok: boolean; error?: string } {
   if (!isAuthConfigured()) {
     return { ok: false, error: "Studio auth is not configured." };
   }
@@ -145,11 +220,27 @@ export function login(password: string, res: Response): { ok: boolean; error?: s
   }
 
   const token = createSession();
-  setSessionCookie(res, token);
+  setSessionCookie(req, res, token);
+  return { ok: true };
+}
+
+export function enterDemo(
+  req: Request,
+  res: Response,
+): { ok: boolean; error?: string } {
+  if (!isDemoModeAvailable()) {
+    return {
+      ok: false,
+      error: "Demo mode is not available when GitHub is fully configured.",
+    };
+  }
+
+  const token = createSession({ demo: true });
+  setSessionCookie(req, res, token);
   return { ok: true };
 }
 
 export function logout(req: Request, res: Response): void {
   destroySession(getSessionToken(req));
-  clearSessionCookie(res);
+  clearSessionCookie(req, res);
 }

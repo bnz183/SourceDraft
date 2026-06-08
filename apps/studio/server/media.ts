@@ -1,17 +1,21 @@
 import { randomBytes } from "node:crypto";
 import type { Request } from "express";
 import Busboy from "busboy";
-import { createGitHubPublisher } from "@sourcedraft/github-publisher";
+import { joinPublicMediaPath } from "@sourcedraft/config";
 import type { PublishEnvConfig } from "./config.js";
+import { createMediaProviderFromEnv } from "./mediaProviderRuntime.js";
+import { normalizeMediaDir } from "./mediaPaths.js";
+import {
+  ALLOWED_MIME_TYPES,
+  allowedTypesMessage,
+  extensionForMime,
+  matchesMediaSignature,
+  maxBytesForMime,
+  mediaKindFromMime,
+  uploadLimitMessage,
+} from "./mediaValidation.js";
 
-const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
-
-const ALLOWED_MIME_TYPES = new Set([
-  "image/png",
-  "image/jpeg",
-  "image/gif",
-  "image/webp",
-]);
+const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 
 type ParsedUpload = {
   buffer: Buffer;
@@ -23,8 +27,12 @@ export type MediaUploadSuccess = {
   ok: true;
   repoPath: string;
   publicPath: string;
+  kind: "image" | "pdf";
+  url: string;
+  provider: string;
   sha: string;
   commitSha: string;
+  metadata?: Record<string, unknown>;
 };
 
 export type MediaUploadError = {
@@ -33,16 +41,6 @@ export type MediaUploadError = {
 };
 
 export type MediaUploadResponse = MediaUploadSuccess | MediaUploadError;
-
-function normalizeMediaDir(mediaDir: string): string {
-  return mediaDir.replace(/^\/+/u, "").replace(/\/+$/u, "").trim();
-}
-
-function mediaPublicPath(mediaDir: string, filename: string): string {
-  const normalized = normalizeMediaDir(mediaDir);
-  const leaf = normalized.split("/").pop() ?? "media";
-  return `/${leaf}/${filename}`;
-}
 
 function sanitizeFilename(filename: string): string {
   const base = filename.split(/[/\\]/u).pop() ?? "upload";
@@ -56,52 +54,6 @@ function sanitizeFilename(filename: string): string {
   }
 
   return cleaned.slice(0, 120);
-}
-
-function extensionForMime(mimeType: string): string | null {
-  switch (mimeType) {
-    case "image/png":
-      return "png";
-    case "image/jpeg":
-      return "jpg";
-    case "image/gif":
-      return "gif";
-    case "image/webp":
-      return "webp";
-    default:
-      return null;
-  }
-}
-
-function matchesSignature(buffer: Buffer, mimeType: string): boolean {
-  if (buffer.length < 12) {
-    return false;
-  }
-
-  switch (mimeType) {
-    case "image/png":
-      return (
-        buffer[0] === 0x89 &&
-        buffer[1] === 0x50 &&
-        buffer[2] === 0x4e &&
-        buffer[3] === 0x47
-      );
-    case "image/jpeg":
-      return buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
-    case "image/gif":
-      return (
-        buffer.toString("ascii", 0, 3) === "GIF" &&
-        (buffer.toString("ascii", 3, 6) === "87a" ||
-          buffer.toString("ascii", 3, 6) === "89a")
-      );
-    case "image/webp":
-      return (
-        buffer.toString("ascii", 0, 4) === "RIFF" &&
-        buffer.toString("ascii", 8, 12) === "WEBP"
-      );
-    default:
-      return false;
-  }
 }
 
 function parseUpload(req: Request): Promise<ParsedUpload> {
@@ -141,7 +93,7 @@ function parseUpload(req: Request): Promise<ParsedUpload> {
 
       stream.on("limit", () => {
         rejected = true;
-        reject(new Error("File exceeds the 5MB upload limit."));
+        reject(new Error("File exceeds the maximum upload limit."));
       });
 
       stream.on("end", () => {
@@ -215,70 +167,81 @@ export async function uploadMedia(
     };
   }
 
-  if (parsed.buffer.length > MAX_UPLOAD_BYTES) {
-    return {
-      status: 400,
-      body: { ok: false, error: "File exceeds the 5MB upload limit." },
-    };
-  }
-
   if (!ALLOWED_MIME_TYPES.has(parsed.mimeType)) {
     return {
       status: 400,
-      body: {
-        ok: false,
-        error: "Only PNG, JPEG, GIF, and WebP uploads are allowed.",
-      },
+      body: { ok: false, error: allowedTypesMessage() },
     };
   }
 
-  if (!matchesSignature(parsed.buffer, parsed.mimeType)) {
+  const kind = mediaKindFromMime(parsed.mimeType);
+  const maxBytes = maxBytesForMime(parsed.mimeType);
+  if (kind === null || maxBytes === null) {
+    return {
+      status: 400,
+      body: { ok: false, error: allowedTypesMessage() },
+    };
+  }
+
+  if (parsed.buffer.length > maxBytes) {
+    return {
+      status: 400,
+      body: { ok: false, error: uploadLimitMessage(parsed.mimeType) },
+    };
+  }
+
+  if (!matchesMediaSignature(parsed.buffer, parsed.mimeType)) {
     return {
       status: 400,
       body: {
         ok: false,
-        error: "File content does not match the declared image type.",
+        error: "File content does not match the declared file type.",
       },
     };
   }
 
   const filename = buildUploadFilename(parsed.filename, parsed.mimeType);
   const uniqueSuffix = randomBytes(4).toString("hex");
-  const repoFilename = filename.replace(
-    /(\.[^.]+)$/u,
-    `-${uniqueSuffix}$1`,
-  );
+  const repoFilename = filename.replace(/(\.[^.]+)$/u, `-${uniqueSuffix}$1`);
   const repoPath = `${mediaDir}/${repoFilename}`;
-  const publicPath = mediaPublicPath(mediaDir, repoFilename);
+  const publicPath = joinPublicMediaPath(env.publicMediaPath, repoFilename);
 
-  const publisher = createGitHubPublisher({
-    token: env.token,
-    owner: env.owner,
-    repo: env.repo,
-    branch: env.branch,
-  });
+  const mediaProvider = createMediaProviderFromEnv(env);
 
-  const result = await publisher.publishFile({
-    path: repoPath,
-    contentBase64: parsed.buffer.toString("base64"),
+  const result = await mediaProvider.uploadMedia({
+    buffer: parsed.buffer,
+    filename: repoFilename,
+    mimeType: parsed.mimeType,
+    repoPath,
+    publicPath,
     message: `Upload media: ${repoFilename}`,
   });
 
   if (!result.ok) {
     return {
       status: 502,
-      body: { ok: false, error: result.error },
+      body: {
+        ok: false,
+        error: result.error || "Media upload failed.",
+      },
     };
   }
+
+  const displayPath =
+    result.provider === "github-media" ? publicPath : result.url || publicPath;
 
   return {
     status: 200,
     body: {
       ok: true,
       repoPath: result.path,
-      publicPath,
-      sha: result.sha,
-      commitSha: result.commitSha,
+      publicPath: displayPath,
+      kind,
+      url: result.url,
+      provider: result.provider,
+      sha: result.sha ?? result.path,
+      commitSha: result.commitSha ?? result.path,
+      ...(result.metadata !== undefined ? { metadata: result.metadata } : {}),
     },
   };
 }

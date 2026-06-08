@@ -1,5 +1,11 @@
-import { getAstroMdxPath, toAstroMdx } from "@sourcedraft/adapter-astro-mdx";
-import { getMarkdownPath, toMarkdown } from "@sourcedraft/adapter-markdown";
+import { useState } from "react";
+import {
+  getAdapterPostPath,
+  getAdapterPreviewMeta,
+  getAdapterPreviewNavHint,
+  isAdapterId,
+  renderAdapterOutput,
+} from "@sourcedraft/adapters";
 import type { Article, ValidationIssue } from "@sourcedraft/core";
 
 type AstroMdxPreviewProps = {
@@ -8,12 +14,9 @@ type AstroMdxPreviewProps = {
   article: Article | null;
   contentDir: string;
   adapter: string;
+  adapterOptions?: Record<string, unknown>;
   outputPath?: string | null;
 };
-
-function previewLabel(adapter: string): string {
-  return adapter === "markdown" ? "Markdown output" : "Astro MDX output";
-}
 
 export function AstroMdxPreview({
   valid,
@@ -21,54 +24,105 @@ export function AstroMdxPreview({
   article,
   contentDir,
   adapter,
+  adapterOptions,
   outputPath,
 }: AstroMdxPreviewProps) {
+  const [collapsed, setCollapsed] = useState(false);
+  const adapterId = isAdapterId(adapter) ? adapter : "astro-mdx";
+  const previewMeta = getAdapterPreviewMeta(adapterId);
+
   const resolvedOutputPath =
     valid && article
       ? outputPath && outputPath.length > 0
         ? outputPath
-        : adapter === "markdown"
-          ? getMarkdownPath(article, { contentDir })
-          : getAstroMdxPath(article, { contentDir })
+        : getAdapterPostPath(adapterId, article, {
+            contentDir,
+            ...(adapterOptions !== undefined ? { adapterOptions } : {}),
+          })
       : null;
 
   const fileOutput =
     valid && article
-      ? adapter === "markdown"
-        ? toMarkdown(article)
-        : toAstroMdx(article)
+      ? renderAdapterOutput(adapterId, article, adapterOptions)
       : null;
 
+  const navHint =
+    valid && article && resolvedOutputPath
+      ? getAdapterPreviewNavHint(
+          adapterId,
+          article,
+          resolvedOutputPath,
+          adapterOptions,
+        ) ?? previewMeta.navHint
+      : previewMeta.navHint;
+
   return (
-    <section className="panel mdx-output">
-      <div className="panel__header">
-        <h2 className="panel__title">{previewLabel(adapter)}</h2>
-        <p className="panel__meta">
-          {valid
-            ? "Preview of the file that will be committed"
-            : "Fix validation issues to preview output"}
-        </p>
+    <section className="preview-panel" aria-labelledby="preview-panel-title">
+      <div className="preview-panel__header">
+        <div>
+          <h2 className="preview-panel__title" id="preview-panel-title">
+            {previewMeta.label}
+          </h2>
+          <p className="preview-panel__meta">
+            {valid
+              ? "File that will be saved to GitHub"
+              : "Complete post details to preview output"}
+          </p>
+        </div>
+        <button
+          type="button"
+          className="button button--compact"
+          aria-expanded={!collapsed}
+          aria-controls="preview-panel-content"
+          onClick={() => setCollapsed((current) => !current)}
+        >
+          {collapsed ? "Show preview" : "Hide preview"}
+        </button>
       </div>
 
-      {valid && resolvedOutputPath && fileOutput ? (
-        <div className="mdx-output__content">
-          <div className="mdx-output__path">
-            <span className="mdx-output__path-label">Output path</span>
-            <code>{resolvedOutputPath}</code>
-          </div>
-          <pre className="mdx-output__code">
-            <code>{fileOutput}</code>
-          </pre>
+      {!collapsed && (
+        <div className="preview-panel__content" id="preview-panel-content">
+          {valid && resolvedOutputPath && fileOutput ? (
+            <>
+              <div className="preview-panel__path">
+                <span className="preview-panel__path-label">Output file</span>
+                <code>{resolvedOutputPath}</code>
+              </div>
+              {navHint && (
+                <p className="preview-panel__meta" role="note">
+                  {navHint}
+                </p>
+              )}
+              <pre className="preview-panel__code">
+                <code>{fileOutput}</code>
+              </pre>
+            </>
+          ) : (
+            <div className="validation-panel">
+              {issues.length === 0 ? (
+                <p className="validation-panel__intro">
+                  Add a title, description, dates, category, and body to continue.
+                </p>
+              ) : (
+                <>
+                  <p className="validation-panel__intro" role="status">
+                    Fix these items before publishing:
+                  </p>
+                  <ul className="validation-panel__issues">
+                    {issues.map((issue) => (
+                      <li key={`${issue.field}-${issue.message}`}>
+                        <span className="validation-panel__field">
+                          {issue.field}
+                        </span>
+                        {issue.message}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+            </div>
+          )}
         </div>
-      ) : (
-        <ul className="validation-panel__issues mdx-output__issues">
-          {issues.map((issue) => (
-            <li key={`${issue.field}-${issue.message}`}>
-              <span className="validation-panel__field">{issue.field}</span>
-              {issue.message}
-            </li>
-          ))}
-        </ul>
       )}
     </section>
   );

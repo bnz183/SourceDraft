@@ -1,6 +1,10 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import {
+  derivePublicMediaPath,
+  normalizePublicMediaPath,
+} from "./publicMediaPath.js";
+import {
   DEFAULT_SOURCEDRAFT_CONFIG,
   type SourceDraftConfig,
 } from "./types.js";
@@ -36,22 +40,73 @@ export function normalizeSourceDraftConfig(
 
   const input = raw as Record<string, unknown>;
   const categories = normalizeCategories(input.categories);
+  const mediaDir = isNonEmptyString(input.mediaDir)
+    ? input.mediaDir.trim()
+    : DEFAULT_SOURCEDRAFT_CONFIG.mediaDir;
+  const publicMediaPathExplicit = isNonEmptyString(input.publicMediaPath)
+    ? normalizePublicMediaPath(input.publicMediaPath.trim())
+    : undefined;
+
+  const adapterOptions =
+    input.adapterOptions !== null &&
+    typeof input.adapterOptions === "object" &&
+    !Array.isArray(input.adapterOptions)
+      ? (input.adapterOptions as Record<string, unknown>)
+      : undefined;
+
+  const publisherOptions =
+    input.publisherOptions !== null &&
+    typeof input.publisherOptions === "object" &&
+    !Array.isArray(input.publisherOptions)
+      ? (input.publisherOptions as Record<string, unknown>)
+      : undefined;
+
+  const plugins = normalizeStringArray(input.plugins);
+  const requiredPlugins = normalizeStringArray(input.requiredPlugins);
+  const discoverPlugins = input.discoverPlugins === true;
 
   return {
     adapter: isNonEmptyString(input.adapter)
       ? input.adapter.trim()
       : DEFAULT_SOURCEDRAFT_CONFIG.adapter,
+    publisher: isNonEmptyString(input.publisher)
+      ? input.publisher.trim()
+      : DEFAULT_SOURCEDRAFT_CONFIG.publisher,
     contentDir: isNonEmptyString(input.contentDir)
       ? input.contentDir.trim()
       : DEFAULT_SOURCEDRAFT_CONFIG.contentDir,
-    mediaDir: isNonEmptyString(input.mediaDir)
-      ? input.mediaDir.trim()
-      : DEFAULT_SOURCEDRAFT_CONFIG.mediaDir,
+    mediaDir,
+    publicMediaPath:
+      publicMediaPathExplicit ?? derivePublicMediaPath(mediaDir),
+    ...(publicMediaPathExplicit !== undefined
+      ? { publicMediaPathExplicit }
+      : {}),
     defaultBranch: isNonEmptyString(input.defaultBranch)
       ? input.defaultBranch.trim()
       : DEFAULT_SOURCEDRAFT_CONFIG.defaultBranch,
     categories: categories ?? DEFAULT_SOURCEDRAFT_CONFIG.categories,
+    ...(adapterOptions !== undefined ? { adapterOptions } : {}),
+    ...(publisherOptions !== undefined ? { publisherOptions } : {}),
+    ...(plugins !== undefined ? { plugins } : {}),
+    ...(requiredPlugins !== undefined ? { requiredPlugins } : {}),
+    ...(discoverPlugins ? { discoverPlugins } : {}),
   };
+}
+
+function normalizeStringArray(value: unknown): string[] | undefined {
+  if (!Array.isArray(value)) {
+    return undefined;
+  }
+
+  const items: string[] = [];
+  for (const item of value) {
+    if (!isNonEmptyString(item)) {
+      return undefined;
+    }
+    items.push(item.trim());
+  }
+
+  return items.length > 0 ? items : undefined;
 }
 
 export function resolveConfigPath(cwd: string): string | null {

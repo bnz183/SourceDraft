@@ -1,14 +1,19 @@
+import { getAdapterPostPath, isAdapterId } from "@sourcedraft/adapters";
 import { normalizeArticle, validateArticle } from "@sourcedraft/core";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { AdapterStatus } from "./components/AdapterStatus";
-import { ArticlePipeline } from "./components/ArticlePipeline";
-import { CommandBar } from "./components/CommandBar";
-import { EditorWorkspace } from "./components/EditorWorkspace";
-import { FrontmatterInspector } from "./components/FrontmatterInspector";
+import { AppBar } from "./components/AppBar";
 import { AstroMdxPreview } from "./components/AstroMdxPreview";
+import { DemoBanner } from "./components/DemoBanner";
 import { LoginScreen } from "./components/LoginScreen";
+import { PostDetailsPanel } from "./components/PostDetailsPanel";
+import { PostSidebar } from "./components/PostSidebar";
 import { PublishGate } from "./components/PublishGate";
+import { RestoreDraftBanner } from "./components/RestoreDraftBanner";
+import { SettingsPanel } from "./components/SettingsPanel";
+import { WritingCanvas } from "./components/WritingCanvas";
+import { useDocumentAutosave } from "./hooks/useDocumentAutosave";
 import {
+  enterDemo,
   fetchAuthStatus,
   login as loginToStudio,
   logout as logoutFromStudio,
@@ -45,7 +50,10 @@ function App() {
   const [authChecked, setAuthChecked] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
   const [authConfigured, setAuthConfigured] = useState(false);
-  const [view, setView] = useState<View>("overview");
+  const [demoMode, setDemoMode] = useState(false);
+  const [demoModeForced, setDemoModeForced] = useState(false);
+  const [demoModeAvailable, setDemoModeAvailable] = useState(false);
+  const [view, setView] = useState<View>("editor");
   const [studioConfig, setStudioConfig] = useState<StudioConfig>(
     FALLBACK_STUDIO_CONFIG,
   );
@@ -61,6 +69,9 @@ function App() {
   const [publishing, setPublishing] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
   const [publishSuccess, setPublishSuccess] = useState<string | null>(null);
+  const [latestUploadedImagePath, setLatestUploadedImagePath] = useState<
+    string | null
+  >(null);
 
   const articleInput = useMemo(() => formStateToArticleInput(form), [form]);
   const validation = useMemo(
@@ -90,6 +101,9 @@ function App() {
     fetchAuthStatus().then((status) => {
       setAuthConfigured(status.configured);
       setAuthenticated(status.authenticated);
+      setDemoMode(status.demoMode === true);
+      setDemoModeForced(status.demoModeForced === true);
+      setDemoModeAvailable(status.demoModeAvailable === true);
       setAuthChecked(true);
     });
   }, []);
@@ -99,8 +113,15 @@ function App() {
       return;
     }
 
-    fetchStudioConfig().then((config) => {
+    let cancelled = false;
+
+    void fetchStudioConfig().then((config) => {
+      if (cancelled) {
+        return;
+      }
+
       setStudioConfig(config);
+      setDemoMode(config.demoMode === true);
       setForm((current) => {
         if (current.title.length > 0 || current.body.length > 0) {
           return current;
@@ -113,7 +134,14 @@ function App() {
       });
     });
 
-    void refreshPosts();
+    const postsTimer = window.setTimeout(() => {
+      void refreshPosts();
+    }, 0);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(postsTimer);
+    };
   }, [authenticated, refreshPosts]);
 
   const githubReady = useMemo(
@@ -135,21 +163,97 @@ function App() {
     }
   }, [articleInput, validation.valid]);
 
+  const outputPath = useMemo(() => {
+    if (!validation.valid || !normalizedArticle) {
+      return null;
+    }
+
+    if (editingPath && editingPath.length > 0) {
+      return editingPath;
+    }
+
+    const adapterId = isAdapterId(studioConfig.adapter)
+      ? studioConfig.adapter
+      : "astro-mdx";
+
+    return getAdapterPostPath(adapterId, normalizedArticle, {
+      contentDir: studioConfig.contentDir,
+      ...(studioConfig.adapterOptions !== undefined
+        ? { adapterOptions: studioConfig.adapterOptions }
+        : {}),
+    });
+  }, [
+    validation.valid,
+    normalizedArticle,
+    editingPath,
+    studioConfig.adapter,
+    studioConfig.adapterOptions,
+    studioConfig.contentDir,
+  ]);
+
+  const documentSnapshot = useMemo(
+    () => ({
+      form,
+      editingPath,
+      slugAuto,
+    }),
+    [form, editingPath, slugAuto],
+  );
+
+  const {
+    documentStatus,
+    restorePrompt,
+    applyRestore,
+    discardDraft,
+    commitBaseline,
+    checkRestorePrompt,
+  } = useDocumentAutosave({
+    snapshot: documentSnapshot,
+    publishing,
+    enabled: authenticated && view === "editor",
+  });
+
   function resetEditor(defaultCategory?: string) {
     setEditingPath(null);
     setLoadPostError(null);
     setSlugAuto(true);
     setPublishError(null);
     setPublishSuccess(null);
-    setForm(createInitialFormState(defaultCategory ?? studioConfig.categories[0]));
+    setView("editor");
+    const nextForm = createInitialFormState(
+      defaultCategory ?? studioConfig.categories[0],
+    );
+    setForm(nextForm);
+
+    const nextSnapshot = {
+      form: nextForm,
+      editingPath: null,
+      slugAuto: true,
+    };
+    commitBaseline(nextSnapshot, {
+      remoteSync: false,
+      clearLocalDraft: false,
+    });
+    checkRestorePrompt(nextSnapshot);
   }
 
-  function handleViewChange(next: View) {
-    if (next === "new-article" && view !== "new-article") {
-      resetEditor();
+  function handleRestoreDraft() {
+    const restored = applyRestore();
+    if (!restored) {
+      return;
     }
 
-    setView(next);
+    setForm(restored.form);
+    setEditingPath(restored.editingPath);
+    setSlugAuto(restored.slugAuto);
+    setPublishError(null);
+    setPublishSuccess(null);
+    setLoadPostError(null);
+    setView("editor");
+  }
+
+  function handleDiscardDraft() {
+    discardDraft();
   }
 
   function handleFieldChange(
@@ -194,33 +298,68 @@ function App() {
     }));
   }
 
+  function handleInsertPdfLink(publicPath: string, filename: string) {
+    const label = filename.replace(/\.pdf$/iu, "") || "Document";
+    const snippet = `\n\n[${label}](${publicPath})\n`;
+
+    setForm((current) => ({
+      ...current,
+      body: `${current.body}${snippet}`,
+    }));
+  }
+
   async function handleEditPost(path: string) {
     setLoadPostError(null);
+    setView("editor");
 
     const result = await fetchPost(path);
     if (!result.ok) {
       setLoadPostError(result.error);
-      setView("overview");
       return;
     }
 
-    setForm(
-      articleInputToFormState(
-        result.article,
-        studioConfig.categories[0] ?? "Guides",
-      ),
+    const loadedForm = articleInputToFormState(
+      result.article,
+      studioConfig.categories[0] ?? "Guides",
     );
+    setForm(loadedForm);
     setSlugAuto(false);
     setEditingPath(result.path);
     setPublishError(null);
     setPublishSuccess(null);
-    setView("new-article");
+
+    const nextSnapshot = {
+      form: loadedForm,
+      editingPath: result.path,
+      slugAuto: false,
+    };
+    commitBaseline(nextSnapshot, {
+      remoteSync: true,
+      clearLocalDraft: false,
+    });
+    checkRestorePrompt(nextSnapshot);
   }
 
   async function handleLogin(password: string) {
     const result = await loginToStudio(password);
     if (result.ok) {
+      const status = await fetchAuthStatus();
       setAuthenticated(true);
+      setDemoMode(status.demoMode === true);
+      setDemoModeForced(status.demoModeForced === true);
+      setDemoModeAvailable(status.demoModeAvailable === true);
+    }
+    return result;
+  }
+
+  async function handleEnterDemo() {
+    const result = await enterDemo();
+    if (result.ok) {
+      const status = await fetchAuthStatus();
+      setAuthenticated(true);
+      setDemoMode(true);
+      setDemoModeForced(status.demoModeForced === true);
+      setDemoModeAvailable(status.demoModeAvailable === true);
     }
     return result;
   }
@@ -232,6 +371,7 @@ function App() {
     setEditingPath(null);
     setPublishError(null);
     setPublishSuccess(null);
+    setView("editor");
   }
 
   async function handlePublish() {
@@ -256,11 +396,31 @@ function App() {
       }
 
       const action = result.created ? "Created" : "Updated";
-      setPublishSuccess(`${action} ${result.path} (${result.commitSha.slice(0, 7)})`);
+      const deployNote =
+        result.deployHook?.triggered === true
+          ? ` ${result.deployHook.ok ? "Deploy hook succeeded." : result.deployHook.message}`
+          : "";
+
+      setPublishSuccess(
+        `${action} ${result.path} (commit ${result.commitSha.slice(0, 7)}).${deployNote}`,
+      );
       setEditingPath(result.path);
+      commitBaseline(
+        {
+          form,
+          editingPath: result.path,
+          slugAuto,
+        },
+        {
+          remoteSync: true,
+          clearLocalDraft: true,
+        },
+      );
       await refreshPosts();
     } catch {
-      setPublishError("Could not reach the publish API. Is the server running?");
+      setPublishError(
+        "Could not reach the publish API. Start the dev server and try again.",
+      );
     } finally {
       setPublishing(false);
     }
@@ -269,199 +429,128 @@ function App() {
   if (!authChecked) {
     return (
       <div className="login-screen">
-        <p className="login-screen__loading">Checking session...</p>
+        <p className="login-screen__loading" role="status">
+          Checking session…
+        </p>
       </div>
     );
   }
 
   if (!authenticated) {
     return (
-      <LoginScreen configured={authConfigured} onLogin={handleLogin} />
+      <LoginScreen
+        configured={authConfigured}
+        demoAvailable={demoModeAvailable}
+        demoForced={demoModeForced}
+        onLogin={handleLogin}
+        onEnterDemo={handleEnterDemo}
+      />
     );
   }
 
   return (
     <div className="studio">
-      <CommandBar
-        currentView={view}
-        onViewChange={handleViewChange}
+      {demoMode && <DemoBanner forced={demoModeForced} />}
+      <AppBar
+        adapter={studioConfig.adapter}
+        documentStatus={view === "editor" ? documentStatus : null}
+        githubOwner={studioConfig.githubOwner}
+        githubRepo={studioConfig.githubRepo}
+        githubReady={githubReady}
+        settingsActive={view === "settings"}
+        onOpenSettings={() =>
+          setView((current) => (current === "settings" ? "editor" : "settings"))
+        }
         onLogout={handleLogout}
       />
 
-      <main className="studio__main">
-        {view === "overview" && (
-          <div className="studio__stack">
-            {loadPostError && (
-              <p className="article-pipeline__error article-pipeline__error--banner">
-                {loadPostError}
-              </p>
+      {view === "settings" ? (
+        <main className="studio__settings">
+          <SettingsPanel config={studioConfig} />
+        </main>
+      ) : (
+        <div className="studio__workspace">
+          <PostSidebar
+            posts={posts}
+            loading={postsLoading}
+            error={postsError}
+            githubReady={githubReady}
+            activePath={editingPath}
+            loadPostError={loadPostError}
+            onNewPost={() => resetEditor()}
+            onRefresh={() => {
+              void refreshPosts();
+            }}
+            onEdit={(path) => {
+              void handleEditPost(path);
+            }}
+          />
+
+          <main className="studio__canvas-column">
+            {restorePrompt && (
+              <RestoreDraftBanner
+                autosave={restorePrompt}
+                onRestore={handleRestoreDraft}
+                onDiscard={handleDiscardDraft}
+              />
             )}
-            <ArticlePipeline
+
+            <WritingCanvas
+              title={form.title}
+              description={form.description}
+              body={form.body}
+              editingPath={editingPath}
+              draft={form.draft}
+              latestImagePath={latestUploadedImagePath}
               posts={posts}
-              loading={postsLoading}
-              error={postsError}
-              onRefresh={() => {
-                void refreshPosts();
-              }}
-              onEdit={(path) => {
-                void handleEditPost(path);
-              }}
-            />
-            <AdapterStatus
-              adapter={studioConfig.adapter}
-              githubOwner={studioConfig.githubOwner}
-              githubRepo={studioConfig.githubRepo}
-              contentDir={studioConfig.contentDir}
-            />
-          </div>
-        )}
-
-        {view === "new-article" && (
-          <div className="studio__editor-layout">
-            <div className="studio__editor-column">
-              {editingPath && (
-                <p className="editor-notice">
-                  Editing <code>{editingPath}</code>. Publishing will update this
-                  file in GitHub.
-                </p>
-              )}
-              <EditorWorkspace body={form.body} onBodyChange={handleBodyChange} />
-              {fieldErrors.body && (
-                <p className="editor-workspace__error">{fieldErrors.body}</p>
-              )}
-              <AstroMdxPreview
-                valid={validation.valid}
-                issues={validation.issues}
-                article={normalizedArticle}
-                contentDir={studioConfig.contentDir}
-                adapter={studioConfig.adapter}
-                outputPath={editingPath}
-              />
-              <PublishGate
-                ready={validation.valid}
-                publishing={publishing}
-                publishError={publishError}
-                publishSuccess={publishSuccess}
-                githubReady={githubReady}
-                onPublish={handlePublish}
-              />
-            </div>
-            <FrontmatterInspector
-              values={form}
-              categories={studioConfig.categories}
-              mediaDir={studioConfig.mediaDir}
               fieldErrors={fieldErrors}
-              slugAuto={slugAuto}
-              onChange={handleFieldChange}
-              onSlugManualEdit={handleSlugManualEdit}
-              onSlugResync={handleSlugResync}
-              onUseHeroImage={handleUseHeroImage}
-              onInsertImage={handleInsertImage}
+              onTitleChange={(value) => handleFieldChange("title", value)}
+              onDescriptionChange={(value) =>
+                handleFieldChange("description", value)
+              }
+              onBodyChange={handleBodyChange}
             />
-          </div>
-        )}
 
-        {view === "settings" && (
-          <div className="studio__stack">
-            <section className="panel settings-panel">
-              <div className="panel__header">
-                <h2 className="panel__title">Publishing configuration</h2>
-                <p className="panel__meta">
-                  Paths and categories from sourcedraft.config.json. GitHub
-                  target from .env.
-                </p>
-              </div>
-
-              <p className="settings-panel__note">
-                Publishing requires a GitHub token with write access to the
-                target repository. The token is read only by the server when you
-                publish.
-              </p>
-
-              <div className="settings-panel__grid">
-                <label className="field">
-                  <span className="field__label">Content directory</span>
-                  <input
-                    className="field__input field__input--mono"
-                    type="text"
-                    value={studioConfig.contentDir}
-                    readOnly
-                  />
-                </label>
-
-                <label className="field">
-                  <span className="field__label">Adapter</span>
-                  <input
-                    className="field__input field__input--mono"
-                    type="text"
-                    value={studioConfig.adapter}
-                    readOnly
-                  />
-                </label>
-
-                <label className="field">
-                  <span className="field__label">GitHub owner</span>
-                  <input
-                    className="field__input field__input--mono"
-                    type="text"
-                    value={studioConfig.githubOwner}
-                    placeholder="Set GITHUB_OWNER in .env"
-                    readOnly
-                  />
-                </label>
-
-                <label className="field">
-                  <span className="field__label">GitHub repository</span>
-                  <input
-                    className="field__input field__input--mono"
-                    type="text"
-                    value={studioConfig.githubRepo}
-                    placeholder="Set GITHUB_REPO in .env"
-                    readOnly
-                  />
-                </label>
-
-                <label className="field">
-                  <span className="field__label">Branch</span>
-                  <input
-                    className="field__input field__input--mono"
-                    type="text"
-                    value={studioConfig.defaultBranch}
-                    readOnly
-                  />
-                </label>
-
-                <label className="field">
-                  <span className="field__label">Media directory</span>
-                  <input
-                    className="field__input field__input--mono"
-                    type="text"
-                    value={studioConfig.mediaDir}
-                    readOnly
-                  />
-                </label>
-
-                <label className="field field--full">
-                  <span className="field__label">Categories</span>
-                  <input
-                    className="field__input field__input--mono"
-                    type="text"
-                    value={studioConfig.categories.join(", ")}
-                    readOnly
-                  />
-                </label>
-              </div>
-            </section>
-
-            <AdapterStatus
-              adapter={studioConfig.adapter}
-              githubOwner={studioConfig.githubOwner}
-              githubRepo={studioConfig.githubRepo}
+            <AstroMdxPreview
+              valid={validation.valid}
+              issues={validation.issues}
+              article={normalizedArticle}
               contentDir={studioConfig.contentDir}
+              adapter={studioConfig.adapter}
+              adapterOptions={studioConfig.adapterOptions}
+              outputPath={editingPath}
             />
-          </div>
-        )}
-      </main>
+
+            <PublishGate
+              ready={validation.valid}
+              publishing={publishing}
+              publishError={publishError}
+              publishSuccess={publishSuccess}
+              githubReady={githubReady}
+              demoMode={demoMode}
+              onPublish={handlePublish}
+            />
+          </main>
+
+          <PostDetailsPanel
+            values={form}
+            categories={studioConfig.categories}
+            githubReady={githubReady}
+            fieldErrors={fieldErrors}
+            slugAuto={slugAuto}
+            valid={validation.valid}
+            issues={validation.issues}
+            outputPath={outputPath}
+            onChange={handleFieldChange}
+            onSlugManualEdit={handleSlugManualEdit}
+            onSlugResync={handleSlugResync}
+            onUseHeroImage={handleUseHeroImage}
+            onInsertImage={handleInsertImage}
+            onInsertPdfLink={handleInsertPdfLink}
+            onUploadSuccess={setLatestUploadedImagePath}
+          />
+        </div>
+      )}
     </div>
   );
 }
