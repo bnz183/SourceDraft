@@ -1,6 +1,8 @@
 # GitHub publishing
 
-SourceDraft publishes **files**, not live websites. When you click **Publish to GitHub** in Studio, a server-side process commits one content file into the repository you configure.
+SourceDraft also supports [GitLab and Bitbucket](git-publishers.md). This page covers GitHub only.
+
+SourceDraft publishes **files**, not live websites. When you click **Publish** in Studio, a server-side process commits one content file into the repository you configure.
 
 The file format depends on your adapter: `.mdx` for `astro-mdx`, `.md` for `markdown`. Both use YAML frontmatter plus the article body.
 

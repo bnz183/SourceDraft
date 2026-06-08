@@ -10,7 +10,7 @@ SourceDraft uses two files on purpose:
 
 - Content paths (`contentDir`, `mediaDir`, `publicMediaPath`)
 - Adapter name — see [adapters.md](adapters.md) compatibility matrix
-- Publisher name (`github` today)
+- Publisher name (`github`, `gitlab`, or `bitbucket`)
 - Category list for Studio
 - Default branch name when `GITHUB_BRANCH` is unset
 
@@ -81,10 +81,14 @@ Set in `sourcedraft.config.json`, or override with `CMS_ADAPTER` in `.env`.
 | Value | Package | Capabilities |
 |-------|---------|--------------|
 | `github` | `@sourcedraft/publishers` → `@sourcedraft/github-publisher` | Publish posts, upload media, list/read files via GitHub Contents API |
+| `gitlab` | `@sourcedraft/publishers` | Publish posts, upload media, list/read files via GitLab Repository Files API |
+| `bitbucket` | `@sourcedraft/publishers` | Publish posts and upload media via Bitbucket commit-upload API (no list/read yet) |
 
 Set in `sourcedraft.config.json`, or override with `CMS_PUBLISHER` in `.env`. Default: `github`.
 
 Studio resolves publishers through `publisherRegistry`. Unknown publisher ids return a clear configuration error before any API call.
+
+Publisher-specific env vars and API behavior: [git-publishers.md](git-publishers.md).
 
 ### `mediaDir` and `publicMediaPath`
 
@@ -105,19 +109,19 @@ SourceDraft searches for `sourcedraft.config.json` in the working directory, up 
 
 Missing file → built-in defaults matching the example above.
 
-Wrong `contentDir` or `mediaDir` values produce clear GitHub errors in Studio when listing posts, opening a post, publishing, or uploading media. See [github-publishing.md](github-publishing.md#common-failures).
+Wrong `contentDir` or `mediaDir` values produce clear publisher errors in Studio when listing posts, opening a post, publishing, or uploading media. See [git-publishers.md](git-publishers.md) and [github-publishing.md](github-publishing.md#common-failures).
 
 ## Environment variables
 
-```env
-SOURCEDRAFT_ADMIN_PASSWORD=
-GITHUB_TOKEN=
-GITHUB_OWNER=
-GITHUB_REPO=
-GITHUB_BRANCH=main
-```
+Copy from `.env.example`. Set credentials for the publisher selected in `sourcedraft.config.json` (`publisher` or `CMS_PUBLISHER`).
 
-Optional overrides:
+**GitHub** (default): `GITHUB_TOKEN`, `GITHUB_OWNER`, `GITHUB_REPO`, optional `GITHUB_BRANCH`
+
+**GitLab:** `GITLAB_TOKEN`, `GITLAB_PROJECT_ID` or `GITLAB_PROJECT_PATH`, optional `GITLAB_BRANCH`, `GITLAB_BASE_URL`
+
+**Bitbucket:** `BITBUCKET_TOKEN`, `BITBUCKET_WORKSPACE`, `BITBUCKET_REPO_SLUG`, optional `BITBUCKET_BRANCH`, `BITBUCKET_USERNAME`
+
+Shared optional overrides:
 
 ```env
 CMS_CONTENT_DIR=
@@ -130,15 +134,16 @@ CMS_PUBLISHER=
 | Variable | Required | Purpose |
 |----------|----------|---------|
 | `SOURCEDRAFT_ADMIN_PASSWORD` | Yes for Studio | Server-side login password |
-| `GITHUB_TOKEN` | Yes to publish/upload | GitHub API token (server only) |
-| `GITHUB_OWNER` | Yes to publish/upload | Repository owner |
-| `GITHUB_REPO` | Yes to publish/upload | Repository name |
-| `GITHUB_BRANCH` | No | Overrides `defaultBranch` |
+| `GITHUB_*` | When `publisher` is `github` | GitHub API credentials (server only) |
+| `GITLAB_*` | When `publisher` is `gitlab` | GitLab API credentials (server only) |
+| `BITBUCKET_*` | When `publisher` is `bitbucket` | Bitbucket API credentials (server only) |
 | `CMS_CONTENT_DIR` | No | Overrides `contentDir` |
 | `CMS_MEDIA_DIR` | No | Overrides `mediaDir` |
 | `CMS_PUBLIC_MEDIA_PATH` | No | Overrides `publicMediaPath` |
 | `CMS_ADAPTER` | No | Overrides `adapter` |
 | `CMS_PUBLISHER` | No | Overrides `publisher` (default `github`) |
+
+Full publisher reference: [git-publishers.md](git-publishers.md).
 
 ## Precedence
 

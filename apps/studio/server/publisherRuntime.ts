@@ -21,6 +21,13 @@ export function toPublisherRuntimeConfig(
     ...(env.publisherOptions !== undefined
       ? { publisherOptions: env.publisherOptions }
       : {}),
+    ...(env.gitlabProjectRef !== undefined
+      ? { gitlabProjectRef: env.gitlabProjectRef }
+      : {}),
+    ...(env.gitlabBaseUrl !== undefined ? { gitlabBaseUrl: env.gitlabBaseUrl } : {}),
+    ...(env.bitbucketUsername !== undefined
+      ? { bitbucketUsername: env.bitbucketUsername }
+      : {}),
   };
 }
 
