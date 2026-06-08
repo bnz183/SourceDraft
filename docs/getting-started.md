@@ -28,6 +28,8 @@ cp .env.example .env
 
 ```env
 SOURCEDRAFT_ADMIN_PASSWORD=your-local-studio-password
+# Optional: force demo mode (no GitHub commits)
+# SOURCEDRAFT_DEMO_MODE=true
 GITHUB_TOKEN=ghp_...
 GITHUB_OWNER=your-username-or-org
 GITHUB_REPO=your-site-repo
@@ -57,6 +59,23 @@ Sign in with `SOURCEDRAFT_ADMIN_PASSWORD`.
 
 **MVP password auth is intended for local/private use.** Do not expose Studio on the public internet without extra hardening.
 
+## Demo mode (no GitHub required)
+
+Use demo mode to explore Studio before connecting a repository:
+
+1. **Environment flag:** set `SOURCEDRAFT_DEMO_MODE=true` in `.env` and restart the API, or
+2. **Opt-in:** leave `GITHUB_TOKEN`, `GITHUB_OWNER`, and `GITHUB_REPO` unset and click **Explore demo mode** on the sign-in screen.
+
+Demo mode provides sample posts, local editing, simulated media upload paths, and simulated publish success. A banner reads: **Demo mode — no GitHub commits are made**.
+
+Demo mode never sends your GitHub token to the browser and never commits to GitHub, even if credentials are present while `SOURCEDRAFT_DEMO_MODE=true`.
+
+## Setup health
+
+Open **Settings** in Studio. The **Setup health** section shows booleans for admin password, GitHub owner/repo, server-side token presence (never the value), content/media paths, adapter, and demo mode status. It suggests a next action when setup is incomplete.
+
+The publish API also exposes `GET /api/health/setup` (authenticated) with the same safe diagnostics.
+
 ## 5. Write and publish
 
 1. **Posts** sidebar — open an existing post, or click **New post**
@@ -67,6 +86,24 @@ Sign in with `SOURCEDRAFT_ADMIN_PASSWORD`.
 SourceDraft validates, builds the file with your adapter, and commits to `contentDir/<slug>.mdx` or `.md`.
 
 How that commit works: [github-publishing.md](github-publishing.md)
+
+## Smoke tests (Playwright)
+
+Optional browser smoke tests run against demo mode — no live GitHub credentials required:
+
+```bash
+cd apps/studio
+pnpm exec playwright install chromium
+pnpm test:e2e
+```
+
+These tests cover sign-in/demo entry, post list, editor, toolbar, autosave status, media library, content quality, setup health, and simulated publish. They are not part of default CI yet; run them locally before release promotion.
+
+Unit tests (default):
+
+```bash
+pnpm test
+```
 
 ## 6. Verify
 
@@ -86,5 +123,6 @@ Open your site repo on GitHub and confirm the new file (and any uploaded images 
 | Wrong file path | `contentDir` in config |
 | Upload rejected | File type or 5 MB limit; see [media.md](media.md) |
 | Empty post list | Wrong repo in `.env` or no `.md`/`.mdx` in `contentDir` |
+| Demo only | GitHub not configured or `SOURCEDRAFT_DEMO_MODE=true` — expected; configure GitHub for real publish |
 
 Plain-language intro: [non-technical-overview.md](non-technical-overview.md)

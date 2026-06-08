@@ -7,6 +7,7 @@ export type StudioConfig = {
   categories: string[];
   githubOwner: string;
   githubRepo: string;
+  demoMode?: boolean;
 };
 
 export const FALLBACK_STUDIO_CONFIG: StudioConfig = {
@@ -41,6 +42,7 @@ export async function fetchStudioConfig(): Promise<StudioConfig> {
           : FALLBACK_STUDIO_CONFIG.categories,
       githubOwner: data.githubOwner || "",
       githubRepo: data.githubRepo || "",
+      demoMode: data.demoMode === true,
     };
   } catch {
     return FALLBACK_STUDIO_CONFIG;

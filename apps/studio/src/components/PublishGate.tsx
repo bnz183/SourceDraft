@@ -4,6 +4,7 @@ type PublishGateProps = {
   publishError: string | null;
   publishSuccess: string | null;
   githubReady: boolean;
+  demoMode: boolean;
   onPublish: () => void;
 };
 
@@ -11,12 +12,13 @@ function disabledReason(
   ready: boolean,
   githubReady: boolean,
   publishing: boolean,
+  demoMode: boolean,
 ): string | null {
   if (publishing) {
     return null;
   }
 
-  if (!githubReady) {
+  if (!githubReady && !demoMode) {
     return "Set GITHUB_OWNER, GITHUB_REPO, and GITHUB_TOKEN in .env, then check Settings.";
   }
 
@@ -33,10 +35,11 @@ export function PublishGate({
   publishError,
   publishSuccess,
   githubReady,
+  demoMode,
   onPublish,
 }: PublishGateProps) {
-  const canPublish = ready && !publishing && githubReady;
-  const reason = disabledReason(ready, githubReady, publishing);
+  const canPublish = ready && !publishing && (githubReady || demoMode);
+  const reason = disabledReason(ready, githubReady, publishing, demoMode);
 
   return (
     <section className="publish-bar" aria-labelledby="publish-bar-title">
@@ -47,9 +50,13 @@ export function PublishGate({
           </h2>
           <p className="publish-bar__meta" aria-live="polite">
             {publishing
-              ? "Saving to GitHub…"
+              ? demoMode
+                ? "Simulating publish…"
+                : "Saving to GitHub…"
               : ready
-                ? "Your post will be committed to the repository"
+                ? demoMode
+                  ? "Demo mode will simulate a successful publish"
+                  : "Your post will be committed to the repository"
                 : "Complete required fields to enable publish"}
           </p>
         </div>
@@ -60,7 +67,11 @@ export function PublishGate({
           aria-describedby={reason ? "publish-disabled-reason" : undefined}
           onClick={onPublish}
         >
-          {publishing ? "Publishing…" : "Publish to GitHub"}
+          {publishing
+            ? "Publishing…"
+            : demoMode
+              ? "Simulate publish"
+              : "Publish to GitHub"}
         </button>
       </div>
 
@@ -82,10 +93,14 @@ export function PublishGate({
 
       {publishSuccess && (
         <div className="notice notice--success publish-bar__notice" role="status">
-          <p className="notice__title">Published successfully</p>
+          <p className="notice__title">
+            {demoMode ? "Publish simulated" : "Published successfully"}
+          </p>
           <p className="notice__body">{publishSuccess}</p>
           <p className="notice__hint">
-            Your site build or CI will pick up the file from the repository.
+            {demoMode
+              ? "No GitHub commit was made. Configure GitHub in .env for real publishing."
+              : "Your site build or CI will pick up the file from the repository."}
           </p>
         </div>
       )}

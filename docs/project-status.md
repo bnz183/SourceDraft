@@ -13,7 +13,10 @@ Early open-source MVP — usable for single-editor writing and GitHub publishing
 - Image upload from Studio (PNG, JPEG, GIF, WebP; 5 MB max) with configurable `publicMediaPath`
 - `sourcedraft.config.json` + `.env` configuration
 - Server-side password auth for Studio and API
+- **Demo mode** with sample posts and simulated publish/upload (no GitHub writes)
+- **Setup health** checks in Settings and `GET /api/health/setup`
 - CI: build and unit tests on push/PR
+- Optional Playwright smoke tests (demo mode, local only — not in CI yet)
 
 ## What does not work yet
 
@@ -27,6 +30,13 @@ Early open-source MVP — usable for single-editor writing and GitHub publishing
 | Adapters | `astro-mdx` and `markdown` only |
 | Media | GitHub repo uploads only; no Cloudinary/S3/R2 |
 | Teams | No roles, review workflow, or multi-editor accounts |
+| Demo mode | In-memory sample content; resets on API restart; not a hosted demo SaaS |
+
+## Known limitations (demo mode)
+
+- Sample posts and simulated commits stay in server memory for the session/process.
+- `SOURCEDRAFT_DEMO_MODE=true` disables all GitHub writes even if a token is configured.
+- Demo mode is for exploration and smoke tests, not production publishing.
 
 ## Known MVP limitations (GitHub)
 

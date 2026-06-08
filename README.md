@@ -36,6 +36,8 @@ Your static site — Astro today, others later — still builds and deploys exac
 - Upload images to GitHub (`mediaDir`) from Studio
 - Configure paths, adapter, and categories in `sourcedraft.config.json`
 - Protect Studio with a server-side admin password
+- **Demo mode** — explore Studio with sample posts without GitHub credentials
+- **Setup health** — Settings panel checks for missing config (no secrets exposed)
 
 ## What it does not do yet
 
@@ -89,6 +91,8 @@ pnpm dev
 ```
 
 Sign in, click **New post**, preview the output, publish. The file lands at `contentDir/<slug>.mdx` or `.md` depending on your adapter (default: `src/content/blog/`).
+
+**Try without GitHub:** set `SOURCEDRAFT_DEMO_MODE=true` in `.env`, or leave GitHub vars empty and click **Explore demo mode** on the sign-in screen.
 
 Full walkthrough: [docs/getting-started.md](docs/getting-started.md)
 
@@ -146,6 +150,7 @@ Issues and pull requests are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) fo
 - [Adapters](docs/adapters.md)
 - [Project status](docs/project-status.md)
 - [Manual acceptance test](docs/manual-acceptance-test.md)
+- [Smoke tests (Playwright)](docs/getting-started.md#smoke-tests-playwright)
 - [Release checklist](RELEASE_CHECKLIST.md)
 - [Security](docs/security.md)
 - [Screenshots guide](docs/screenshots.md)

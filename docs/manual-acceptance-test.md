@@ -14,6 +14,22 @@ pnpm build
 pnpm test
 ```
 
+Optional Playwright smoke tests (demo mode, from `apps/studio`):
+
+```bash
+pnpm exec playwright install chromium
+pnpm test:e2e
+```
+
+## Demo mode checklist
+
+- [ ] With GitHub unset or `SOURCEDRAFT_DEMO_MODE=true`, **Explore demo mode** appears on sign-in
+- [ ] Demo banner reads **Demo mode — no GitHub commits are made**
+- [ ] Sample posts load in the **Posts** sidebar
+- [ ] Opening and editing a sample post works
+- [ ] **Simulate publish** succeeds without a GitHub commit
+- [ ] Settings → **Setup health** shows check statuses (no token values)
+
 ## Setup
 
 - [ ] Copy `sourcedraft.config.example.json` → `sourcedraft.config.json` and adjust paths
@@ -29,6 +45,7 @@ pnpm test
 
 - [ ] After login, the **Posts** sidebar and center editor workspace load (not a blank page)
 - [ ] Open **Settings** in the top bar and confirm adapter, `contentDir`, `mediaDir`, and `publicMediaPath` match your config
+- [ ] **Setup health** lists admin password, GitHub, paths, adapter, and demo mode status
 - [ ] Click **Back to editor** to return to the writing workspace
 
 ## Create and preview
