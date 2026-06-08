@@ -7,8 +7,8 @@ export function EditorWorkspace({ body, onBodyChange }: EditorWorkspaceProps) {
   return (
     <section className="panel editor-workspace">
       <div className="panel__header">
-        <h2 className="panel__title">Body</h2>
-        <p className="panel__meta">MDX / Markdown</p>
+        <h2 className="panel__title">Write</h2>
+        <p className="panel__meta">Markdown or MDX body</p>
       </div>
 
       <textarea

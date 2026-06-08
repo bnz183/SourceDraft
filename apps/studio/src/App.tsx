@@ -256,7 +256,9 @@ function App() {
       }
 
       const action = result.created ? "Created" : "Updated";
-      setPublishSuccess(`${action} ${result.path} (${result.commitSha.slice(0, 7)})`);
+      setPublishSuccess(
+        `${action} output file ${result.path} (commit ${result.commitSha.slice(0, 7)}).`,
+      );
       setEditingPath(result.path);
       await refreshPosts();
     } catch {
@@ -269,7 +271,9 @@ function App() {
   if (!authChecked) {
     return (
       <div className="login-screen">
-        <p className="login-screen__loading">Checking session...</p>
+        <p className="login-screen__loading" role="status">
+          Checking session…
+        </p>
       </div>
     );
   }
@@ -292,14 +296,16 @@ function App() {
         {view === "overview" && (
           <div className="studio__stack">
             {loadPostError && (
-              <p className="article-pipeline__error article-pipeline__error--banner">
-                {loadPostError}
-              </p>
+              <div className="notice notice--error" role="alert">
+                <p className="notice__title">Could not open post</p>
+                <p className="notice__body">{loadPostError}</p>
+              </div>
             )}
             <ArticlePipeline
               posts={posts}
               loading={postsLoading}
               error={postsError}
+              githubReady={githubReady}
               onRefresh={() => {
                 void refreshPosts();
               }}
@@ -320,10 +326,13 @@ function App() {
           <div className="studio__editor-layout">
             <div className="studio__editor-column">
               {editingPath && (
-                <p className="editor-notice">
-                  Editing <code>{editingPath}</code>. Publishing will update this
-                  file in GitHub.
-                </p>
+                <div className="notice notice--info editor-notice" role="status">
+                  <p className="notice__title">Editing an existing post</p>
+                  <p className="notice__body">
+                    Changes will update output file{" "}
+                    <code>{editingPath}</code> on GitHub.
+                  </p>
+                </div>
               )}
               <EditorWorkspace body={form.body} onBodyChange={handleBodyChange} />
               {fieldErrors.body && (
@@ -349,7 +358,7 @@ function App() {
             <FrontmatterInspector
               values={form}
               categories={studioConfig.categories}
-              mediaDir={studioConfig.mediaDir}
+              githubReady={githubReady}
               fieldErrors={fieldErrors}
               slugAuto={slugAuto}
               onChange={handleFieldChange}
@@ -365,17 +374,17 @@ function App() {
           <div className="studio__stack">
             <section className="panel settings-panel">
               <div className="panel__header">
-                <h2 className="panel__title">Publishing configuration</h2>
+                <h2 className="panel__title">Settings</h2>
                 <p className="panel__meta">
-                  Paths and categories from sourcedraft.config.json. GitHub
-                  target from .env.
+                  Project paths from config · GitHub target from .env
                 </p>
               </div>
 
               <p className="settings-panel__note">
-                Publishing requires a GitHub token with write access to the
-                target repository. The token is read only by the server when you
-                publish.
+                These values are read-only here. Edit{" "}
+                <code>sourcedraft.config.json</code> for folders and categories, and{" "}
+                <code>.env</code> for GitHub credentials. The token never reaches
+                the browser.
               </p>
 
               <div className="settings-panel__grid">

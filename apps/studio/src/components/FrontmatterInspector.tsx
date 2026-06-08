@@ -4,7 +4,7 @@ import { MediaDropzone } from "./MediaDropzone";
 type FrontmatterInspectorProps = {
   values: ArticleFormState;
   categories: string[];
-  mediaDir: string;
+  githubReady: boolean;
   fieldErrors: Record<string, string>;
   slugAuto: boolean;
   onChange: (field: keyof ArticleFormState, value: string | boolean) => void;
@@ -17,7 +17,7 @@ type FrontmatterInspectorProps = {
 export function FrontmatterInspector({
   values,
   categories,
-  mediaDir,
+  githubReady,
   fieldErrors,
   slugAuto,
   onChange,
@@ -35,8 +35,8 @@ export function FrontmatterInspector({
   return (
     <aside className="panel frontmatter-inspector">
       <div className="panel__header">
-        <h2 className="panel__title">Frontmatter</h2>
-        <p className="panel__meta">Title, dates, category, tags, draft</p>
+        <h2 className="panel__title">Post details</h2>
+        <p className="panel__meta">Title, dates, category, and cover image</p>
       </div>
 
       <div className="frontmatter-inspector__grid">
@@ -162,19 +162,25 @@ export function FrontmatterInspector({
         </label>
 
         <label className="field field--full">
-          <span className="field__label">Hero image</span>
+          <span className="field__label">Cover image</span>
           <input
             className={`${fieldClass("heroImage")} field__input--mono`}
             type="text"
             value={values.heroImage}
             onChange={(event) => onChange("heroImage", event.target.value)}
-            placeholder="/images/..."
+            placeholder="/images/your-cover.png"
+            aria-describedby="cover-image-hint"
           />
+          <span className="field__hint" id="cover-image-hint">
+            Public URL path used in frontmatter (heroImage)
+          </span>
           {fieldErrors.heroImage && (
-            <span className="field__error">{fieldErrors.heroImage}</span>
+            <span className="field__error" role="alert">
+              {fieldErrors.heroImage}
+            </span>
           )}
           <MediaDropzone
-            mediaDir={mediaDir}
+            githubReady={githubReady}
             onUseAsHero={onUseHeroImage}
             onInsertIntoBody={onInsertImage}
           />
