@@ -1,5 +1,6 @@
 import type { ValidationIssue } from "@sourcedraft/core";
 import type { ArticleFormState } from "../lib/articleForm";
+import { ContentQualityPanel } from "./ContentQualityPanel";
 import { MediaDropzone } from "./MediaDropzone";
 
 type PostDetailsPanelProps = {
@@ -203,6 +204,8 @@ export function PostDetailsPanel({
             </p>
           )}
         </div>
+
+        <ContentQualityPanel values={values} validationIssues={issues} />
 
         <div
           className={
