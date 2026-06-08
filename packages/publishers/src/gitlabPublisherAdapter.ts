@@ -61,6 +61,7 @@ function createGitLabPublisherInstance(config: PublisherRuntimeConfig): Publishe
 
   return {
     id: "gitlab",
+    kind: "git",
     capabilities: GITLAB_CAPABILITIES,
     async publishArticle(input: PublishArticleInput): Promise<PublishArticleResult> {
       const result = await gitlab.publishFile({
@@ -150,6 +151,7 @@ function wrapPublisherWithCapabilities(
 ): Publisher {
   return {
     id: factory.id,
+    kind: factory.kind,
     capabilities: factory.capabilities,
     publishArticle: factory.capabilities.publishArticle
       ? (input) => publisher.publishArticle(input)
@@ -168,6 +170,7 @@ function wrapPublisherWithCapabilities(
 
 export const gitlabPublisherFactory: PublisherFactory = {
   id: "gitlab",
+  kind: "git",
   capabilities: GITLAB_CAPABILITIES,
   createPublisher(config: PublisherRuntimeConfig): Publisher {
     return wrapPublisherWithCapabilities(

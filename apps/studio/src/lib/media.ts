@@ -26,8 +26,11 @@ export type MediaUploadSuccess = {
   repoPath: string;
   publicPath: string;
   kind: MediaKind;
+  url: string;
+  provider: string;
   sha: string;
   commitSha: string;
+  metadata?: Record<string, unknown>;
 };
 
 export type MediaUploadError = {

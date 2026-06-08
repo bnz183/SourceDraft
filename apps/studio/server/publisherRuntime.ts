@@ -28,6 +28,29 @@ export function toPublisherRuntimeConfig(
     ...(env.bitbucketUsername !== undefined
       ? { bitbucketUsername: env.bitbucketUsername }
       : {}),
+    ...(env.wordpressApiUrl !== undefined ? { wordpressApiUrl: env.wordpressApiUrl } : {}),
+    ...(env.wordpressUsername !== undefined
+      ? { wordpressUsername: env.wordpressUsername }
+      : {}),
+    ...(env.wordpressAppPassword !== undefined
+      ? { wordpressAppPassword: env.wordpressAppPassword }
+      : {}),
+    ...(env.wordpressDefaultStatus !== undefined
+      ? { wordpressDefaultStatus: env.wordpressDefaultStatus }
+      : {}),
+    ...(env.wordpressDefaultAuthor !== undefined
+      ? { wordpressDefaultAuthor: env.wordpressDefaultAuthor }
+      : {}),
+    ...(env.ghostAdminUrl !== undefined ? { ghostAdminUrl: env.ghostAdminUrl } : {}),
+    ...(env.ghostAdminApiKey !== undefined
+      ? { ghostAdminApiKey: env.ghostAdminApiKey }
+      : {}),
+    ...(env.ghostAcceptVersion !== undefined
+      ? { ghostAcceptVersion: env.ghostAcceptVersion }
+      : {}),
+    ...(env.ghostDefaultStatus !== undefined
+      ? { ghostDefaultStatus: env.ghostDefaultStatus }
+      : {}),
   };
 }
 

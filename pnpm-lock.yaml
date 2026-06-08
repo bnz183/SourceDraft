@@ -50,6 +50,9 @@ importers:
       '@sourcedraft/github-publisher':
         specifier: workspace:*
         version: link:../../packages/github-publisher
+      '@sourcedraft/media-providers':
+        specifier: workspace:*
+        version: link:../../packages/media-providers
       '@sourcedraft/publishers':
         specifier: workspace:*
         version: link:../../packages/publishers
@@ -281,6 +284,18 @@ importers:
         version: 5.9.3
 
   packages/github-publisher:
+    devDependencies:
+      '@types/node':
+        specifier: ^22.15.30
+        version: 22.19.19
+      tsx:
+        specifier: ^4.20.3
+        version: 4.22.4
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+
+  packages/media-providers:
     devDependencies:
       '@types/node':
         specifier: ^22.15.30

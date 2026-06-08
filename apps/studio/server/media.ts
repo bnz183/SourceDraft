@@ -3,7 +3,7 @@ import type { Request } from "express";
 import Busboy from "busboy";
 import { joinPublicMediaPath } from "@sourcedraft/config";
 import type { PublishEnvConfig } from "./config.js";
-import { createPublisherFromEnv } from "./publisherRuntime.js";
+import { createMediaProviderFromEnv } from "./mediaProviderRuntime.js";
 import { normalizeMediaDir } from "./mediaPaths.js";
 import {
   ALLOWED_MIME_TYPES,
@@ -28,8 +28,11 @@ export type MediaUploadSuccess = {
   repoPath: string;
   publicPath: string;
   kind: "image" | "pdf";
+  url: string;
+  provider: string;
   sha: string;
   commitSha: string;
+  metadata?: Record<string, unknown>;
 };
 
 export type MediaUploadError = {
@@ -203,11 +206,14 @@ export async function uploadMedia(
   const repoPath = `${mediaDir}/${repoFilename}`;
   const publicPath = joinPublicMediaPath(env.publicMediaPath, repoFilename);
 
-  const publisher = createPublisherFromEnv(env);
+  const mediaProvider = createMediaProviderFromEnv(env);
 
-  const result = await publisher.uploadMedia({
+  const result = await mediaProvider.uploadMedia({
+    buffer: parsed.buffer,
+    filename: repoFilename,
+    mimeType: parsed.mimeType,
     repoPath,
-    contentBase64: parsed.buffer.toString("base64"),
+    publicPath,
     message: `Upload media: ${repoFilename}`,
   });
 
@@ -216,20 +222,26 @@ export async function uploadMedia(
       status: 502,
       body: {
         ok: false,
-        error: result.error || "Media upload to GitHub failed.",
+        error: result.error || "Media upload failed.",
       },
     };
   }
+
+  const displayPath =
+    result.provider === "github-media" ? publicPath : result.url || publicPath;
 
   return {
     status: 200,
     body: {
       ok: true,
       repoPath: result.path,
-      publicPath,
+      publicPath: displayPath,
       kind,
-      sha: result.sha,
-      commitSha: result.commitSha,
+      url: result.url,
+      provider: result.provider,
+      sha: result.sha ?? result.path,
+      commitSha: result.commitSha ?? result.path,
+      ...(result.metadata !== undefined ? { metadata: result.metadata } : {}),
     },
   };
 }

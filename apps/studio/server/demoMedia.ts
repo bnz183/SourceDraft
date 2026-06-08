@@ -190,6 +190,8 @@ export async function uploadDemoMedia(
       repoPath,
       publicPath,
       kind,
+      url: publicPath,
+      provider: "github-media",
       sha: commitSha,
       commitSha,
     },

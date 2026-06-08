@@ -383,8 +383,13 @@ function App() {
       }
 
       const action = result.created ? "Created" : "Updated";
+      const deployNote =
+        result.deployHook?.triggered === true
+          ? ` ${result.deployHook.ok ? "Deploy hook succeeded." : result.deployHook.message}`
+          : "";
+
       setPublishSuccess(
-        `${action} ${result.path} (commit ${result.commitSha.slice(0, 7)}).`,
+        `${action} ${result.path} (commit ${result.commitSha.slice(0, 7)}).${deployNote}`,
       );
       setEditingPath(result.path);
       commitBaseline(

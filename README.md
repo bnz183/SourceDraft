@@ -36,8 +36,9 @@ Your static site — Astro today, others later — still builds and deploys exac
 - List and edit existing posts from your GitHub `contentDir`
 - Validate fields against a universal article schema
 - Preview Markdown or Astro MDX output and target file path before publishing
-- Publish to GitHub, GitLab, or Bitbucket (create or update a file on a branch)
-- Upload images to the configured remote (`mediaDir`) from Studio
+- Publish to Git hosts (GitHub, GitLab, Bitbucket) or remote CMS APIs (WordPress, Ghost)
+- Upload images to git `mediaDir`, Cloudinary, or (experimental) S3-compatible storage
+- Optional deploy hooks after publish (Vercel, Netlify, Cloudflare Pages, generic)
 - Configure paths, adapter, and categories in `sourcedraft.config.json`
 - Protect Studio with a server-side admin password
 - **Demo mode** — explore Studio with sample posts without GitHub credentials
@@ -47,7 +48,7 @@ Your static site — Astro today, others later — still builds and deploys exac
 
 - Host your website or run your Astro build
 - OAuth, user accounts, or role-based access
-- Cloud image hosts (Cloudinary, S3, R2, etc.)
+- Full S3/R2 media upload (config validation only today; Cloudinary supported)
 - Adapters beyond `astro-mdx` and `markdown`
 
 See [docs/project-status.md](docs/project-status.md).
@@ -57,14 +58,19 @@ See [docs/project-status.md](docs/project-status.md).
 1. You finish a valid article in Studio and click **Publish**.
 2. The **publish API** (server only) validates the article again.
 3. The configured **adapter** builds the file (YAML frontmatter + body) as `.mdx` or `.md`.
-4. The configured **publisher** (`github`, `gitlab`, or `bitbucket`) commits the file to your repository.
-5. Your existing CI or build step picks up the new file from `contentDir`.
+4. The configured **publisher** sends content to your target — Git file commit or remote CMS API.
+5. For Git publishers, your CI or build step picks up the new file from `contentDir`.
 
 API tokens never reach the browser. They are read from `.env` on the server when you publish or upload media.
 
-Details: [docs/git-publishers.md](docs/git-publishers.md) · [docs/github-publishing.md](docs/github-publishing.md) · [docs/media.md](docs/media.md)
+Details: [docs/publishers.md](docs/publishers.md) · [docs/git-publishers.md](docs/git-publishers.md) · [docs/wordpress.md](docs/wordpress.md) · [docs/ghost.md](docs/ghost.md)
 
-**Compatibility:** GitHub (Contents API), GitLab (Repository Files API), and Bitbucket Cloud (commit-upload). GitHub and GitLab support listing/editing existing posts; Bitbucket supports publish and media upload only today.
+**Compatibility**
+
+| Kind | Publishers | Notes |
+|------|------------|-------|
+| Git file | GitHub, GitLab, Bitbucket | Commit `.md`/`.mdx` to a repo; list/edit in Studio for GitHub/GitLab |
+| Remote CMS | WordPress, Ghost | Server-side API connectors; updates need `remoteId` from prior publish |
 
 ## Quickstart
 
@@ -147,7 +153,11 @@ Issues and pull requests are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) fo
 - [Getting started](docs/getting-started.md)
 - [Demo mode](docs/demo-mode.md)
 - [Non-technical overview](docs/non-technical-overview.md) — for writers
+- [Publishers overview](docs/publishers.md)
 - [Git publishing (GitHub, GitLab, Bitbucket)](docs/git-publishers.md)
+- [WordPress publishing](docs/wordpress.md)
+- [Ghost publishing](docs/ghost.md)
+- [Deploy hooks](docs/deploy-hooks.md)
 - [GitHub publishing](docs/github-publishing.md)
 - [Media uploads](docs/media.md)
 - [Configuration](docs/configuration.md)

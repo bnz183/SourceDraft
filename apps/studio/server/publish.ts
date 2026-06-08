@@ -8,12 +8,21 @@ import {
   type Article,
   type ArticleInput,
 } from "@sourcedraft/core";
+import type { CmsArticlePayload } from "@sourcedraft/publishers";
 import type { PublishEnvConfig } from "./config.js";
+import {
+  applyDeployHookStrictMode,
+  loadDeployHookConfigFromEnv,
+  triggerDeployHook,
+  type DeployHookResult,
+} from "./deployHook.js";
 import { createPublisherFromEnv } from "./publisherRuntime.js";
 import { safePostPath } from "./postPaths.js";
 
 export type PublishRequestBody = ArticleInput & {
   sourcePath?: unknown;
+  /** Remote CMS post id (WordPress post id, Ghost uuid) for updates */
+  remoteId?: unknown;
 };
 
 export type PublishSuccessResponse = {
@@ -22,6 +31,8 @@ export type PublishSuccessResponse = {
   created: boolean;
   sha: string;
   commitSha: string;
+  remoteId?: string;
+  deployHook?: DeployHookResult;
 };
 
 export type PublishErrorResponse = {
@@ -29,6 +40,7 @@ export type PublishErrorResponse = {
   error: string;
   issues?: { field: string; message: string }[];
   status?: number;
+  deployHook?: DeployHookResult;
 };
 
 export type PublishResponse = PublishSuccessResponse | PublishErrorResponse;
@@ -44,6 +56,40 @@ function defaultPostPath(article: Article, env: PublishEnvConfig): string {
       ? { adapterOptions: env.adapterOptions }
       : {}),
   });
+}
+
+function toCmsPayload(article: Article): CmsArticlePayload {
+  return {
+    title: article.title,
+    slug: article.slug,
+    description: article.description,
+    body: article.body,
+    pubDate: article.pubDate,
+    category: article.category,
+    tags: article.tags,
+    draft: article.draft,
+    ...(article.updatedDate !== undefined ? { updatedDate: article.updatedDate } : {}),
+    ...(article.heroImage !== undefined ? { heroImage: article.heroImage } : {}),
+    ...(article.author !== undefined ? { author: article.author } : {}),
+    ...(article.metaTitle !== undefined ? { metaTitle: article.metaTitle } : {}),
+    ...(article.metaDescription !== undefined
+      ? { metaDescription: article.metaDescription }
+      : {}),
+    ...(article.canonicalUrl !== undefined ? { canonicalUrl: article.canonicalUrl } : {}),
+    ...(article.socialImage !== undefined ? { socialImage: article.socialImage } : {}),
+  };
+}
+
+function parseRemoteId(value: unknown): string | undefined {
+  if (typeof value === "string" && value.trim().length > 0) {
+    return value.trim();
+  }
+
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return String(value);
+  }
+
+  return undefined;
 }
 
 export async function publishArticle(
@@ -83,19 +129,21 @@ export async function publishArticle(
   }
 
   const content = renderArticle(article, env);
-
+  const remoteId = parseRemoteId(body.remoteId);
   const publisher = createPublisherFromEnv(env);
 
   const result = await publisher.publishArticle({
     path,
     content,
     message: `Publish: ${article.slug}`,
+    article: toCmsPayload(article),
+    ...(remoteId !== undefined ? { remoteId } : {}),
   });
 
   if (!result.ok) {
     const errorBody: PublishErrorResponse = {
       ok: false,
-      error: result.error || "Publish to GitHub failed.",
+      error: result.error || "Publish failed.",
     };
 
     if (result.status !== undefined) {
@@ -108,6 +156,25 @@ export async function publishArticle(
     };
   }
 
+  const deployHookConfig = loadDeployHookConfigFromEnv();
+  const deployHook = await triggerDeployHook(result.path, deployHookConfig);
+  const strictGate = applyDeployHookStrictMode(
+    true,
+    deployHook,
+    deployHookConfig.strict === true,
+  );
+
+  if (!strictGate.ok) {
+    return {
+      status: 502,
+      body: {
+        ok: false,
+        error: strictGate.error ?? "Deploy hook failed in strict mode.",
+        deployHook,
+      },
+    };
+  }
+
   return {
     status: 200,
     body: {
@@ -116,6 +183,8 @@ export async function publishArticle(
       created: result.created,
       sha: result.sha,
       commitSha: result.commitSha,
+      ...(result.remoteId !== undefined ? { remoteId: result.remoteId } : {}),
+      ...(deployHook.triggered ? { deployHook } : {}),
     },
   };
 }

@@ -36,6 +36,7 @@ function createGitHubPublisherInstance(config: PublisherRuntimeConfig): Publishe
 
   return {
     id: "github",
+    kind: "git",
     capabilities: GITHUB_CAPABILITIES,
     async publishArticle(input: PublishArticleInput): Promise<PublishArticleResult> {
       const result = await github.publishFile({
@@ -127,6 +128,7 @@ function wrapPublisherWithCapabilities(
 ): Publisher {
   return {
     id: factory.id,
+    kind: factory.kind,
     capabilities: factory.capabilities,
     publishArticle: factory.capabilities.publishArticle
       ? (input) => publisher.publishArticle(input)
@@ -145,6 +147,7 @@ function wrapPublisherWithCapabilities(
 
 export const githubPublisherFactory: PublisherFactory = {
   id: "github",
+  kind: "git",
   capabilities: GITHUB_CAPABILITIES,
   createPublisher(config: PublisherRuntimeConfig): Publisher {
     return wrapPublisherWithCapabilities(

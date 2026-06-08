@@ -54,6 +54,7 @@ function createBitbucketPublisherInstance(config: PublisherRuntimeConfig): Publi
 
   return {
     id: "bitbucket",
+    kind: "git",
     capabilities: BITBUCKET_CAPABILITIES,
     async publishArticle(input: PublishArticleInput): Promise<PublishArticleResult> {
       const result = await bitbucket.publishFile({
@@ -115,6 +116,7 @@ function wrapPublisherWithCapabilities(
 ): Publisher {
   return {
     id: factory.id,
+    kind: factory.kind,
     capabilities: factory.capabilities,
     publishArticle: factory.capabilities.publishArticle
       ? (input) => publisher.publishArticle(input)
@@ -133,6 +135,7 @@ function wrapPublisherWithCapabilities(
 
 export const bitbucketPublisherFactory: PublisherFactory = {
   id: "bitbucket",
+  kind: "git",
   capabilities: BITBUCKET_CAPABILITIES,
   createPublisher(config: PublisherRuntimeConfig): Publisher {
     return wrapPublisherWithCapabilities(
