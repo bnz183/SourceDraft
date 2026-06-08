@@ -4,8 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "predev": "pnpm --filter @sourcedraft/core --filter @sourcedraft/adapter-astro-mdx --filter @sourcedraft/github-publisher --filter @sourcedraft/config build",
-    "prebuild": "pnpm --filter @sourcedraft/core --filter @sourcedraft/adapter-astro-mdx --filter @sourcedraft/github-publisher --filter @sourcedraft/config build",
+    "predev": "pnpm --filter @sourcedraft/core --filter @sourcedraft/adapter-astro-mdx --filter @sourcedraft/adapter-markdown --filter @sourcedraft/github-publisher --filter @sourcedraft/config build",
+    "prebuild": "pnpm --filter @sourcedraft/core --filter @sourcedraft/adapter-astro-mdx --filter @sourcedraft/adapter-markdown --filter @sourcedraft/github-publisher --filter @sourcedraft/config build",
     "dev": "concurrently -n web,api -c blue,gray \"vite\" \"tsx watch server/index.ts\"",
     "dev:web": "vite",
     "dev:server": "tsx watch server/index.ts",
@@ -17,9 +17,11 @@
   },
   "dependencies": {
     "@sourcedraft/adapter-astro-mdx": "workspace:*",
+    "@sourcedraft/adapter-markdown": "workspace:*",
     "@sourcedraft/config": "workspace:*",
     "@sourcedraft/core": "workspace:*",
     "@sourcedraft/github-publisher": "workspace:*",
+    "busboy": "^1.6.0",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "react": "^19.2.6",
@@ -27,6 +29,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@types/busboy": "^1.5.4",
     "@types/express": "^5.0.3",
     "@types/node": "^24.12.3",
     "@types/react": "^19.2.14",

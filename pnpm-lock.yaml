@@ -17,6 +17,9 @@ importers:
       '@sourcedraft/adapter-astro-mdx':
         specifier: workspace:*
         version: link:../../packages/adapter-astro-mdx
+      '@sourcedraft/adapter-markdown':
+        specifier: workspace:*
+        version: link:../../packages/adapter-markdown
       '@sourcedraft/config':
         specifier: workspace:*
         version: link:../../packages/config
@@ -26,6 +29,9 @@ importers:
       '@sourcedraft/github-publisher':
         specifier: workspace:*
         version: link:../../packages/github-publisher
+      busboy:
+        specifier: ^1.6.0
+        version: 1.6.0
       dotenv:
         specifier: ^16.5.0
         version: 16.6.1
@@ -42,6 +48,9 @@ importers:
       '@eslint/js':
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.4.1)
+      '@types/busboy':
+        specifier: ^1.5.4
+        version: 1.5.4
       '@types/express':
         specifier: ^5.0.3
         version: 5.0.6
@@ -560,6 +569,9 @@ packages:
   '@types/body-parser@1.19.6':
     resolution: {integrity: sha512-HLFeCYgz89uk22N5Qg3dvGvsv46B8GLvKKo1zKG4NybA8U2DiEO3w9lqGg29t/tfLRJpJ6iQxnVw4OnB7MoM9g==}
 
+  '@types/busboy@1.5.4':
+    resolution: {integrity: sha512-kG7WrUuAKK0NoyxfQHsVE6j1m01s6kMma64E+OZenQABMQyTJop1DumUWcLwAQ2JzpefU7PDYoRDKl8uZosFjw==}
+
   '@types/connect@3.4.38':
     resolution: {integrity: sha512-K6uROf1LD88uDQqJCktA4yzL1YYAK6NgfsI0v/mTgyPKWsX1CnJ0XPSDhViejru1GcRkLWb8RlzFYJRqGUbaug==}
 
@@ -725,6 +737,10 @@ packages:
     resolution: {integrity: sha512-48xSriZYYg+8qXna9kwqjIVzuQxi+KYWp2+5nCYnYKPTr0LvD89Jqk2Or5ogxz0NUMfIjhh2lIUX/LyX9B4oIg==}
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
     hasBin: true
+
+  busboy@1.6.0:
+    resolution: {integrity: sha512-8SFQbg/0hQ9xy3UNTB0YEnsNBbWfhf7RtnzpL7TkBiTBRfrQ9Fxcnz7VJsleJpyp6rVLvXiuORqjlHi5q+PYuA==}
+    engines: {node: '>=10.16.0'}
 
   bytes@3.1.2:
     resolution: {integrity: sha512-/Nf7TyzTx6S3yRJObOAV7956r8cr2+Oj8AC5dt8wSP3BQAoeX58NoHyCU8P8zGkNXStjTSi6fzO6F0pBdcYbEg==}
@@ -1378,6 +1394,10 @@ packages:
     resolution: {integrity: sha512-DvEy55V3DB7uknRo+4iOGT5fP1slR8wQohVdknigZPMpMstaKJQWhwiYBACJE3Ul2pTnATihhBYnRhZQHGBiRw==}
     engines: {node: '>= 0.8'}
 
+  streamsearch@1.1.0:
+    resolution: {integrity: sha512-Mcc5wHehp9aXz1ax6bZUyY5afg9u2rv5cqQI3mRrYkGC8rW2hM02jWuwjtL++LS5qinSyhj2QfLyNsuc+VsExg==}
+    engines: {node: '>=10.0.0'}
+
   string-width@4.2.3:
     resolution: {integrity: sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==}
     engines: {node: '>=8'}
@@ -1890,6 +1910,10 @@ snapshots:
       '@types/connect': 3.4.38
       '@types/node': 24.13.0
 
+  '@types/busboy@1.5.4':
+    dependencies:
+      '@types/node': 24.13.0
+
   '@types/connect@3.4.38':
     dependencies:
       '@types/node': 24.13.0
@@ -2093,6 +2117,10 @@ snapshots:
       electron-to-chromium: 1.5.368
       node-releases: 2.0.47
       update-browserslist-db: 1.2.3(browserslist@4.28.2)
+
+  busboy@1.6.0:
+    dependencies:
+      streamsearch: 1.1.0
 
   bytes@3.1.2: {}
 
@@ -2750,6 +2778,8 @@ snapshots:
   source-map-js@1.2.1: {}
 
   statuses@2.0.2: {}
+
+  streamsearch@1.1.0: {}
 
   string-width@4.2.3:
     dependencies:

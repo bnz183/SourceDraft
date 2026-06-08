@@ -11,6 +11,8 @@ import {
   requireAuth,
 } from "./auth.js";
 import { loadPublicConfig, loadPublishEnv } from "./config.js";
+import { uploadMedia } from "./media.js";
+import { listPosts, loadPost } from "./posts.js";
 import { publishArticle, type PublishRequestBody } from "./publish.js";
 
 const envPaths = [
@@ -71,6 +73,37 @@ app.get("/api/config", requireAuth, (_req, res) => {
     githubOwner: runtime.owner,
     githubRepo: runtime.repo,
   });
+});
+
+app.get("/api/posts", requireAuth, async (req, res) => {
+  const envResult = loadPublishEnv();
+  if (!envResult.ok) {
+    res.status(500).json({ ok: false, error: envResult.error });
+    return;
+  }
+
+  const pathParam =
+    typeof req.query.path === "string" ? req.query.path.trim() : "";
+
+  if (pathParam.length > 0) {
+    const result = await loadPost(pathParam, envResult.config);
+    res.status(result.status).json(result.body);
+    return;
+  }
+
+  const result = await listPosts(envResult.config);
+  res.status(result.status).json(result.body);
+});
+
+app.post("/api/media/upload", requireAuth, async (req, res) => {
+  const envResult = loadPublishEnv();
+  if (!envResult.ok) {
+    res.status(500).json({ ok: false, error: envResult.error });
+    return;
+  }
+
+  const result = await uploadMedia(req, envResult.config);
+  res.status(result.status).json(result.body);
 });
 
 app.post("/api/publish", requireAuth, async (req, res) => {

@@ -1,6 +1,8 @@
 import { loadSourceDraftConfig } from "@sourcedraft/config";
 import type { SourceDraftConfig } from "@sourcedraft/config";
 
+export type SupportedAdapter = "astro-mdx" | "markdown";
+
 export type PublishEnvConfig = {
   token: string;
   owner: string;
@@ -8,13 +10,23 @@ export type PublishEnvConfig = {
   branch: string;
   contentDir: string;
   mediaDir: string;
-  adapter: string;
+  adapter: SupportedAdapter;
   categories: string[];
 };
 
 export type PublishEnvResult =
   | { ok: true; config: PublishEnvConfig }
   | { ok: false; error: string };
+
+const SUPPORTED_ADAPTERS = new Set<string>(["astro-mdx", "markdown"]);
+
+function resolveAdapter(rawAdapter: string): SupportedAdapter | null {
+  if (SUPPORTED_ADAPTERS.has(rawAdapter)) {
+    return rawAdapter as SupportedAdapter;
+  }
+
+  return null;
+}
 
 export function loadProjectConfig(): SourceDraftConfig {
   return loadSourceDraftConfig();
@@ -31,7 +43,8 @@ export function loadPublishEnv(): PublishEnvResult {
   const contentDir =
     process.env.CMS_CONTENT_DIR?.trim() || project.contentDir;
   const mediaDir = process.env.CMS_MEDIA_DIR?.trim() || project.mediaDir;
-  const adapter = process.env.CMS_ADAPTER?.trim() || project.adapter;
+  const rawAdapter = process.env.CMS_ADAPTER?.trim() || project.adapter;
+  const adapter = resolveAdapter(rawAdapter);
 
   if (!token) {
     return { ok: false, error: "GITHUB_TOKEN is not configured." };
@@ -45,10 +58,10 @@ export function loadPublishEnv(): PublishEnvResult {
     return { ok: false, error: "GITHUB_REPO is not configured." };
   }
 
-  if (adapter !== "astro-mdx") {
+  if (adapter === null) {
     return {
       ok: false,
-      error: `Unsupported adapter "${adapter}". Only astro-mdx is supported.`,
+      error: `Unsupported adapter "${rawAdapter}". Supported adapters: astro-mdx, markdown.`,
     };
   }
 
@@ -69,6 +82,8 @@ export function loadPublishEnv(): PublishEnvResult {
 
 export function loadPublicConfig(): Omit<PublishEnvConfig, "token"> {
   const project = loadProjectConfig();
+  const rawAdapter = process.env.CMS_ADAPTER?.trim() || project.adapter;
+  const adapter = resolveAdapter(rawAdapter) ?? "astro-mdx";
 
   return {
     owner: process.env.GITHUB_OWNER?.trim() || "",
@@ -76,7 +91,7 @@ export function loadPublicConfig(): Omit<PublishEnvConfig, "token"> {
     branch: process.env.GITHUB_BRANCH?.trim() || project.defaultBranch,
     contentDir: process.env.CMS_CONTENT_DIR?.trim() || project.contentDir,
     mediaDir: process.env.CMS_MEDIA_DIR?.trim() || project.mediaDir,
-    adapter: process.env.CMS_ADAPTER?.trim() || project.adapter,
+    adapter,
     categories: project.categories,
   };
 }

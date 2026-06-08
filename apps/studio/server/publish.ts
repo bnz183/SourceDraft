@@ -1,13 +1,18 @@
 import { getAstroMdxPath, toAstroMdx } from "@sourcedraft/adapter-astro-mdx";
+import { getMarkdownPath, toMarkdown } from "@sourcedraft/adapter-markdown";
 import {
   normalizeArticle,
   validateArticle,
+  type Article,
   type ArticleInput,
 } from "@sourcedraft/core";
 import { createGitHubPublisher } from "@sourcedraft/github-publisher";
 import type { PublishEnvConfig } from "./config.js";
+import { safePostPath } from "./postPaths.js";
 
-export type PublishRequestBody = ArticleInput;
+export type PublishRequestBody = ArticleInput & {
+  sourcePath?: unknown;
+};
 
 export type PublishSuccessResponse = {
   ok: true;
@@ -26,6 +31,26 @@ export type PublishErrorResponse = {
 
 export type PublishResponse = PublishSuccessResponse | PublishErrorResponse;
 
+function renderArticle(article: Article, adapter: PublishEnvConfig["adapter"]): string {
+  if (adapter === "markdown") {
+    return toMarkdown(article);
+  }
+
+  return toAstroMdx(article);
+}
+
+function defaultPostPath(
+  article: Article,
+  adapter: PublishEnvConfig["adapter"],
+  contentDir: string,
+): string {
+  if (adapter === "markdown") {
+    return getMarkdownPath(article, { contentDir });
+  }
+
+  return getAstroMdxPath(article, { contentDir });
+}
+
 export async function publishArticle(
   body: PublishRequestBody,
   env: PublishEnvConfig,
@@ -43,8 +68,26 @@ export async function publishArticle(
   }
 
   const article = normalizeArticle(body);
-  const mdx = toAstroMdx(article);
-  const path = getAstroMdxPath(article, { contentDir: env.contentDir });
+  let path: string;
+
+  if (typeof body.sourcePath === "string" && body.sourcePath.trim().length > 0) {
+    const safe = safePostPath(body.sourcePath.trim(), env.contentDir);
+    if (!safe.ok) {
+      return {
+        status: 400,
+        body: {
+          ok: false,
+          error: safe.error,
+        },
+      };
+    }
+
+    path = safe.path;
+  } else {
+    path = defaultPostPath(article, env.adapter, env.contentDir);
+  }
+
+  const content = renderArticle(article, env.adapter);
 
   const publisher = createGitHubPublisher({
     token: env.token,
@@ -55,7 +98,7 @@ export async function publishArticle(
 
   const result = await publisher.publishFile({
     path,
-    content: mdx,
+    content,
     message: `Publish: ${article.slug}`,
   });
 

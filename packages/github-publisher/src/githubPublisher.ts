@@ -9,9 +9,11 @@ export type GitHubPublisherConfig = {
 
 export type PublishFileInput = {
   path: string;
-  content: string;
   message: string;
-};
+} & (
+  | { content: string; contentBase64?: never }
+  | { contentBase64: string; content?: never }
+);
 
 export type PublishFileSuccess = {
   ok: true;
@@ -29,8 +31,41 @@ export type PublishFileError = {
 
 export type PublishFileResult = PublishFileSuccess | PublishFileError;
 
+export type ListFilesInput = {
+  path: string;
+};
+
+export type ListedFile = {
+  path: string;
+  name: string;
+  sha: string;
+  size: number;
+};
+
+export type ListFilesSuccess = {
+  ok: true;
+  files: ListedFile[];
+};
+
+export type ListFilesResult = ListFilesSuccess | PublishFileError;
+
+export type ReadFileInput = {
+  path: string;
+};
+
+export type ReadFileSuccess = {
+  ok: true;
+  path: string;
+  content: string;
+  sha: string;
+};
+
+export type ReadFileResult = ReadFileSuccess | PublishFileError;
+
 export type GitHubPublisher = {
   publishFile: (input: PublishFileInput) => Promise<PublishFileResult>;
+  listFiles: (input: ListFilesInput) => Promise<ListFilesResult>;
+  readFile: (input: ReadFileInput) => Promise<ReadFileResult>;
 };
 
 type GitHubErrorBody = {
@@ -39,6 +74,20 @@ type GitHubErrorBody = {
 
 type GitHubContentBody = {
   sha?: string;
+  type?: string;
+  content?: string;
+  encoding?: string;
+  path?: string;
+  name?: string;
+  size?: number;
+};
+
+type GitHubDirectoryEntry = {
+  type?: string;
+  path?: string;
+  name?: string;
+  sha?: string;
+  size?: number;
 };
 
 type GitHubCommitBody = {
@@ -92,6 +141,35 @@ function encodeContent(content: string): string {
   return Buffer.from(content, "utf8").toString("base64");
 }
 
+function resolvePublishContent(input: PublishFileInput): PublishFileError | string {
+  const hasContent = typeof input.content === "string";
+  const hasBase64 = typeof input.contentBase64 === "string";
+
+  if (hasContent === hasBase64) {
+    return {
+      ok: false,
+      error: "Provide exactly one of content or contentBase64.",
+    };
+  }
+
+  if (hasBase64) {
+    const encoded = input.contentBase64.trim();
+    if (encoded.length === 0) {
+      return { ok: false, error: "contentBase64 is required." };
+    }
+
+    try {
+      Buffer.from(encoded, "base64");
+    } catch {
+      return { ok: false, error: "contentBase64 is not valid base64." };
+    }
+
+    return encoded;
+  }
+
+  return encodeContent(input.content);
+}
+
 async function getExistingFileSha(
   config: GitHubPublisherConfig,
   path: string,
@@ -133,13 +211,13 @@ async function getExistingFileSha(
 async function putFile(
   config: GitHubPublisherConfig,
   path: string,
-  content: string,
+  contentBase64: string,
   message: string,
   existingSha?: string,
 ): Promise<PublishFileResult> {
   const payload: Record<string, string> = {
     message,
-    content: encodeContent(content),
+    content: contentBase64,
     branch: config.branch,
   };
 
@@ -193,6 +271,77 @@ async function putFile(
   };
 }
 
+async function collectFiles(
+  config: GitHubPublisherConfig,
+  path: string,
+  files: ListedFile[],
+): Promise<PublishFileError | null> {
+  const url = `${contentsUrl(config, path)}?ref=${encodeURIComponent(config.branch)}`;
+  const response = await fetch(url, {
+    method: "GET",
+    headers: githubHeaders(config.token),
+  });
+
+  if (!response.ok) {
+    return {
+      ok: false,
+      error: await readGitHubError(response),
+      status: response.status,
+    };
+  }
+
+  const body = (await response.json()) as GitHubDirectoryEntry | GitHubDirectoryEntry[];
+
+  if (!Array.isArray(body)) {
+    if (
+      body.type === "file" &&
+      typeof body.path === "string" &&
+      typeof body.name === "string" &&
+      typeof body.sha === "string" &&
+      typeof body.size === "number"
+    ) {
+      files.push({
+        path: body.path,
+        name: body.name,
+        sha: body.sha,
+        size: body.size,
+      });
+    }
+
+    return null;
+  }
+
+  for (const entry of body) {
+    if (entry.type === "file") {
+      if (
+        typeof entry.path !== "string" ||
+        typeof entry.name !== "string" ||
+        typeof entry.sha !== "string" ||
+        typeof entry.size !== "number"
+      ) {
+        continue;
+      }
+
+      files.push({
+        path: entry.path,
+        name: entry.name,
+        sha: entry.sha,
+        size: entry.size,
+      });
+      continue;
+    }
+
+    if (entry.type === "dir" && typeof entry.path === "string") {
+      const error = await collectFiles(config, entry.path, files);
+      if (error !== null) {
+        return error;
+      }
+    }
+  }
+
+  return null;
+}
+
 export function createGitHubPublisher(
   config: GitHubPublisherConfig,
 ): GitHubPublisher {
@@ -213,16 +362,98 @@ export function createGitHubPublisher(
         };
       }
 
+      const encodedContent = resolvePublishContent(input);
+      if (typeof encodedContent !== "string") {
+        return encodedContent;
+      }
+
       const existing = await getExistingFileSha(config, path);
       if ("ok" in existing) {
         return existing;
       }
 
       if (existing.found) {
-        return putFile(config, path, input.content, input.message, existing.sha);
+        return putFile(
+          config,
+          path,
+          encodedContent,
+          input.message,
+          existing.sha,
+        );
       }
 
-      return putFile(config, path, input.content, input.message);
+      return putFile(config, path, encodedContent, input.message);
+    },
+
+    async listFiles(input: ListFilesInput): Promise<ListFilesResult> {
+      const path = normalizeRepoPath(input.path);
+      if (path.length === 0) {
+        return {
+          ok: false,
+          error: "Path is required.",
+        };
+      }
+
+      const files: ListedFile[] = [];
+      const error = await collectFiles(config, path, files);
+      if (error !== null) {
+        return error;
+      }
+
+      return { ok: true, files };
+    },
+
+    async readFile(input: ReadFileInput): Promise<ReadFileResult> {
+      const path = normalizeRepoPath(input.path);
+      if (path.length === 0) {
+        return {
+          ok: false,
+          error: "Path is required.",
+        };
+      }
+
+      const url = `${contentsUrl(config, path)}?ref=${encodeURIComponent(config.branch)}`;
+      const response = await fetch(url, {
+        method: "GET",
+        headers: githubHeaders(config.token),
+      });
+
+      if (!response.ok) {
+        return {
+          ok: false,
+          error: await readGitHubError(response),
+          status: response.status,
+        };
+      }
+
+      const body = (await response.json()) as GitHubContentBody;
+      if (body.type !== "file") {
+        return {
+          ok: false,
+          error: "Path is not a file.",
+        };
+      }
+
+      if (typeof body.content !== "string" || body.encoding !== "base64") {
+        return {
+          ok: false,
+          error: "GitHub did not return base64 file content.",
+        };
+      }
+
+      if (typeof body.sha !== "string" || body.sha.length === 0) {
+        return {
+          ok: false,
+          error: "GitHub returned a file without a sha.",
+        };
+      }
+
+      return {
+        ok: true,
+        path,
+        content: Buffer.from(body.content, "base64").toString("utf8"),
+        sha: body.sha,
+      };
     },
   };
 }
