@@ -68,6 +68,7 @@ app.get("/api/config", requireAuth, (_req, res) => {
     adapter: runtime.adapter,
     contentDir: runtime.contentDir,
     mediaDir: runtime.mediaDir,
+    publicMediaPath: runtime.publicMediaPath,
     defaultBranch: runtime.branch,
     categories: runtime.categories,
     githubOwner: runtime.owner,

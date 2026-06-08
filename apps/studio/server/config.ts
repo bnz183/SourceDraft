@@ -1,4 +1,8 @@
-import { loadSourceDraftConfig } from "@sourcedraft/config";
+import {
+  derivePublicMediaPath,
+  loadSourceDraftConfig,
+  normalizePublicMediaPath,
+} from "@sourcedraft/config";
 import type { SourceDraftConfig } from "@sourcedraft/config";
 
 export type SupportedAdapter = "astro-mdx" | "markdown";
@@ -10,6 +14,7 @@ export type PublishEnvConfig = {
   branch: string;
   contentDir: string;
   mediaDir: string;
+  publicMediaPath: string;
   adapter: SupportedAdapter;
   categories: string[];
 };
@@ -32,6 +37,22 @@ export function loadProjectConfig(): SourceDraftConfig {
   return loadSourceDraftConfig();
 }
 
+function resolvePublicMediaPath(
+  mediaDir: string,
+  project: SourceDraftConfig,
+): string {
+  const envOverride = process.env.CMS_PUBLIC_MEDIA_PATH?.trim();
+  if (envOverride) {
+    return normalizePublicMediaPath(envOverride);
+  }
+
+  if (project.publicMediaPathExplicit !== undefined) {
+    return project.publicMediaPathExplicit;
+  }
+
+  return derivePublicMediaPath(mediaDir);
+}
+
 export function loadPublishEnv(): PublishEnvResult {
   const project = loadProjectConfig();
 
@@ -43,6 +64,7 @@ export function loadPublishEnv(): PublishEnvResult {
   const contentDir =
     process.env.CMS_CONTENT_DIR?.trim() || project.contentDir;
   const mediaDir = process.env.CMS_MEDIA_DIR?.trim() || project.mediaDir;
+  const publicMediaPath = resolvePublicMediaPath(mediaDir, project);
   const rawAdapter = process.env.CMS_ADAPTER?.trim() || project.adapter;
   const adapter = resolveAdapter(rawAdapter);
 
@@ -74,6 +96,7 @@ export function loadPublishEnv(): PublishEnvResult {
       branch,
       contentDir,
       mediaDir,
+      publicMediaPath,
       adapter,
       categories: project.categories,
     },
@@ -84,13 +107,15 @@ export function loadPublicConfig(): Omit<PublishEnvConfig, "token"> {
   const project = loadProjectConfig();
   const rawAdapter = process.env.CMS_ADAPTER?.trim() || project.adapter;
   const adapter = resolveAdapter(rawAdapter) ?? "astro-mdx";
+  const mediaDir = process.env.CMS_MEDIA_DIR?.trim() || project.mediaDir;
 
   return {
     owner: process.env.GITHUB_OWNER?.trim() || "",
     repo: process.env.GITHUB_REPO?.trim() || "",
     branch: process.env.GITHUB_BRANCH?.trim() || project.defaultBranch,
     contentDir: process.env.CMS_CONTENT_DIR?.trim() || project.contentDir,
-    mediaDir: process.env.CMS_MEDIA_DIR?.trim() || project.mediaDir,
+    mediaDir,
+    publicMediaPath: resolvePublicMediaPath(mediaDir, project),
     adapter,
     categories: project.categories,
   };

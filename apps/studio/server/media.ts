@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 import type { Request } from "express";
 import Busboy from "busboy";
+import { joinPublicMediaPath } from "@sourcedraft/config";
 import { createGitHubPublisher } from "@sourcedraft/github-publisher";
 import type { PublishEnvConfig } from "./config.js";
 
@@ -36,12 +37,6 @@ export type MediaUploadResponse = MediaUploadSuccess | MediaUploadError;
 
 function normalizeMediaDir(mediaDir: string): string {
   return mediaDir.replace(/^\/+/u, "").replace(/\/+$/u, "").trim();
-}
-
-function mediaPublicPath(mediaDir: string, filename: string): string {
-  const normalized = normalizeMediaDir(mediaDir);
-  const leaf = normalized.split("/").pop() ?? "media";
-  return `/${leaf}/${filename}`;
 }
 
 function sanitizeFilename(filename: string): string {
@@ -249,7 +244,7 @@ export async function uploadMedia(
     `-${uniqueSuffix}$1`,
   );
   const repoPath = `${mediaDir}/${repoFilename}`;
-  const publicPath = mediaPublicPath(mediaDir, repoFilename);
+  const publicPath = joinPublicMediaPath(env.publicMediaPath, repoFilename);
 
   const publisher = createGitHubPublisher({
     token: env.token,

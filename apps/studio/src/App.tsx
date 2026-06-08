@@ -441,6 +441,16 @@ function App() {
                   />
                 </label>
 
+                <label className="field">
+                  <span className="field__label">Public media path</span>
+                  <input
+                    className="field__input field__input--mono"
+                    type="text"
+                    value={studioConfig.publicMediaPath}
+                    readOnly
+                  />
+                </label>
+
                 <label className="field field--full">
                   <span className="field__label">Categories</span>
                   <input

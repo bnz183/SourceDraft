@@ -1,6 +1,10 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import {
+  derivePublicMediaPath,
+  normalizePublicMediaPath,
+} from "./publicMediaPath.js";
+import {
   DEFAULT_SOURCEDRAFT_CONFIG,
   type SourceDraftConfig,
 } from "./types.js";
@@ -36,6 +40,12 @@ export function normalizeSourceDraftConfig(
 
   const input = raw as Record<string, unknown>;
   const categories = normalizeCategories(input.categories);
+  const mediaDir = isNonEmptyString(input.mediaDir)
+    ? input.mediaDir.trim()
+    : DEFAULT_SOURCEDRAFT_CONFIG.mediaDir;
+  const publicMediaPathExplicit = isNonEmptyString(input.publicMediaPath)
+    ? normalizePublicMediaPath(input.publicMediaPath.trim())
+    : undefined;
 
   return {
     adapter: isNonEmptyString(input.adapter)
@@ -44,9 +54,12 @@ export function normalizeSourceDraftConfig(
     contentDir: isNonEmptyString(input.contentDir)
       ? input.contentDir.trim()
       : DEFAULT_SOURCEDRAFT_CONFIG.contentDir,
-    mediaDir: isNonEmptyString(input.mediaDir)
-      ? input.mediaDir.trim()
-      : DEFAULT_SOURCEDRAFT_CONFIG.mediaDir,
+    mediaDir,
+    publicMediaPath:
+      publicMediaPathExplicit ?? derivePublicMediaPath(mediaDir),
+    ...(publicMediaPathExplicit !== undefined
+      ? { publicMediaPathExplicit }
+      : {}),
     defaultBranch: isNonEmptyString(input.defaultBranch)
       ? input.defaultBranch.trim()
       : DEFAULT_SOURCEDRAFT_CONFIG.defaultBranch,

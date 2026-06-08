@@ -107,10 +107,12 @@ Details: [docs/security.md](docs/security.md)
 | | `sourcedraft.config.json` | `.env` |
 |---|---------------------------|--------|
 | **Purpose** | Project settings safe to commit | Secrets and private targets |
-| **Examples** | `contentDir`, `mediaDir`, `categories`, `adapter` | `GITHUB_TOKEN`, `GITHUB_OWNER`, `GITHUB_REPO`, `SOURCEDRAFT_ADMIN_PASSWORD` |
+| **Examples** | `contentDir`, `mediaDir`, `publicMediaPath`, `categories`, `adapter` | `GITHUB_TOKEN`, `GITHUB_OWNER`, `GITHUB_REPO`, `SOURCEDRAFT_ADMIN_PASSWORD` |
 | **Shared in git?** | Yes (copy from `sourcedraft.config.example.json`) | Never |
 
-Optional env vars (`CMS_CONTENT_DIR`, `CMS_MEDIA_DIR`, `CMS_ADAPTER`, etc.) can override values from the JSON file. Secrets always stay in `.env`.
+Optional env vars (`CMS_CONTENT_DIR`, `CMS_MEDIA_DIR`, `CMS_PUBLIC_MEDIA_PATH`, `CMS_ADAPTER`, etc.) can override values from the JSON file. Secrets always stay in `.env`.
+
+`mediaDir` is where images are committed in your site repo. `publicMediaPath` is the URL path Studio inserts into posts (for example `/images`).
 
 Reference: [docs/configuration.md](docs/configuration.md)
 

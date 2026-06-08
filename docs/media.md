@@ -28,34 +28,55 @@ Other types are rejected before upload.
 
 Maximum file size: **5 MB**. Larger files are rejected.
 
-## `mediaDir` behavior
+## `mediaDir` vs `publicMediaPath`
 
-`mediaDir` in `sourcedraft.config.json` is the folder inside your **site repository** where uploaded images are committed.
+These settings are separate on purpose:
+
+| Setting | Purpose |
+|---------|---------|
+| **`mediaDir`** | Repository path where uploaded files are committed |
+| **`publicMediaPath`** | Site-relative URL path inserted into `heroImage` and body Markdown |
 
 Example:
 
 ```json
-"mediaDir": "src/assets/images"
+{
+  "mediaDir": "public/images",
+  "publicMediaPath": "/images"
+}
 ```
 
 Uploaded files land at:
 
 ```
-src/assets/images/your-file-abc12345.png
+public/images/your-file-abc12345.png
 ```
 
-Override with `CMS_MEDIA_DIR` in `.env` if needed. See [configuration.md](configuration.md).
+Studio returns `/images/your-file-abc12345.png` for frontmatter and Markdown — not the full repo path.
 
-## Public path behavior
+Override `mediaDir` with `CMS_MEDIA_DIR` and `publicMediaPath` with `CMS_PUBLIC_MEDIA_PATH` in `.env` if needed. See [configuration.md](configuration.md).
 
-After upload, Studio returns a **public path** for use in frontmatter and Markdown — not the full repo path.
+The upload API always uses server config. The browser cannot send arbitrary `mediaDir` or `publicMediaPath` values.
 
-SourceDraft derives this from the last segment of `mediaDir`:
+## Fallback when `publicMediaPath` is omitted
 
-| `mediaDir` | Example upload | `publicPath` returned |
-|------------|----------------|------------------------|
-| `src/assets/images` | `photo-abc12345.png` | `/images/photo-abc12345.png` |
-| `public/media` | `photo-abc12345.png` | `/media/photo-abc12345.png` |
+If `publicMediaPath` is not set in `sourcedraft.config.json`, SourceDraft derives it from `mediaDir`:
+
+| `mediaDir` | Derived `publicMediaPath` |
+|------------|---------------------------|
+| `public/images` | `/images` |
+| `public/media/blog` | `/media/blog` |
+| `src/assets/images` | `/images` |
+
+If `mediaDir` starts with `public/`, the prefix is stripped. Otherwise the last path segment is used.
+
+## Public path examples
+
+| `mediaDir` | `publicMediaPath` | Example upload | `publicPath` returned |
+|------------|-------------------|----------------|------------------------|
+| `public/images` | `/images` | `photo-abc12345.png` | `/images/photo-abc12345.png` |
+| `src/assets/images` | `/images` | `photo-abc12345.png` | `/images/photo-abc12345.png` |
+| `public/media` | `/media` | `photo-abc12345.png` | `/media/photo-abc12345.png` |
 
 Use that path in `heroImage` or in body Markdown such as `![Alt text](/images/photo-abc12345.png)`.
 
