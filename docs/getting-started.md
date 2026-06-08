@@ -59,8 +59,8 @@ Sign in with `SOURCEDRAFT_ADMIN_PASSWORD`.
 
 ## 5. Write and publish
 
-1. **Posts** — see existing posts from GitHub; click **Edit**, or open **Write** for a new post
-2. Fill in post details; upload a cover image if needed ([media.md](media.md))
+1. **Posts** sidebar — open an existing post, or click **New post**
+2. Fill title and description in the center canvas; set slug, dates, and category in **Post details**; upload a cover image if needed ([media.md](media.md))
 3. Check the Markdown or MDX preview and output path
 4. **Publish to GitHub**
 

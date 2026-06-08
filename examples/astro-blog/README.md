@@ -93,7 +93,7 @@ You do **not** copy this whole `examples/astro-blog` folder into SourceDraft as 
 1. **Paths** — Put posts where SourceDraft can reach them (usually `src/content/blog/`). Set `contentDir` to that path.
 2. **Config** — Copy `adapter`, `contentDir`, `mediaDir`, `publicMediaPath`, `defaultBranch`, and `categories` from the example config into SourceDraft’s `sourcedraft.config.json`. Adjust categories for your site.
 3. **GitHub target** — In SourceDraft’s `.env`, set `GITHUB_OWNER` and `GITHUB_REPO` to your blog repository (not the SourceDraft tool repo, unless you use a monorepo).
-4. **Test publish** — Write a post in Studio, publish once, and confirm the new `.mdx` file appears on GitHub in the right folder.
+4. **Test publish** — Create a post in Studio (**New post**), publish once, and confirm the new `.mdx` file appears on GitHub in the right folder.
 5. **Build as usual** — Run your normal Astro build or CI. No change to your deploy pipeline is required.
 
 Categories in config control the Studio dropdown. They only need to match your Astro setup if your site enforces specific values at build time.

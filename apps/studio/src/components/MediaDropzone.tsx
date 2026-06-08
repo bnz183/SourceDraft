@@ -121,11 +121,11 @@ export function MediaDropzone({
         aria-disabled={uploadDisabled}
       >
         <p className="media-dropzone__label">
-          Drag an image here, or choose a file
+          Drop an image here or choose a file
         </p>
         <p className="media-dropzone__hint">
-          PNG, JPEG, GIF, or WebP · max 5 MB. Uploads are committed to your site
-          repo through the server.
+          PNG, JPEG, GIF, or WebP · 5 MB max. Files upload to your repository
+          through the server.
         </p>
         {!githubReady && (
           <p className="media-dropzone__hint media-dropzone__hint--warning" role="status">
@@ -194,7 +194,7 @@ export function MediaDropzone({
                 onInsertIntoBody(upload.publicPath);
               }}
             >
-              Insert into body
+              Insert into article
             </button>
             <button
               type="button"

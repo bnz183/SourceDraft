@@ -29,6 +29,8 @@ Edit `.env` with local values for development. **Do not commit `.env` or `.env.l
 3. Keep changes focused — avoid unrelated refactors.
 4. Open a pull request against `main` with a clear summary and test notes.
 
+Before a release, see [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md) and [docs/manual-acceptance-test.md](docs/manual-acceptance-test.md).
+
 ## Commands
 
 From the repository root:

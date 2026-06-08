@@ -1,13 +1,15 @@
+import { getAstroMdxPath } from "@sourcedraft/adapter-astro-mdx";
+import { getMarkdownPath } from "@sourcedraft/adapter-markdown";
 import { normalizeArticle, validateArticle } from "@sourcedraft/core";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { AdapterStatus } from "./components/AdapterStatus";
-import { ArticlePipeline } from "./components/ArticlePipeline";
-import { CommandBar } from "./components/CommandBar";
-import { EditorWorkspace } from "./components/EditorWorkspace";
-import { FrontmatterInspector } from "./components/FrontmatterInspector";
+import { AppBar } from "./components/AppBar";
 import { AstroMdxPreview } from "./components/AstroMdxPreview";
 import { LoginScreen } from "./components/LoginScreen";
+import { PostDetailsPanel } from "./components/PostDetailsPanel";
+import { PostSidebar } from "./components/PostSidebar";
 import { PublishGate } from "./components/PublishGate";
+import { SettingsPanel } from "./components/SettingsPanel";
+import { WritingCanvas } from "./components/WritingCanvas";
 import {
   fetchAuthStatus,
   login as loginToStudio,
@@ -45,7 +47,7 @@ function App() {
   const [authChecked, setAuthChecked] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
   const [authConfigured, setAuthConfigured] = useState(false);
-  const [view, setView] = useState<View>("overview");
+  const [view, setView] = useState<View>("editor");
   const [studioConfig, setStudioConfig] = useState<StudioConfig>(
     FALLBACK_STUDIO_CONFIG,
   );
@@ -135,21 +137,40 @@ function App() {
     }
   }, [articleInput, validation.valid]);
 
+  const outputPath = useMemo(() => {
+    if (!validation.valid || !normalizedArticle) {
+      return null;
+    }
+
+    if (editingPath && editingPath.length > 0) {
+      return editingPath;
+    }
+
+    return studioConfig.adapter === "markdown"
+      ? getMarkdownPath(normalizedArticle, {
+          contentDir: studioConfig.contentDir,
+        })
+      : getAstroMdxPath(normalizedArticle, {
+          contentDir: studioConfig.contentDir,
+        });
+  }, [
+    validation.valid,
+    normalizedArticle,
+    editingPath,
+    studioConfig.adapter,
+    studioConfig.contentDir,
+  ]);
+
   function resetEditor(defaultCategory?: string) {
     setEditingPath(null);
     setLoadPostError(null);
     setSlugAuto(true);
     setPublishError(null);
     setPublishSuccess(null);
-    setForm(createInitialFormState(defaultCategory ?? studioConfig.categories[0]));
-  }
-
-  function handleViewChange(next: View) {
-    if (next === "new-article" && view !== "new-article") {
-      resetEditor();
-    }
-
-    setView(next);
+    setView("editor");
+    setForm(
+      createInitialFormState(defaultCategory ?? studioConfig.categories[0]),
+    );
   }
 
   function handleFieldChange(
@@ -196,11 +217,11 @@ function App() {
 
   async function handleEditPost(path: string) {
     setLoadPostError(null);
+    setView("editor");
 
     const result = await fetchPost(path);
     if (!result.ok) {
       setLoadPostError(result.error);
-      setView("overview");
       return;
     }
 
@@ -214,7 +235,6 @@ function App() {
     setEditingPath(result.path);
     setPublishError(null);
     setPublishSuccess(null);
-    setView("new-article");
   }
 
   async function handleLogin(password: string) {
@@ -232,6 +252,7 @@ function App() {
     setEditingPath(null);
     setPublishError(null);
     setPublishSuccess(null);
+    setView("editor");
   }
 
   async function handlePublish() {
@@ -257,12 +278,14 @@ function App() {
 
       const action = result.created ? "Created" : "Updated";
       setPublishSuccess(
-        `${action} output file ${result.path} (commit ${result.commitSha.slice(0, 7)}).`,
+        `${action} ${result.path} (commit ${result.commitSha.slice(0, 7)}).`,
       );
       setEditingPath(result.path);
       await refreshPosts();
     } catch {
-      setPublishError("Could not reach the publish API. Is the server running?");
+      setPublishError(
+        "Could not reach the publish API. Start the dev server and try again.",
+      );
     } finally {
       setPublishing(false);
     }
@@ -286,201 +309,91 @@ function App() {
 
   return (
     <div className="studio">
-      <CommandBar
-        currentView={view}
-        onViewChange={handleViewChange}
+      <AppBar
+        adapter={studioConfig.adapter}
+        githubOwner={studioConfig.githubOwner}
+        githubRepo={studioConfig.githubRepo}
+        githubReady={githubReady}
+        settingsActive={view === "settings"}
+        onOpenSettings={() =>
+          setView((current) => (current === "settings" ? "editor" : "settings"))
+        }
         onLogout={handleLogout}
       />
 
-      <main className="studio__main">
-        {view === "overview" && (
-          <div className="studio__stack">
-            {loadPostError && (
-              <div className="notice notice--error" role="alert">
-                <p className="notice__title">Could not open post</p>
-                <p className="notice__body">{loadPostError}</p>
-              </div>
-            )}
-            <ArticlePipeline
-              posts={posts}
-              loading={postsLoading}
-              error={postsError}
-              githubReady={githubReady}
-              onRefresh={() => {
-                void refreshPosts();
-              }}
-              onEdit={(path) => {
-                void handleEditPost(path);
-              }}
-            />
-            <AdapterStatus
-              adapter={studioConfig.adapter}
-              githubOwner={studioConfig.githubOwner}
-              githubRepo={studioConfig.githubRepo}
-              contentDir={studioConfig.contentDir}
-            />
-          </div>
-        )}
+      {view === "settings" ? (
+        <main className="studio__settings">
+          <SettingsPanel config={studioConfig} />
+        </main>
+      ) : (
+        <div className="studio__workspace">
+          <PostSidebar
+            posts={posts}
+            loading={postsLoading}
+            error={postsError}
+            githubReady={githubReady}
+            activePath={editingPath}
+            loadPostError={loadPostError}
+            onNewPost={() => resetEditor()}
+            onRefresh={() => {
+              void refreshPosts();
+            }}
+            onEdit={(path) => {
+              void handleEditPost(path);
+            }}
+          />
 
-        {view === "new-article" && (
-          <div className="studio__editor-layout">
-            <div className="studio__editor-column">
-              {editingPath && (
-                <div className="notice notice--info editor-notice" role="status">
-                  <p className="notice__title">Editing an existing post</p>
-                  <p className="notice__body">
-                    Changes will update output file{" "}
-                    <code>{editingPath}</code> on GitHub.
-                  </p>
-                </div>
-              )}
-              <EditorWorkspace body={form.body} onBodyChange={handleBodyChange} />
-              {fieldErrors.body && (
-                <p className="editor-workspace__error">{fieldErrors.body}</p>
-              )}
-              <AstroMdxPreview
-                valid={validation.valid}
-                issues={validation.issues}
-                article={normalizedArticle}
-                contentDir={studioConfig.contentDir}
-                adapter={studioConfig.adapter}
-                outputPath={editingPath}
-              />
-              <PublishGate
-                ready={validation.valid}
-                publishing={publishing}
-                publishError={publishError}
-                publishSuccess={publishSuccess}
-                githubReady={githubReady}
-                onPublish={handlePublish}
-              />
-            </div>
-            <FrontmatterInspector
-              values={form}
-              categories={studioConfig.categories}
-              githubReady={githubReady}
+          <main className="studio__canvas-column">
+            <WritingCanvas
+              title={form.title}
+              description={form.description}
+              body={form.body}
+              editingPath={editingPath}
+              draft={form.draft}
               fieldErrors={fieldErrors}
-              slugAuto={slugAuto}
-              onChange={handleFieldChange}
-              onSlugManualEdit={handleSlugManualEdit}
-              onSlugResync={handleSlugResync}
-              onUseHeroImage={handleUseHeroImage}
-              onInsertImage={handleInsertImage}
+              onTitleChange={(value) => handleFieldChange("title", value)}
+              onDescriptionChange={(value) =>
+                handleFieldChange("description", value)
+              }
+              onBodyChange={handleBodyChange}
             />
-          </div>
-        )}
 
-        {view === "settings" && (
-          <div className="studio__stack">
-            <section className="panel settings-panel">
-              <div className="panel__header">
-                <h2 className="panel__title">Settings</h2>
-                <p className="panel__meta">
-                  Project paths from config · GitHub target from .env
-                </p>
-              </div>
-
-              <p className="settings-panel__note">
-                These values are read-only here. Edit{" "}
-                <code>sourcedraft.config.json</code> for folders and categories, and{" "}
-                <code>.env</code> for GitHub credentials. The token never reaches
-                the browser.
-              </p>
-
-              <div className="settings-panel__grid">
-                <label className="field">
-                  <span className="field__label">Content directory</span>
-                  <input
-                    className="field__input field__input--mono"
-                    type="text"
-                    value={studioConfig.contentDir}
-                    readOnly
-                  />
-                </label>
-
-                <label className="field">
-                  <span className="field__label">Adapter</span>
-                  <input
-                    className="field__input field__input--mono"
-                    type="text"
-                    value={studioConfig.adapter}
-                    readOnly
-                  />
-                </label>
-
-                <label className="field">
-                  <span className="field__label">GitHub owner</span>
-                  <input
-                    className="field__input field__input--mono"
-                    type="text"
-                    value={studioConfig.githubOwner}
-                    placeholder="Set GITHUB_OWNER in .env"
-                    readOnly
-                  />
-                </label>
-
-                <label className="field">
-                  <span className="field__label">GitHub repository</span>
-                  <input
-                    className="field__input field__input--mono"
-                    type="text"
-                    value={studioConfig.githubRepo}
-                    placeholder="Set GITHUB_REPO in .env"
-                    readOnly
-                  />
-                </label>
-
-                <label className="field">
-                  <span className="field__label">Branch</span>
-                  <input
-                    className="field__input field__input--mono"
-                    type="text"
-                    value={studioConfig.defaultBranch}
-                    readOnly
-                  />
-                </label>
-
-                <label className="field">
-                  <span className="field__label">Media directory</span>
-                  <input
-                    className="field__input field__input--mono"
-                    type="text"
-                    value={studioConfig.mediaDir}
-                    readOnly
-                  />
-                </label>
-
-                <label className="field">
-                  <span className="field__label">Public media path</span>
-                  <input
-                    className="field__input field__input--mono"
-                    type="text"
-                    value={studioConfig.publicMediaPath}
-                    readOnly
-                  />
-                </label>
-
-                <label className="field field--full">
-                  <span className="field__label">Categories</span>
-                  <input
-                    className="field__input field__input--mono"
-                    type="text"
-                    value={studioConfig.categories.join(", ")}
-                    readOnly
-                  />
-                </label>
-              </div>
-            </section>
-
-            <AdapterStatus
-              adapter={studioConfig.adapter}
-              githubOwner={studioConfig.githubOwner}
-              githubRepo={studioConfig.githubRepo}
+            <AstroMdxPreview
+              valid={validation.valid}
+              issues={validation.issues}
+              article={normalizedArticle}
               contentDir={studioConfig.contentDir}
+              adapter={studioConfig.adapter}
+              outputPath={editingPath}
             />
-          </div>
-        )}
-      </main>
+
+            <PublishGate
+              ready={validation.valid}
+              publishing={publishing}
+              publishError={publishError}
+              publishSuccess={publishSuccess}
+              githubReady={githubReady}
+              onPublish={handlePublish}
+            />
+          </main>
+
+          <PostDetailsPanel
+            values={form}
+            categories={studioConfig.categories}
+            githubReady={githubReady}
+            fieldErrors={fieldErrors}
+            slugAuto={slugAuto}
+            valid={validation.valid}
+            issues={validation.issues}
+            outputPath={outputPath}
+            onChange={handleFieldChange}
+            onSlugManualEdit={handleSlugManualEdit}
+            onSlugResync={handleSlugResync}
+            onUseHeroImage={handleUseHeroImage}
+            onInsertImage={handleInsertImage}
+          />
+        </div>
+      )}
     </div>
   );
 }

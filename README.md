@@ -88,7 +88,7 @@ Start Studio (UI + publish API):
 pnpm dev
 ```
 
-Sign in, open **Write**, preview the output, publish. The file lands at `contentDir/<slug>.mdx` or `.md` depending on your adapter (default: `src/content/blog/`).
+Sign in, click **New post**, preview the output, publish. The file lands at `contentDir/<slug>.mdx` or `.md` depending on your adapter (default: `src/content/blog/`).
 
 Full walkthrough: [docs/getting-started.md](docs/getting-started.md)
 
@@ -100,7 +100,7 @@ If someone technical already installed SourceDraft and pointed it at your blog r
 2. The admin password they set in `.env`
 3. Your site’s category list (from `sourcedraft.config.json`)
 
-Then: sign in → **Posts** to open an existing post, or **Write** → fill in title, description, date, category, tags, and body → upload images if needed → check the preview → **Publish to GitHub**. Your post appears as a file in the blog repo; the normal site build deploys it.
+Then: sign in → open a post from the **Posts** sidebar, or click **New post** → fill in title, description, category, tags, and body → upload images if needed → check the preview → **Publish to GitHub**. Your post appears as a file in the blog repo; the normal site build deploys it.
 
 You do not edit GitHub by hand or run terminal commands for each post. If publish is disabled, ask your technical contact to check `.env` (GitHub token and repo) and that Studio is running with `pnpm dev`.
 
@@ -146,6 +146,7 @@ Issues and pull requests are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) fo
 - [Adapters](docs/adapters.md)
 - [Project status](docs/project-status.md)
 - [Manual acceptance test](docs/manual-acceptance-test.md)
+- [Release checklist](RELEASE_CHECKLIST.md)
 - [Security](docs/security.md)
 - [Screenshots guide](docs/screenshots.md)
 - [Changelog](CHANGELOG.md)

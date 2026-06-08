@@ -6,7 +6,7 @@ See also: [Configuration](configuration.md) · [Security](security.md) · [Getti
 
 ## Upload flow
 
-1. In Studio, open **Write** or edit an existing post from **Posts**.
+1. In Studio, click **New post** or open an existing post from the **Posts** sidebar.
 2. Under **Cover image**, use the upload area: drag an image in or click **Choose image**.
 3. The browser sends the file to `POST /api/media/upload` (multipart field name: `file`).
 4. The server validates type, size, and file signature, sanitizes the filename, and commits the image to `mediaDir` via the GitHub Contents API.
