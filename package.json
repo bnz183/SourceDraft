@@ -8,7 +8,11 @@
     "dev": "pnpm --filter studio dev",
     "build": "pnpm -r build",
     "check": "pnpm -r check",
-    "lint": "pnpm -r lint"
+    "lint": "pnpm -r lint",
+    "test": "pnpm --filter @sourcedraft/core --filter @sourcedraft/adapter-astro-mdx --filter @sourcedraft/adapter-markdown test"
+  },
+  "devDependencies": {
+    "tsx": "^4.20.3"
   },
   "keywords": [
     "cms",

@@ -6,7 +6,11 @@ settings:
 
 importers:
 
-  .: {}
+  .:
+    devDependencies:
+      tsx:
+        specifier: ^4.20.3
+        version: 4.22.4
 
   apps/studio:
     dependencies:
@@ -87,6 +91,22 @@ importers:
         specifier: workspace:*
         version: link:../core
     devDependencies:
+      tsx:
+        specifier: ^4.20.3
+        version: 4.22.4
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+
+  packages/adapter-markdown:
+    dependencies:
+      '@sourcedraft/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      tsx:
+        specifier: ^4.20.3
+        version: 4.22.4
       typescript:
         specifier: ^5.8.3
         version: 5.9.3
@@ -102,6 +122,9 @@ importers:
 
   packages/core:
     devDependencies:
+      tsx:
+        specifier: ^4.20.3
+        version: 4.22.4
       typescript:
         specifier: ^5.8.3
         version: 5.9.3

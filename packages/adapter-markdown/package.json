@@ -1,8 +1,8 @@
 {
-  "name": "@sourcedraft/adapter-astro-mdx",
+  "name": "@sourcedraft/adapter-markdown",
   "version": "0.0.1",
   "private": true,
-  "description": "Convert SourceDraft articles into Astro MDX files.",
+  "description": "Convert SourceDraft articles into Markdown files.",
   "type": "module",
   "exports": {
     ".": {
