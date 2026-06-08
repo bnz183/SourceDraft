@@ -31,3 +31,13 @@ content/posts/getting-started-with-sourcedraft.md
 ## Sample output
 
 See [`content/posts/getting-started-with-sourcedraft.md`](content/posts/getting-started-with-sourcedraft.md).
+
+## How to publish
+
+1. Copy config into SourceDraft’s `sourcedraft.config.json` (`adapter`: `hugo-markdown`).
+2. Set `mediaDir` / `publicMediaPath` to match your Hugo `static/` layout.
+3. Configure git publisher in `.env` (GitHub, GitLab, or Bitbucket).
+4. Publish from Studio → `content/posts/<slug>.md` in your Hugo repo.
+5. Run `hugo` or your CI deploy.
+
+GitLab recipe: [docs/quickstart-recipes.md](../../docs/quickstart-recipes.md#hugo--gitlab)

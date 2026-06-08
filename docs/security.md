@@ -2,21 +2,31 @@
 
 ## Secrets stay on the server
 
-- `GITHUB_TOKEN` — used only in the publish API when committing posts, listing/reading files, and uploading media
-- `SOURCEDRAFT_ADMIN_PASSWORD` — checked only on the server at login
+All credentials are read from `.env` in the publish API only. Studio stores a session cookie after login — never tokens or passwords in the browser.
 
-Studio stores a session cookie after login. It does not store the GitHub token or admin password in the browser.
+| Secret | Used for |
+|--------|----------|
+| `SOURCEDRAFT_ADMIN_PASSWORD` | Studio login |
+| `GITHUB_*` | GitHub Contents API (publish, list, media) |
+| `GITLAB_*` | GitLab Repository Files API |
+| `BITBUCKET_*` | Bitbucket commit-upload API |
+| `WORDPRESS_*` | WordPress REST API |
+| `GHOST_*` | Ghost Admin API |
+| `CLOUDINARY_*` | Cloudinary upload API |
+| `S3_*` | S3-compatible config validation (upload not implemented) |
+| `DEPLOY_HOOK_URL` | Post-publish build webhook |
+
+Never commit `.env`. Never put secrets in `sourcedraft.config.json`.
 
 ## Demo mode
 
-When `SOURCEDRAFT_DEMO_MODE=true` or GitHub is not fully configured:
+When `SOURCEDRAFT_DEMO_MODE=true` or the active publisher is not fully configured:
 
-- Studio serves sample posts from server memory — not your repository.
-- `POST /api/publish` and `POST /api/media/upload` simulate success and **never call the GitHub API**.
-- Forced demo mode (`SOURCEDRAFT_DEMO_MODE=true`) blocks GitHub writes even if `GITHUB_TOKEN` is set.
-- Demo sessions use the same HttpOnly cookie as password login; no secrets are stored in the browser.
+- Sample posts load from server fixtures — not your repository.
+- `POST /api/publish` and `POST /api/media/upload` simulate success and **never call remote APIs**.
+- Forced demo mode blocks all remote writes even if credentials are set.
 
-Use demo mode for local exploration and smoke tests only. **MVP password auth is still intended for local/private use.**
+Use demo mode for local exploration and smoke tests only.
 
 ## Session cookies (MVP)
 
@@ -24,53 +34,58 @@ After login, the server sets an in-memory session cookie:
 
 | Attribute | Behavior |
 |-----------|----------|
-| `HttpOnly` | JavaScript cannot read the cookie — reduces token theft via XSS |
-| `SameSite=Lax` | Browser limits cross-site cookie use on unsafe requests |
-| `Secure` | Set only when running under HTTPS (`NODE_ENV=production`, `X-Forwarded-Proto: https`, or `STUDIO_SECURE_COOKIES=true`) |
+| `HttpOnly` | JavaScript cannot read the cookie |
+| `SameSite=Lax` | Limits cross-site cookie use |
+| `Secure` | When HTTPS (`NODE_ENV=production`, `X-Forwarded-Proto: https`, or `STUDIO_SECURE_COOKIES=true`) |
 | `Max-Age` | 24 hours |
 
-This is MVP session handling, not durable account auth. Sessions are stored in server memory and reset when the process restarts.
+Sessions reset when the API process restarts. This is not durable account auth.
 
 ## Request protection for state-changing routes
 
-These routes use lightweight same-site checks before handling the request:
+Protected routes include login, logout, publish, and media upload. Middleware checks `Sec-Fetch-Site` or `Origin`/`Referer` and rejects obvious cross-site POSTs. Optional `STUDIO_ALLOWED_ORIGINS` for reverse-proxy deployments.
 
-- `POST /api/auth/login`
-- `POST /api/auth/logout`
-- `POST /api/publish`
-- `POST /api/media/upload`
+This is basic MVP hardening — not a substitute for CSRF tokens, rate limiting, or production auth on a public deployment.
 
-The middleware:
+## Server-only publisher access
 
-1. Uses `Sec-Fetch-Site` when the browser sends it — allows `same-origin`, `same-site`, and `none`; rejects `cross-site`
-2. Falls back to `Origin` / `Referer` validation when Fetch Metadata is absent
-3. Allows loopback origins during local development (`localhost`, `127.0.0.1`)
-4. Does not enable CORS wildcards
+All publisher and media API calls run in `apps/studio/server`:
 
-Optional: set `STUDIO_ALLOWED_ORIGINS` (comma-separated full origins) when deploying behind a reverse proxy.
+| Endpoint | Credentials |
+|----------|-------------|
+| `POST /api/publish` | Active publisher token |
+| `GET /api/posts` | Git publisher only (GitHub, GitLab) |
+| `POST /api/media/upload` | Media provider + git publisher when needed |
+| `GET /api/media` | Git-backed media list |
+| `GET /api/health/setup` | Safe diagnostics (no secret values) |
 
-Login uses the same middleware. It is safe for the local Studio UI because the browser issues same-origin requests through the Vite dev proxy (`/api` → publish API). Unauthenticated login still benefits from blocking obvious cross-site POST attempts.
+The client sends article JSON or multipart uploads. The server attaches credentials from `.env`.
 
-This is basic MVP hardening — not a substitute for CSRF tokens, rate limiting, or full production auth on a public deployment.
+Do not import publisher packages in browser code.
 
-## Server-only GitHub access
+## Per-publisher notes
 
-All GitHub API calls run in `apps/studio/server`:
+**GitHub / GitLab / Bitbucket** — Tokens need repository write access for publish and media. Use fine-scoped tokens where your host allows. Rotate on leak.
 
-| Endpoint | Token use |
-|----------|-----------|
-| `POST /api/publish` | Create or update post files |
-| `GET /api/posts` | List and load posts from `contentDir` |
-| `POST /api/media/upload` | Commit image files to `mediaDir` |
-| `GET /api/health/setup` | Safe setup diagnostics (authenticated; no secrets) |
+**WordPress** — Application passwords (not your main account password). REST API over HTTPS only. SEO plugin meta requires explicit opt-in via `publisherOptions`.
 
-The client sends article JSON, post path queries, or multipart uploads. The server attaches credentials from `.env`.
+**Ghost** — Admin API key (`id:secret`) is full admin access to content. Store only on the server.
 
-Do not import `@sourcedraft/github-publisher` in browser code.
+**Cloudinary** — API secret must not reach the browser. Uploaded images are public CDN URLs by default.
+
+**Deploy hooks** — Treat hook URLs like passwords; anyone with the URL can trigger builds.
 
 ## Media uploads
 
-Uploads are validated for allowed image types, maximum size (5 MB), and file signature before commit. Filenames are sanitized. See [media.md](media.md).
+Uploads validate allowed types, size limits (5 MB images, 10 MB PDF), and file signatures. Filenames are sanitized; path traversal is blocked. No SVG, HTML, executables, or ZIP.
+
+Details: [media.md](media.md)
+
+## Plugins
+
+Custom plugins load only on the server at API startup. Review third-party plugin code before enabling — plugins can register publishers with network access.
+
+Details: [plugins.md](plugins.md)
 
 ## Files
 
@@ -82,10 +97,6 @@ Uploads are validated for allowed image types, maximum size (5 MB), and file sig
 
 Single shared password, in-memory sessions.
 
-**MVP password auth is intended for local/private use. Do not expose Studio publicly without HTTPS, stronger auth, and deployment hardening.**
+**Intended for local/private use.** Do not expose Studio publicly without HTTPS, stronger auth, and deployment hardening.
 
-This is not a multi-tenant production auth system yet.
-
-Report security concerns privately; do not include live tokens in reports or public issue templates.
-
-When filing bugs, redact tokens, passwords, and private repository details. See [CONTRIBUTING.md](../CONTRIBUTING.md).
+Report security concerns privately; redact tokens in bug reports. See [CONTRIBUTING.md](../CONTRIBUTING.md).

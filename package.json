@@ -11,9 +11,10 @@
     "lint": "pnpm -r lint",
     "setup": "tsx packages/setup/src/cli.ts setup",
     "validate:config": "tsx packages/setup/src/cli.ts validate",
-    "test": "pnpm --filter @sourcedraft/core --filter @sourcedraft/adapter-astro-mdx --filter @sourcedraft/adapter-markdown --filter @sourcedraft/adapter-nextjs-mdx --filter @sourcedraft/adapter-hugo-markdown --filter @sourcedraft/adapter-eleventy-jekyll-markdown --filter @sourcedraft/adapter-docusaurus-mdx --filter @sourcedraft/adapter-mkdocs-markdown --filter @sourcedraft/adapter-nuxt-content-markdown --filter @sourcedraft/adapters --filter @sourcedraft/publishers --filter @sourcedraft/media-providers --filter @sourcedraft/setup --filter @sourcedraft/github-publisher --filter studio test",
+    "test": "pnpm --filter @sourcedraft/core --filter @sourcedraft/adapter-astro-mdx --filter @sourcedraft/adapter-markdown --filter @sourcedraft/adapter-nextjs-mdx --filter @sourcedraft/adapter-hugo-markdown --filter @sourcedraft/adapter-eleventy-jekyll-markdown --filter @sourcedraft/adapter-docusaurus-mdx --filter @sourcedraft/adapter-mkdocs-markdown --filter @sourcedraft/adapter-nuxt-content-markdown --filter @sourcedraft/adapters --filter @sourcedraft/publishers --filter @sourcedraft/media-providers --filter @sourcedraft/plugins --filter @sourcedraft/setup --filter @sourcedraft/github-publisher --filter studio test",
     "test:e2e": "pnpm --filter studio test:e2e",
-    "screenshots:generate": "pnpm --filter studio screenshots:generate"
+    "screenshots:generate": "pnpm --filter studio screenshots:generate",
+    "capture-doc-screenshots": "cd apps/studio && pnpm exec tsx ../../scripts/capture-doc-screenshots.ts"
   },
   "devDependencies": {
     "tsx": "^4.20.3"

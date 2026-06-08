@@ -1,6 +1,6 @@
 # SourceDraft
 
-SourceDraft is a free, open-source editor for Markdown and MDX blogs backed by GitHub. You write in the browser, upload images, check your metadata, preview the generated file, and publish into your site repository.
+SourceDraft is a free, open-source editor for Markdown and MDX blogs. You write in the browser, upload images, check SEO metadata, preview the generated file, and publish to a Git repository or remote CMS (WordPress, Ghost).
 
 **Project status:** SourceDraft is an early local/private MVP for Git-backed Markdown and MDX publishing. It is usable for solo writing and GitHub commits, but it is not a hosted CMS, multi-user product, or finished SaaS. See [docs/project-status.md](docs/project-status.md) and [CHANGELOG.md](CHANGELOG.md).
 
@@ -18,9 +18,9 @@ More views (toolbar, autosave, media library, content quality, preview, setup he
 
 ## What is SourceDraft?
 
-SourceDraft is not WordPress and not a hosted website builder. It is a local **Studio** (editor) plus a small **publish API** that commits content and media files to GitHub.
+SourceDraft is not WordPress and not a hosted website builder. It is a local **Studio** (editor) plus a small **publish API** that commits content and media to your target — GitHub, GitLab, Bitbucket, WordPress, or Ghost.
 
-Your static site — Astro today, others later — still builds and deploys exactly as before. SourceDraft creates or updates `.mdx` or `.md` files in the folder you configure, and can upload images to `mediaDir`.
+Your static site still builds and deploys exactly as before. SourceDraft creates or updates `.mdx` or `.md` files (via adapters) in the folder you configure, or pushes posts to a remote CMS API. Images can commit to your repo, upload to Cloudinary, or (experimentally) target S3-compatible storage.
 
 ## Who is this for?
 
@@ -48,10 +48,11 @@ Your static site — Astro today, others later — still builds and deploys exac
 
 - Host your website or run your Astro build
 - OAuth, user accounts, or role-based access
-- Full S3/R2 media upload (config validation only today; Cloudinary supported)
-- Adapters beyond `astro-mdx` and `markdown`
+- Full S3/R2 media upload (`s3-compatible` validates config only; use Cloudinary or git media today)
+- Post list in Studio for Bitbucket, WordPress, and Ghost publishers
+- OAuth, team accounts, or hosted multi-tenant Studio
 
-See [docs/project-status.md](docs/project-status.md).
+Eight adapters ship today — see [docs/adapters.md](docs/adapters.md). See [docs/project-status.md](docs/project-status.md) for the full shipped vs experimental list.
 
 ## How publishing works
 
@@ -65,12 +66,14 @@ API tokens never reach the browser. They are read from `.env` on the server when
 
 Details: [docs/publishers.md](docs/publishers.md) · [docs/git-publishers.md](docs/git-publishers.md) · [docs/wordpress.md](docs/wordpress.md) · [docs/ghost.md](docs/ghost.md)
 
-**Compatibility**
+**Compatibility (summary)**
 
-| Kind | Publishers | Notes |
-|------|------------|-------|
-| Git file | GitHub, GitLab, Bitbucket | Commit `.md`/`.mdx` to a repo; list/edit in Studio for GitHub/GitLab |
-| Remote CMS | WordPress, Ghost | Server-side API connectors; updates need `remoteId` from prior publish |
+| | Adapters (8) | Publishers (5) | Media (3) | Deploy hooks (4) |
+|---|--------------|----------------|-----------|------------------|
+| **Shipped** | Astro MDX, Markdown, Next.js MDX, Hugo, Eleventy/Jekyll, Docusaurus, MkDocs, Nuxt Content | GitHub, GitLab, Bitbucket, WordPress, Ghost | Git repo, Cloudinary, S3-compatible† | Generic, Vercel, Netlify, Cloudflare Pages |
+| **Notes** | Plugin loader for custom adapters | Git: list posts (GH/GL); Bitbucket publish only; WP/Ghost API publish | †S3 upload not implemented yet | Optional `DEPLOY_HOOK_URL` after publish |
+
+Full matrices: [adapters](docs/adapters.md) · [publishers](docs/publishers.md) · [media](docs/media.md) · [deploy-hooks](docs/deploy-hooks.md) · [quickstart recipes](docs/quickstart-recipes.md)
 
 ## Quickstart
 
@@ -156,6 +159,9 @@ Issues and pull requests are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) fo
 ## Documentation
 
 - [Getting started](docs/getting-started.md)
+- [Quickstart recipes](docs/quickstart-recipes.md) — Astro+GitHub, Hugo+GitLab, WordPress, Cloudinary, deploy hooks, …
+- [Plugins](docs/plugins.md)
+- [SEO fields](docs/seo-fields.md)
 - [Demo mode](docs/demo-mode.md)
 - [Non-technical overview](docs/non-technical-overview.md) — for writers
 - [Publishers overview](docs/publishers.md)

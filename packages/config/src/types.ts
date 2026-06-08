@@ -12,6 +12,12 @@ export type SourceDraftConfig = {
   categories: string[];
   adapterOptions?: Record<string, unknown>;
   publisherOptions?: Record<string, unknown>;
+  /** Server-side plugin entry paths, relative to sourcedraft.config.json */
+  plugins?: string[];
+  /** Plugin manifest names that must load successfully or startup fails */
+  requiredPlugins?: string[];
+  /** When true, also load *.js/*.mjs/*.cjs from ./plugins next to config */
+  discoverPlugins?: boolean;
 };
 
 export const DEFAULT_SOURCEDRAFT_CONFIG: SourceDraftConfig = {

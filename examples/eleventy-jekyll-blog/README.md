@@ -32,3 +32,13 @@ Set `layout` to match your site's layout name. Permalink defaults to `/<slug>/`;
 ## Sample output
 
 See [`src/posts/getting-started-with-sourcedraft.md`](src/posts/getting-started-with-sourcedraft.md).
+
+## How to publish
+
+1. Choose Eleventy (`src/posts`) or Jekyll (`_posts`) config from this folder’s example JSON files.
+2. Copy `adapter`, `contentDir`, and `adapterOptions` into SourceDraft’s `sourcedraft.config.json`.
+3. For Bitbucket: set `publisher`: `bitbucket` and `BITBUCKET_*` in `.env` (publish works; post list in Studio is not available yet).
+4. Publish from Studio → confirm filename (`slug` or `YYYY-MM-DD-slug` for Jekyll).
+5. Run Eleventy/Jekyll build as usual.
+
+Bitbucket recipe: [docs/quickstart-recipes.md](../../docs/quickstart-recipes.md#eleventy--bitbucket)

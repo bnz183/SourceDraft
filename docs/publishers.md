@@ -11,6 +11,20 @@ SourceDraft publishers are **connectors** — they send validated article data t
 
 Set the active publisher in `sourcedraft.config.json` (`publisher`) or override with `CMS_PUBLISHER` in `.env`.
 
+## Compatibility matrix
+
+| Publisher | Kind | Publish post | Upload media | List/read in Studio | Update existing | Official API docs |
+|-----------|------|--------------|--------------|---------------------|-----------------|-------------------|
+| `github` | Git | Yes | Yes (`github-media`) | Yes | Yes (`sourcePath`) | [GitHub Contents API](https://docs.github.com/en/rest/repos/contents) |
+| `gitlab` | Git | Yes | Yes (`github-media`) | Yes | Yes (`sourcePath`) | [GitLab Repository Files](https://docs.gitlab.com/ee/api/repository_files.html) |
+| `bitbucket` | Git | Yes | Yes (`github-media`) | No | Yes (`sourcePath`) | [Bitbucket Source API](https://developer.atlassian.com/cloud/bitbucket/rest/api-group-source/) |
+| `wordpress` | Remote CMS | Yes | No (use Cloudinary or git media with a git publisher) | No | Yes (`remoteId`) | [WP REST Posts](https://developer.wordpress.org/rest-api/reference/posts/) |
+| `ghost` | Remote CMS | Yes | No | No | Yes (`remoteId`) | [Ghost Admin API](https://docs.ghost.org/admin-api/) |
+
+Connector doc screenshots (optional, maintainer-captured): [assets/screenshots/connectors/README.md](assets/screenshots/connectors/README.md)
+
+Quickstart copy-paste configs: [quickstart-recipes.md](quickstart-recipes.md)
+
 ## Git file publishers
 
 - Render output comes from the selected [adapter](adapters.md) (frontmatter + body).

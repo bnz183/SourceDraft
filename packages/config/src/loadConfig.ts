@@ -61,6 +61,10 @@ export function normalizeSourceDraftConfig(
       ? (input.publisherOptions as Record<string, unknown>)
       : undefined;
 
+  const plugins = normalizeStringArray(input.plugins);
+  const requiredPlugins = normalizeStringArray(input.requiredPlugins);
+  const discoverPlugins = input.discoverPlugins === true;
+
   return {
     adapter: isNonEmptyString(input.adapter)
       ? input.adapter.trim()
@@ -83,7 +87,26 @@ export function normalizeSourceDraftConfig(
     categories: categories ?? DEFAULT_SOURCEDRAFT_CONFIG.categories,
     ...(adapterOptions !== undefined ? { adapterOptions } : {}),
     ...(publisherOptions !== undefined ? { publisherOptions } : {}),
+    ...(plugins !== undefined ? { plugins } : {}),
+    ...(requiredPlugins !== undefined ? { requiredPlugins } : {}),
+    ...(discoverPlugins ? { discoverPlugins } : {}),
   };
+}
+
+function normalizeStringArray(value: unknown): string[] | undefined {
+  if (!Array.isArray(value)) {
+    return undefined;
+  }
+
+  const items: string[] = [];
+  for (const item of value) {
+    if (!isNonEmptyString(item)) {
+      return undefined;
+    }
+    items.push(item.trim());
+  }
+
+  return items.length > 0 ? items : undefined;
 }
 
 export function resolveConfigPath(cwd: string): string | null {

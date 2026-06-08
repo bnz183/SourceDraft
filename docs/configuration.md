@@ -14,6 +14,10 @@ Studio **Settings → Compatibility & status** mirrors validation (adapter, publ
 
 Details: [setup-wizard.md](setup-wizard.md).
 
+## Server-side plugins
+
+Optional `plugins`, `requiredPlugins`, and `discoverPlugins` load custom adapters/publishers/media providers when the Studio API starts. Server-only — never loaded in the browser. See [plugins.md](plugins.md).
+
 ## Secrets vs project settings
 
 SourceDraft uses two files on purpose:

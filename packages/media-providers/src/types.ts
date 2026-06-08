@@ -1,6 +1,7 @@
 export const MEDIA_PROVIDER_IDS = ["github-media", "cloudinary", "s3-compatible"] as const;
 
-export type MediaProviderId = (typeof MEDIA_PROVIDER_IDS)[number];
+/** Built-in media provider ids; plugins may register additional string ids at runtime. */
+export type MediaProviderId = string;
 
 export type MediaUploadInput = {
   buffer: Buffer;

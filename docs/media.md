@@ -48,11 +48,21 @@ Listing uses the same GitHub session as publish and post listing. Only allowed f
 
 Set `CMS_MEDIA_PROVIDER` in `.env` (default: `github-media`).
 
+### Compatibility matrix
+
+| Provider | Status | Upload images | Upload PDF | Media library list | Requires git publisher | Official docs |
+|----------|--------|---------------|------------|-------------------|------------------------|---------------|
+| `github-media` | Shipped | Yes | Yes | Yes | Yes (GitHub/GitLab/Bitbucket) | [GitHub Contents](https://docs.github.com/en/rest/repos/contents) |
+| `cloudinary` | Shipped | Yes | No | No (git list only) | No | [Cloudinary Upload API](https://cloudinary.com/documentation/image_upload_api_reference) |
+| `s3-compatible` | Experimental | No | No | No | No | [Cloudflare R2](https://developers.cloudflare.com/r2/) |
+
+### Environment variables
+
 | Provider | Env vars | Notes |
 |----------|----------|-------|
 | `github-media` | Uses publisher credentials | Commits to `mediaDir` via git publisher; supports images + PDF |
 | `cloudinary` | `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, optional `CLOUDINARY_FOLDER` | Images only (PNG, JPEG, GIF, WebP); returns secure CDN URL |
-| `s3-compatible` | `S3_ENDPOINT`, `S3_REGION`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, optional `S3_PUBLIC_BASE_URL`, `S3_FORCE_PATH_STYLE` | **Experimental** — config validation only; upload not implemented yet |
+| `s3-compatible` | `S3_ENDPOINT`, `S3_REGION`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, optional `S3_PUBLIC_BASE_URL`, `S3_FORCE_PATH_STYLE` | Config validation only; upload not implemented yet |
 
 Upload API response includes `url`, `provider`, and optional `metadata` in addition to legacy `publicPath` / `repoPath` fields.
 
