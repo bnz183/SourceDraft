@@ -5,6 +5,15 @@ export type SetupHealthCheck = {
   detail: string;
 };
 
+export type SetupCompatibilityReport = {
+  adapter: string;
+  publisher: string;
+  mediaProvider: string;
+  validationOk: boolean;
+  missingEnvVars: string[];
+  warnings: string[];
+};
+
 export type SetupHealthReport = {
   ok: boolean;
   adminPasswordConfigured: boolean;
@@ -15,9 +24,11 @@ export type SetupHealthReport = {
   mediaDirConfigured: boolean;
   publicMediaPathConfigured: boolean;
   adapterValid: boolean;
+  publisherValid: boolean;
   demoModeForced: boolean;
   demoModeAvailable: boolean;
   githubReady: boolean;
+  compatibility: SetupCompatibilityReport;
   checks: SetupHealthCheck[];
   nextAction: string | null;
 };

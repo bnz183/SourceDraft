@@ -69,4 +69,4 @@ Defaults: `adapter: "astro-mdx"`, `publisher: "github"`.
 
 - Post list still walks GitHub Contents API — large repos remain an MVP limitation.
 - `listPosts` is reused for media library listing until a dedicated `listMedia` capability is added.
-- SEO optional fields exist on the schema but Studio UI exposure is still partial.
+- SEO optional fields are available in schema, adapters, and Studio **SEO / Sharing** panel — see [seo-fields.md](seo-fields.md).

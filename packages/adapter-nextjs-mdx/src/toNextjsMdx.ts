@@ -1,4 +1,9 @@
-import type { Article, ArticleInput } from "@sourcedraft/core";
+import {
+  appendSeoFrontmatterLines,
+  mergeArticleInputWithSeo,
+  type Article,
+  type ArticleInput,
+} from "@sourcedraft/core";
 import { formatYamlTags, yamlScalar } from "./yaml.js";
 
 function pushOptional(
@@ -24,12 +29,8 @@ export function toNextjsMdx(article: Article): string {
   frontmatter.push(`slug: ${yamlScalar(article.slug)}`);
   frontmatter.push(`category: ${yamlScalar(article.category)}`);
   frontmatter.push(...formatYamlTags(article.tags));
-  pushOptional(frontmatter, "author", article.author);
   pushOptional(frontmatter, "coverImage", article.heroImage);
-  pushOptional(frontmatter, "metaTitle", article.metaTitle);
-  pushOptional(frontmatter, "metaDescription", article.metaDescription);
-  pushOptional(frontmatter, "canonicalUrl", article.canonicalUrl);
-  pushOptional(frontmatter, "socialImage", article.socialImage);
+  appendSeoFrontmatterLines(frontmatter, article, yamlScalar);
   frontmatter.push("---");
 
   return `${frontmatter.join("\n")}\n\n${article.body}`;
@@ -46,23 +47,19 @@ export function nextjsMdxFromFrontmatter(
       ? frontmatter.slug.trim()
       : slugFromPath(path);
 
-  const input: ArticleInput = {
-    title: frontmatter.title,
-    slug,
-    description: frontmatter.description,
-    pubDate: frontmatter.date ?? frontmatter.pubDate,
-    updatedDate: frontmatter.updatedDate,
-    category: frontmatter.category,
-    tags: frontmatter.tags,
-    draft: frontmatter.draft,
-    heroImage: frontmatter.coverImage ?? frontmatter.heroImage,
-    body,
-    author: frontmatter.author,
-    metaTitle: frontmatter.metaTitle,
-    metaDescription: frontmatter.metaDescription,
-    canonicalUrl: frontmatter.canonicalUrl,
-    socialImage: frontmatter.socialImage,
-  };
-
-  return input;
+  return mergeArticleInputWithSeo(
+    {
+      title: frontmatter.title,
+      slug,
+      description: frontmatter.description,
+      pubDate: frontmatter.date ?? frontmatter.pubDate,
+      updatedDate: frontmatter.updatedDate,
+      category: frontmatter.category,
+      tags: frontmatter.tags,
+      draft: frontmatter.draft,
+      heroImage: frontmatter.coverImage ?? frontmatter.heroImage,
+      body,
+    },
+    frontmatter,
+  );
 }

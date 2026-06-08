@@ -114,6 +114,15 @@ export function parseAutosave(raw: string): AutosaveRecord | null {
         draft: form.draft,
         heroImage: form.heroImage as string,
         body: form.body as string,
+        author: typeof form.author === "string" ? form.author : "",
+        metaTitle: typeof form.metaTitle === "string" ? form.metaTitle : "",
+        metaDescription:
+          typeof form.metaDescription === "string" ? form.metaDescription : "",
+        canonicalUrl: typeof form.canonicalUrl === "string" ? form.canonicalUrl : "",
+        socialImage: typeof form.socialImage === "string" ? form.socialImage : "",
+        coverImageAlt:
+          typeof form.coverImageAlt === "string" ? form.coverImageAlt : "",
+        noindex: form.noindex === true,
       },
       editingPath,
       slugAuto: candidate.slugAuto,
@@ -153,7 +162,14 @@ export function formsEqual(left: ArticleFormState, right: ArticleFormState): boo
     left.tags === right.tags &&
     left.draft === right.draft &&
     left.heroImage === right.heroImage &&
-    left.body === right.body
+    left.body === right.body &&
+    left.author === right.author &&
+    left.metaTitle === right.metaTitle &&
+    left.metaDescription === right.metaDescription &&
+    left.canonicalUrl === right.canonicalUrl &&
+    left.socialImage === right.socialImage &&
+    left.coverImageAlt === right.coverImageAlt &&
+    left.noindex === right.noindex
   );
 }
 

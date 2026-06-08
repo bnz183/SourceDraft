@@ -48,6 +48,7 @@ describe("WordPress publisher", () => {
         assert.equal(body.excerpt, article.description);
         assert.deepEqual(body.categories, [3]);
         assert.deepEqual(body.tags, [10, 11]);
+        assert.equal(body.meta, undefined);
 
         return new Response(
           JSON.stringify({ id: 42, slug: "hello-wordpress", status: "draft" }),
@@ -115,6 +116,34 @@ describe("WordPress publisher", () => {
     if (!result.ok) {
       assert.match(result.error, /WORDPRESS_USERNAME/);
     }
+  });
+
+  it("omits meta unless wordpressSeoMeta keys are configured", async () => {
+    const publisher = createWordPressPublisher({
+      ...config,
+      seoMetaKeys: {
+        _yoast_wpseo_title: "metaTitle",
+        _yoast_wpseo_metadesc: "metaDescription",
+      },
+      fetch: async (_url, init) => {
+        const body = JSON.parse(init?.body?.toString() ?? "{}");
+        assert.deepEqual(body.meta, {
+          _yoast_wpseo_title: "Custom SEO title",
+          _yoast_wpseo_metadesc: "Short excerpt",
+        });
+        return new Response(JSON.stringify({ id: 99, slug: "seo-post" }), { status: 201 });
+      },
+    });
+
+    const result = await publisher.publishPost({
+      article: {
+        ...article,
+        slug: "seo-post",
+        metaTitle: "Custom SEO title",
+      },
+    });
+
+    assert.equal(result.ok, true);
   });
 
   it("returns actionable error on invalid endpoint", async () => {

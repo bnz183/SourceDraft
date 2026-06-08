@@ -71,6 +71,37 @@ describe("Ghost publisher", () => {
     }
   });
 
+  it("maps cover alt text and meta fallbacks", async () => {
+    const publisher = createGhostPublisher({
+      ...config,
+      fetch: async (_url, init) => {
+        const body = JSON.parse(init?.body?.toString() ?? "{}");
+        const post = body.posts[0];
+        assert.equal(post.meta_title, article.title);
+        assert.equal(post.meta_description, article.description);
+        assert.equal(post.feature_image_alt, "Hero alt text");
+
+        return new Response(
+          JSON.stringify({
+            posts: [{ id: "ghost-uuid-2", slug: "hello-ghost", status: "draft" }],
+          }),
+          { status: 201 },
+        );
+      },
+    });
+
+    const result = await publisher.publishPost({
+      article: {
+        ...article,
+        metaTitle: undefined,
+        metaDescription: undefined,
+        coverImageAlt: "Hero alt text",
+      },
+    });
+
+    assert.equal(result.ok, true);
+  });
+
   it("updates an existing post when remoteId is provided", async () => {
     const publisher = createGhostPublisher({
       ...config,

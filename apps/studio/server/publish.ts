@@ -77,6 +77,8 @@ function toCmsPayload(article: Article): CmsArticlePayload {
       : {}),
     ...(article.canonicalUrl !== undefined ? { canonicalUrl: article.canonicalUrl } : {}),
     ...(article.socialImage !== undefined ? { socialImage: article.socialImage } : {}),
+    ...(article.coverImageAlt !== undefined ? { coverImageAlt: article.coverImageAlt } : {}),
+    ...(article.noindex === true ? { noindex: true } : {}),
   };
 }
 

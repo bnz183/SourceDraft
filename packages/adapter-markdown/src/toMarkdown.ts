@@ -1,4 +1,4 @@
-import type { Article } from "@sourcedraft/core";
+import { appendSeoFrontmatterLines, type Article } from "@sourcedraft/core";
 
 const YAML_NEEDS_QUOTES =
   /^$|^[\s#>|@[`%&*!?{[\]},]|:\s|[\n\r]|^['"]|['"]$|^(true|false|null|yes|no|on|off)$/iu;
@@ -44,6 +44,7 @@ export function toMarkdown(article: Article): string {
     frontmatter.push(`heroImage: ${yamlScalar(article.heroImage)}`);
   }
 
+  appendSeoFrontmatterLines(frontmatter, article, yamlScalar);
   frontmatter.push("---");
 
   return `${frontmatter.join("\n")}\n\n${article.body}`;

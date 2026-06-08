@@ -1,5 +1,6 @@
 import { isAdapterId } from "@sourcedraft/adapters";
 import { isPublisherId } from "@sourcedraft/publishers";
+import { validateConfig } from "@sourcedraft/setup";
 import { isAuthConfigured } from "./auth.js";
 import { loadProjectConfig, loadPublicConfig } from "./config.js";
 import {
@@ -32,6 +33,15 @@ export type SetupHealthCheck = {
   detail: string;
 };
 
+export type SetupCompatibilityReport = {
+  adapter: string;
+  publisher: string;
+  mediaProvider: string;
+  validationOk: boolean;
+  missingEnvVars: string[];
+  warnings: string[];
+};
+
 export type SetupHealthReport = {
   ok: boolean;
   adminPasswordConfigured: boolean;
@@ -46,6 +56,7 @@ export type SetupHealthReport = {
   demoModeForced: boolean;
   demoModeAvailable: boolean;
   githubReady: boolean;
+  compatibility: SetupCompatibilityReport;
   checks: SetupHealthCheck[];
   nextAction: string | null;
 };
@@ -314,6 +325,41 @@ export function getSetupHealth(): SetupHealthReport {
     nextAction = null;
   }
 
+  const validation = validateConfig();
+  const compatibility: SetupCompatibilityReport = {
+    adapter: validation.adapter,
+    publisher: validation.publisher,
+    mediaProvider: validation.mediaProvider,
+    validationOk: validation.ok,
+    missingEnvVars: validation.missingEnvVars,
+    warnings: validation.warnings,
+  };
+
+  if (!validation.ok && validation.missingEnvVars.length > 0) {
+    checks.push({
+      id: "config-validation",
+      label: "Configuration validation",
+      ok: false,
+      detail: `Missing: ${validation.missingEnvVars.join(", ")}. Run pnpm validate:config for details.`,
+    });
+  } else if (validation.warnings.length > 0) {
+    checks.push({
+      id: "config-validation",
+      label: "Configuration validation",
+      ok: true,
+      detail: validation.warnings[0] ?? "Configuration validated with warnings.",
+    });
+  } else {
+    checks.push({
+      id: "config-validation",
+      label: "Configuration validation",
+      ok: validation.ok,
+      detail: validation.ok
+        ? "Adapter, publisher, and media provider look compatible."
+        : "Run pnpm validate:config locally for details.",
+    });
+  }
+
   return {
     ok: publisherReady || demoModeAvailable,
     adminPasswordConfigured,
@@ -328,6 +374,7 @@ export function getSetupHealth(): SetupHealthReport {
     demoModeForced,
     demoModeAvailable,
     githubReady: publisherReady,
+    compatibility,
     checks,
     nextAction,
   };

@@ -80,7 +80,12 @@ Requirements: Node.js 22+, pnpm 11+
 git clone https://github.com/bnz183/SourceDraft.git
 cd SourceDraft
 pnpm install
+pnpm setup    # guided wizard — or copy example files manually (below)
+```
 
+Or copy example files manually:
+
+```bash
 cp sourcedraft.config.example.json sourcedraft.config.json
 cp .env.example .env
 ```
@@ -104,7 +109,7 @@ Sign in, click **New post**, preview the output, publish. The file lands at `con
 
 **Try without GitHub:** set `SOURCEDRAFT_DEMO_MODE=true` in `.env`, or leave GitHub vars empty and click **Explore demo mode** on the sign-in screen. Demo content reloads from repository fixtures on each API start. See [docs/demo-mode.md](docs/demo-mode.md).
 
-Full walkthrough: [docs/getting-started.md](docs/getting-started.md)
+Validate config: `pnpm validate:config` · Wizard details: [docs/setup-wizard.md](docs/setup-wizard.md) · Full walkthrough: [docs/getting-started.md](docs/getting-started.md)
 
 ## Beginner path
 

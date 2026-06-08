@@ -12,6 +12,13 @@ export type ArticleFormState = {
   draft: boolean;
   heroImage: string;
   body: string;
+  author: string;
+  metaTitle: string;
+  metaDescription: string;
+  canonicalUrl: string;
+  socialImage: string;
+  coverImageAlt: string;
+  noindex: boolean;
 };
 
 export function createInitialFormState(
@@ -28,6 +35,13 @@ export function createInitialFormState(
     draft: true,
     heroImage: "",
     body: "",
+    author: "",
+    metaTitle: "",
+    metaDescription: "",
+    canonicalUrl: "",
+    socialImage: "",
+    coverImageAlt: "",
+    noindex: false,
   };
 }
 
@@ -56,6 +70,34 @@ export function formStateToArticleInput(state: ArticleFormState): ArticleInput {
 
   if (state.heroImage.trim().length > 0) {
     input.heroImage = state.heroImage;
+  }
+
+  if (state.author.trim().length > 0) {
+    input.author = state.author;
+  }
+
+  if (state.metaTitle.trim().length > 0) {
+    input.metaTitle = state.metaTitle;
+  }
+
+  if (state.metaDescription.trim().length > 0) {
+    input.metaDescription = state.metaDescription;
+  }
+
+  if (state.canonicalUrl.trim().length > 0) {
+    input.canonicalUrl = state.canonicalUrl;
+  }
+
+  if (state.socialImage.trim().length > 0) {
+    input.socialImage = state.socialImage;
+  }
+
+  if (state.coverImageAlt.trim().length > 0) {
+    input.coverImageAlt = state.coverImageAlt;
+  }
+
+  if (state.noindex) {
+    input.noindex = true;
   }
 
   return input;
@@ -110,5 +152,12 @@ export function articleInputToFormState(
     draft: typeof input.draft === "boolean" ? input.draft : true,
     heroImage: stringField(input.heroImage),
     body: stringField(input.body),
+    author: stringField(input.author),
+    metaTitle: stringField(input.metaTitle),
+    metaDescription: stringField(input.metaDescription),
+    canonicalUrl: stringField(input.canonicalUrl),
+    socialImage: stringField(input.socialImage),
+    coverImageAlt: stringField(input.coverImageAlt),
+    noindex: input.noindex === true,
   };
 }
