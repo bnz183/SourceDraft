@@ -1,16 +1,23 @@
 # Adapters
 
-An adapter turns a validated SourceDraft article into content for a specific platform — today, an Astro MDX file with YAML frontmatter.
+An adapter turns a validated SourceDraft article into content for a specific platform — YAML frontmatter plus a Markdown or MDX body.
+
+Adapter choice is set in `sourcedraft.config.json` (`adapter` field) or overridden with `CMS_ADAPTER` in `.env`.
 
 ## Shipped
 
-- **astro-mdx** — `@sourcedraft/adapter-astro-mdx`
+| Adapter | Package | Output |
+|---------|---------|--------|
+| **astro-mdx** | `@sourcedraft/adapter-astro-mdx` | Astro content collection `.mdx` file |
+| **markdown** | `@sourcedraft/adapter-markdown` | Plain `.md` file with the same frontmatter fields |
 
-## Planned (not in repo yet)
+Both adapters use the same universal article schema from `@sourcedraft/core`. Studio preview and publish pick the adapter at runtime.
+
+## Future (not in repo yet)
 
 - Next.js MDX
-- Hugo Markdown
+- Hugo Markdown (site-specific frontmatter)
 - WordPress REST API
 - Ghost API
 
-Adapter choice is set in `sourcedraft.config.json` (`adapter` field). Only `astro-mdx` is implemented in this MVP.
+These are planned directions, not shipped packages.

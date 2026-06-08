@@ -1,6 +1,8 @@
 # GitHub publishing
 
-SourceDraft publishes **files**, not live websites. When you click **Publish to GitHub** in Studio, a server-side process commits one MDX file into the repository you configure.
+SourceDraft publishes **files**, not live websites. When you click **Publish to GitHub** in Studio, a server-side process commits one content file into the repository you configure.
+
+The file format depends on your adapter: `.mdx` for `astro-mdx`, `.md` for `markdown`. Both use YAML frontmatter plus the article body.
 
 ## What you need
 
@@ -17,21 +19,27 @@ In `sourcedraft.config.json`:
 
 | Field | Role |
 |-------|------|
-| `contentDir` | Folder inside the repo where the `.mdx` file is written |
-| `adapter` | Output format (`astro-mdx` today) |
+| `contentDir` | Folder inside the repo where post files are written |
+| `adapter` | Output format (`astro-mdx` or `markdown`) |
+
+The same token is used for media uploads to `mediaDir`. See [media.md](media.md).
 
 ## Step by step
 
-1. **Studio** sends article JSON to `POST /api/publish` (cookie session required).
+1. **Studio** sends article JSON to `POST /api/publish` (cookie session required). When editing an existing post, it includes `sourcePath` so the same repo file is updated.
 2. **Server** loads token and repo from `.env`, paths from config.
 3. **Core** validates the article.
-4. **Adapter** produces MDX text and the relative path (e.g. `src/content/blog/my-post.mdx`).
+4. **Adapter** produces file text and the relative path (for example `src/content/blog/my-post.mdx` or `src/content/blog/my-post.md`).
 5. **Publisher** calls the GitHub Contents API:
    - if the file exists → update with the file’s current `sha`
    - if not → create
 6. GitHub stores the commit on your branch.
 
 Your Astro (or other) build runs separately — on push, in CI, or locally.
+
+## Listing and editing
+
+`GET /api/posts` lists `.md` and `.mdx` files under `contentDir`. `GET /api/posts?path=...` loads one post for editing. Paths are validated server-side so requests cannot escape `contentDir`.
 
 ## What never touches the browser
 
@@ -48,6 +56,7 @@ Studio only holds a session cookie after login.
 | `GITHUB_TOKEN is not configured` | `.env` on server, restart API |
 | 401 / 403 from GitHub | Token scope or repo access |
 | Wrong path | `contentDir` in config vs your site layout |
+| Unsupported adapter | `adapter` must be `astro-mdx` or `markdown` |
 
 ## Token scope
 

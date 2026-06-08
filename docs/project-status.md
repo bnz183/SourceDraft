@@ -1,34 +1,37 @@
 # Project status
 
-Early MVP — usable for single-editor publishing to GitHub, not feature-complete.
+Early open-source MVP — usable for single-editor writing and GitHub publishing, not a full hosted CMS.
 
 ## What works
 
 - Studio editor with universal article fields
+- Post list and edit from GitHub (`contentDir`)
 - Validation (`@sourcedraft/core`)
-- Live Astro MDX preview (`@sourcedraft/adapter-astro-mdx`)
-- GitHub file create/update (`@sourcedraft/github-publisher`)
+- Live preview for `astro-mdx` and `markdown` adapters
+- GitHub file create/update for posts and media (`@sourcedraft/github-publisher`)
+- Image upload from Studio (PNG, JPEG, GIF, WebP; 5 MB max)
 - `sourcedraft.config.json` + `.env` configuration
 - Server-side password auth for Studio and API
+- CI: build and unit tests on push/PR
 
 ## What does not work yet
 
 | Area | Today |
 |------|--------|
 | Auth | One shared password; no OAuth or accounts |
-| Media | Hero image path only; no upload |
-| Article list | Overview does not load posts from GitHub |
-| Adapters | `astro-mdx` only |
-| Publishers | GitHub Contents API only |
 | Sessions | In-memory; lost when API restarts |
-| Hosting | You run it locally or on your own server |
+| Hosting | You run Studio locally or on your own server |
+| Publishers | GitHub Contents API only |
+| Adapters | `astro-mdx` and `markdown` only |
+| Media | GitHub repo uploads only; no Cloudinary/S3/R2 |
+| Teams | No roles, review workflow, or multi-editor accounts |
 
 ## Intended use
 
-Open-source tool for developers and technical bloggers who accept these limits. Not a turnkey hosted CMS for teams without a setup step.
+Open-source tool for developers and technical bloggers who accept these limits. Setup required — not a turnkey WordPress replacement or hosted writing product.
 
 ## Origin
 
 Built first for [QuBrite.com](https://qubrite.com). Core code stays generic; each site uses its own config and GitHub target.
 
-Publishing flow: [github-publishing.md](github-publishing.md)
+Publishing flow: [github-publishing.md](github-publishing.md) · Media: [media.md](media.md)

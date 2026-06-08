@@ -38,7 +38,7 @@ your-astro-blog/
       blog/              ← contentDir (posts land here)
         my-post.mdx
     assets/
-      images/            ← mediaDir (hero image paths often point here)
+      images/            ← mediaDir (uploads and hero paths; public URLs often /images/...)
 ```
 
 The path `examples/astro-blog/` in the SourceDraft repo mirrors that layout so you can see it without cloning a full site.
@@ -64,6 +64,8 @@ GITHUB_OWNER=your-github-user
 GITHUB_REPO=your-astro-blog
 GITHUB_BRANCH=main
 ```
+
+`mediaDir` is where Studio commits uploaded images. Studio returns paths like `/images/filename.png` for hero and inline Markdown — your Astro site should resolve those to files under `src/assets/images/` (or your chosen layout). See [docs/media.md](../../docs/media.md).
 
 A post with slug `getting-started-with-sourcedraft` is published to:
 
@@ -95,8 +97,9 @@ Categories in config control the Studio dropdown. They only need to match your A
 - `package.json`, dependencies, or a build command
 - Layouts, pages, routing, or styling
 - Astro content collection `config.ts` (you keep that in your real project)
-- Image upload from Studio
 - Instructions to run this folder as a local site
+
+Image uploads are handled by SourceDraft Studio (see [docs/media.md](../../docs/media.md)), not by this example folder.
 
 Your blog repository remains the home for site code. SourceDraft remains the writing and publish tool.
 
