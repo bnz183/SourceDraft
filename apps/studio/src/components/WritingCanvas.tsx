@@ -1,10 +1,8 @@
 import { useId, useRef } from "react";
 import type { PostSummary } from "../lib/posts";
 import { DocumentOutline } from "./DocumentOutline";
-import {
-  handleMarkdownShortcut,
-  MarkdownToolbar,
-} from "./MarkdownToolbar";
+import { handleMarkdownShortcut } from "../lib/markdownShortcuts";
+import { MarkdownToolbar } from "./MarkdownToolbar";
 
 type WritingCanvasProps = {
   title: string;

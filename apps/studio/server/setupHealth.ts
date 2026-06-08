@@ -4,17 +4,14 @@ import { validateConfig } from "@sourcedraft/setup";
 import { isAuthConfigured } from "./auth.js";
 import { loadProjectConfig, loadPublicConfig } from "./config.js";
 import {
-  isBitbucketConfigured,
   isBitbucketRepoConfigured,
   isBitbucketTokenConfigured,
   isBitbucketWorkspaceConfigured,
   isDemoModeAvailable,
   isDemoModeForced,
-  isGitHubConfigured,
   isGitHubOwnerConfigured,
   isGitHubRepoConfigured,
   isGitHubTokenConfigured,
-  isGitLabConfigured,
   isGitLabProjectConfigured,
   isGitLabTokenConfigured,
   isGhostAdminApiKeyConfigured,
@@ -309,21 +306,15 @@ export function getSetupHealth(): SetupHealthReport {
     },
   ];
 
-  let nextAction: string | null = null;
-
-  if (demoModeForced) {
-    nextAction =
-      "Demo mode is active. Explore Studio locally or configure your publisher and disable SOURCEDRAFT_DEMO_MODE for real publishing.";
-  } else if (!adminPasswordConfigured && demoModeAvailable) {
-    nextAction =
-      "Enter demo mode from the sign-in screen or set SOURCEDRAFT_ADMIN_PASSWORD for password sign-in.";
-  } else if (!adminPasswordConfigured) {
-    nextAction = "Set SOURCEDRAFT_ADMIN_PASSWORD in .env and restart the API server.";
-  } else if (!publisherReady) {
-    nextAction = publisherSetupMessage(activePublisher);
-  } else {
-    nextAction = null;
-  }
+  const nextAction = demoModeForced
+    ? "Demo mode is active. Explore Studio locally or configure your publisher and disable SOURCEDRAFT_DEMO_MODE for real publishing."
+    : !adminPasswordConfigured && demoModeAvailable
+      ? "Enter demo mode from the sign-in screen or set SOURCEDRAFT_ADMIN_PASSWORD for password sign-in."
+      : !adminPasswordConfigured
+        ? "Set SOURCEDRAFT_ADMIN_PASSWORD in .env and restart the API server."
+        : !publisherReady
+          ? publisherSetupMessage(activePublisher)
+          : null;
 
   const validation = validateConfig();
   const compatibility: SetupCompatibilityReport = {
