@@ -2,7 +2,15 @@
 
 SourceDraft is a free, open-source editor for Markdown and MDX blogs backed by GitHub. You write in the browser, upload images, check your metadata, preview the generated file, and publish into your site repository.
 
+**Project status:** SourceDraft is an early local/private MVP for Git-backed Markdown and MDX publishing. It is usable for solo writing and GitHub commits, but it is not a hosted CMS, multi-user product, or finished SaaS. See [docs/project-status.md](docs/project-status.md) and [CHANGELOG.md](CHANGELOG.md).
+
 SourceDraft began as an internal tool for [QuBrite.com](https://qubrite.com) and is published here for anyone running a similar static-site workflow. QuBrite is the origin story, not a dependency — you point SourceDraft at your own repository and config.
+
+## Screenshots
+
+Screenshots are not included in the repository yet. Expected images and capture instructions: [docs/screenshots.md](docs/screenshots.md).
+
+When added, they will live in `docs/assets/` (overview, editor preview, media upload, publish success).
 
 ## What is SourceDraft?
 
@@ -80,7 +88,7 @@ Start Studio (UI + publish API):
 pnpm dev
 ```
 
-Sign in, open **New Article**, preview the output, publish. The file lands at `contentDir/<slug>.mdx` or `.md` depending on your adapter (default: `src/content/blog/`).
+Sign in, open **Write**, preview the output, publish. The file lands at `contentDir/<slug>.mdx` or `.md` depending on your adapter (default: `src/content/blog/`).
 
 Full walkthrough: [docs/getting-started.md](docs/getting-started.md)
 
@@ -92,7 +100,7 @@ If someone technical already installed SourceDraft and pointed it at your blog r
 2. The admin password they set in `.env`
 3. Your site’s category list (from `sourcedraft.config.json`)
 
-Then: sign in → **Overview** to open an existing post, or **New Article** → fill in title, description, date, category, tags, and body → upload images if needed → check the preview → **Publish to GitHub**. Your post appears as a file in the blog repo; the normal site build deploys it.
+Then: sign in → **Posts** to open an existing post, or **Write** → fill in title, description, date, category, tags, and body → upload images if needed → check the preview → **Publish to GitHub**. Your post appears as a file in the blog repo; the normal site build deploys it.
 
 You do not edit GitHub by hand or run terminal commands for each post. If publish is disabled, ask your technical contact to check `.env` (GitHub token and repo) and that Studio is running with `pnpm dev`.
 
@@ -122,6 +130,10 @@ Reference: [docs/configuration.md](docs/configuration.md)
 
 [examples/astro-blog/](examples/astro-blog/) is a **folder layout example** — not a runnable Astro site. It shows where files go, a sample published `.mdx`, and matching config. Read its README before copying paths into your own blog repo.
 
+## Contributing
+
+Issues and pull requests are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) for local setup, commands, and security reminders.
+
 ## Documentation
 
 - [Getting started](docs/getting-started.md)
@@ -134,6 +146,8 @@ Reference: [docs/configuration.md](docs/configuration.md)
 - [Adapters](docs/adapters.md)
 - [Project status](docs/project-status.md)
 - [Security](docs/security.md)
+- [Screenshots guide](docs/screenshots.md)
+- [Changelog](CHANGELOG.md)
 
 ## License
 

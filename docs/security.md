@@ -74,4 +74,6 @@ Single shared password, in-memory sessions.
 
 This is not a multi-tenant production auth system yet.
 
-Report security concerns privately; do not include live tokens in reports.
+Report security concerns privately; do not include live tokens in reports or public issue templates.
+
+When filing bugs, redact tokens, passwords, and private repository details. See [CONTRIBUTING.md](../CONTRIBUTING.md).

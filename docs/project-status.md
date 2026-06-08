@@ -10,7 +10,7 @@ Early open-source MVP — usable for single-editor writing and GitHub publishing
 - Live preview for `astro-mdx` and `markdown` adapters
 - GitHub file create/update for posts and media (`@sourcedraft/github-publisher`)
 - Clearer GitHub API error messages for token, repo, path, and Contents API limits
-- Image upload from Studio (PNG, JPEG, GIF, WebP; 5 MB max)
+- Image upload from Studio (PNG, JPEG, GIF, WebP; 5 MB max) with configurable `publicMediaPath`
 - `sourcedraft.config.json` + `.env` configuration
 - Server-side password auth for Studio and API
 - CI: build and unit tests on push/PR
@@ -43,3 +43,5 @@ Open-source tool for developers and technical bloggers who accept these limits. 
 Built first for [QuBrite.com](https://qubrite.com). Core code stays generic; each site uses its own config and GitHub target.
 
 Publishing flow: [github-publishing.md](github-publishing.md) · Media: [media.md](media.md)
+
+Contributing: [../CONTRIBUTING.md](../CONTRIBUTING.md) · Releases: [../CHANGELOG.md](../CHANGELOG.md)
