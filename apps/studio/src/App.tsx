@@ -273,6 +273,16 @@ function App() {
     }));
   }
 
+  function handleInsertPdfLink(publicPath: string, filename: string) {
+    const label = filename.replace(/\.pdf$/iu, "") || "Document";
+    const snippet = `\n\n[${label}](${publicPath})\n`;
+
+    setForm((current) => ({
+      ...current,
+      body: `${current.body}${snippet}`,
+    }));
+  }
+
   async function handleEditPost(path: string) {
     setLoadPostError(null);
     setView("editor");
@@ -480,6 +490,7 @@ function App() {
             onSlugResync={handleSlugResync}
             onUseHeroImage={handleUseHeroImage}
             onInsertImage={handleInsertImage}
+            onInsertPdfLink={handleInsertPdfLink}
             onUploadSuccess={setLatestUploadedImagePath}
           />
         </div>

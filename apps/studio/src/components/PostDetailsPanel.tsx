@@ -1,7 +1,7 @@
 import type { ValidationIssue } from "@sourcedraft/core";
 import type { ArticleFormState } from "../lib/articleForm";
 import { ContentQualityPanel } from "./ContentQualityPanel";
-import { MediaDropzone } from "./MediaDropzone";
+import { MediaSection } from "./MediaSection";
 
 type PostDetailsPanelProps = {
   values: ArticleFormState;
@@ -17,6 +17,7 @@ type PostDetailsPanelProps = {
   onSlugResync: () => void;
   onUseHeroImage: (publicPath: string) => void;
   onInsertImage: (publicPath: string) => void;
+  onInsertPdfLink: (publicPath: string, filename: string) => void;
   onUploadSuccess?: (publicPath: string) => void;
 };
 
@@ -34,6 +35,7 @@ export function PostDetailsPanel({
   onSlugResync,
   onUseHeroImage,
   onInsertImage,
+  onInsertPdfLink,
   onUploadSuccess,
 }: PostDetailsPanelProps) {
   function fieldClass(field: string): string {
@@ -186,10 +188,11 @@ export function PostDetailsPanel({
             )}
           </label>
 
-          <MediaDropzone
+          <MediaSection
             githubReady={githubReady}
             onUseAsHero={onUseHeroImage}
-            onInsertIntoBody={onInsertImage}
+            onInsertImage={onInsertImage}
+            onInsertPdfLink={onInsertPdfLink}
             onUploadSuccess={onUploadSuccess}
           />
         </div>

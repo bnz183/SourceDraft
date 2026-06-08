@@ -14,7 +14,7 @@
     "start:server": "node dist-server/index.js",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "node --import tsx --test src/**/*.test.ts"
+    "test": "node --import tsx --test src/**/*.test.ts server/**/*.test.ts"
   },
   "dependencies": {
     "@fontsource/ibm-plex-mono": "^5.2.7",
