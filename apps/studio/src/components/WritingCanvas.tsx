@@ -1,9 +1,16 @@
+import { useId, useRef } from "react";
+import {
+  handleMarkdownShortcut,
+  MarkdownToolbar,
+} from "./MarkdownToolbar";
+
 type WritingCanvasProps = {
   title: string;
   description: string;
   body: string;
   editingPath: string | null;
   draft: boolean;
+  latestImagePath: string | null;
   fieldErrors: Record<string, string>;
   onTitleChange: (value: string) => void;
   onDescriptionChange: (value: string) => void;
@@ -16,11 +23,15 @@ export function WritingCanvas({
   body,
   editingPath,
   draft,
+  latestImagePath,
   fieldErrors,
   onTitleChange,
   onDescriptionChange,
   onBodyChange,
 }: WritingCanvasProps) {
+  const bodyFieldId = useId();
+  const bodyRef = useRef<HTMLTextAreaElement>(null);
+
   return (
     <div className="writing-canvas">
       {editingPath && (
@@ -73,21 +84,20 @@ export function WritingCanvas({
       </label>
 
       <div className="writing-canvas__page">
-        <div
-          className="editor-toolbar"
-          role="toolbar"
-          aria-label="Formatting"
-          aria-disabled="true"
-        >
-          <p className="editor-toolbar__note">
-            Write Markdown in the editor below. A formatting toolbar is planned
-            for a future release.
-          </p>
-        </div>
+        <MarkdownToolbar
+          body={body}
+          bodyFieldId={bodyFieldId}
+          latestImagePath={latestImagePath}
+          imageAlt={title.trim() || "Image"}
+          textareaRef={bodyRef}
+          onBodyChange={onBodyChange}
+        />
 
         <label className="writing-canvas__body-field">
           <span className="visually-hidden">Article body</span>
           <textarea
+            id={bodyFieldId}
+            ref={bodyRef}
             className={
               fieldErrors.body
                 ? "writing-canvas__body writing-canvas__body--error"
@@ -95,6 +105,9 @@ export function WritingCanvas({
             }
             value={body}
             onChange={(event) => onBodyChange(event.target.value)}
+            onKeyDown={(event) => {
+              handleMarkdownShortcut(event, body, onBodyChange);
+            }}
             spellCheck={true}
             placeholder="Start writing your article…"
             aria-invalid={fieldErrors.body ? true : undefined}

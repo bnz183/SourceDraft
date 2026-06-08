@@ -16,6 +16,7 @@ type PostDetailsPanelProps = {
   onSlugResync: () => void;
   onUseHeroImage: (publicPath: string) => void;
   onInsertImage: (publicPath: string) => void;
+  onUploadSuccess?: (publicPath: string) => void;
 };
 
 export function PostDetailsPanel({
@@ -32,6 +33,7 @@ export function PostDetailsPanel({
   onSlugResync,
   onUseHeroImage,
   onInsertImage,
+  onUploadSuccess,
 }: PostDetailsPanelProps) {
   function fieldClass(field: string): string {
     return fieldErrors[field]
@@ -187,6 +189,7 @@ export function PostDetailsPanel({
             githubReady={githubReady}
             onUseAsHero={onUseHeroImage}
             onInsertIntoBody={onInsertImage}
+            onUploadSuccess={onUploadSuccess}
           />
         </div>
 

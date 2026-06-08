@@ -65,6 +65,9 @@ function App() {
   const [publishing, setPublishing] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
   const [publishSuccess, setPublishSuccess] = useState<string | null>(null);
+  const [latestUploadedImagePath, setLatestUploadedImagePath] = useState<
+    string | null
+  >(null);
 
   const articleInput = useMemo(() => formStateToArticleInput(form), [form]);
   const validation = useMemo(
@@ -435,6 +438,7 @@ function App() {
               body={form.body}
               editingPath={editingPath}
               draft={form.draft}
+              latestImagePath={latestUploadedImagePath}
               fieldErrors={fieldErrors}
               onTitleChange={(value) => handleFieldChange("title", value)}
               onDescriptionChange={(value) =>
@@ -476,6 +480,7 @@ function App() {
             onSlugResync={handleSlugResync}
             onUseHeroImage={handleUseHeroImage}
             onInsertImage={handleInsertImage}
+            onUploadSuccess={setLatestUploadedImagePath}
           />
         </div>
       )}

@@ -12,6 +12,7 @@ type MediaDropzoneProps = {
   githubReady: boolean;
   onUseAsHero: (publicPath: string) => void;
   onInsertIntoBody: (publicPath: string) => void;
+  onUploadSuccess?: (publicPath: string) => void;
 };
 
 type UploadState =
@@ -24,6 +25,7 @@ export function MediaDropzone({
   githubReady,
   onUseAsHero,
   onInsertIntoBody,
+  onUploadSuccess,
 }: MediaDropzoneProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragActive, setDragActive] = useState(false);
@@ -65,6 +67,7 @@ export function MediaDropzone({
       publicPath: result.publicPath,
       repoPath: result.repoPath,
     });
+    onUploadSuccess?.(result.publicPath);
   }
 
   function handleDragOver(event: DragEvent<HTMLDivElement>) {
