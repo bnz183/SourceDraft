@@ -1,10 +1,35 @@
 # Screenshots
 
-Screenshots help first-time visitors understand SourceDraft without running the project locally. They are optional for development but useful for the README and release notes.
+Screenshots help first-time visitors understand SourceDraft without running the project locally. They live in `docs/assets/` and are referenced from the root README.
+
+## Automated generation (demo mode)
+
+Regenerate all release screenshots from Playwright using deterministic demo fixtures — no GitHub credentials required:
+
+```bash
+pnpm screenshots:generate
+```
+
+From `apps/studio` only:
+
+```bash
+pnpm exec playwright install chromium
+pnpm screenshots:generate
+```
+
+This writes nine PNG files under `docs/assets/` at 1280×900. Commit updated images when Studio UI changes.
+
+Smoke tests (no file writes) run separately:
+
+```bash
+pnpm test:e2e
+```
+
+CI runs `pnpm test:e2e` on every push/PR to `main` after build and unit tests.
 
 ## Required screenshots checklist
 
-Capture these from a **real local session** (demo mode or a sanitized test repo). Save PNGs under `docs/assets/` when ready.
+These files are maintained under `docs/assets/`:
 
 | File | What to show | Mode |
 |------|----------------|------|
@@ -18,9 +43,7 @@ Capture these from a **real local session** (demo mode or a sanitized test repo)
 | `publish-success.png` | Publish confirmation (GitHub or **Publish simulated** in demo) | Demo or GitHub |
 | `setup-health.png` | Settings → **Setup health** with check rows | Demo or GitHub |
 
-Do not commit placeholder or generated fake screenshots.
-
-## How to capture locally
+## Manual capture (optional)
 
 ### GitHub mode
 
@@ -51,4 +74,5 @@ If screenshots are not ready yet, the root README links here instead of showing 
 ## Related testing
 
 - Unit tests: `pnpm test`
-- Playwright smoke tests (demo mode): `pnpm test:e2e` from `apps/studio` — see [getting-started.md](getting-started.md)
+- Playwright smoke tests (demo mode): `pnpm test:e2e` — see [getting-started.md](getting-started.md)
+- Screenshot regeneration: `pnpm screenshots:generate`

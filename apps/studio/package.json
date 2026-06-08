@@ -15,7 +15,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "node --import tsx --test src/**/*.test.ts server/**/*.test.ts",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test e2e/smoke.spec.ts",
+    "screenshots:generate": "playwright test e2e/screenshots.spec.ts"
   },
   "dependencies": {
     "@fontsource/ibm-plex-mono": "^5.2.7",

@@ -8,9 +8,13 @@ SourceDraft began as an internal tool for [QuBrite.com](https://qubrite.com) and
 
 ## Screenshots
 
-Screenshots are not included in the repository yet. Expected images and capture instructions: [docs/screenshots.md](docs/screenshots.md).
+![Studio overview](docs/assets/studio-overview.png)
 
-When added, they will live in `docs/assets/` (overview, editor preview, media upload, publish success).
+| | |
+|---|---|
+| ![Editor](docs/assets/editor.png) | ![Publish simulated in demo mode](docs/assets/publish-success.png) |
+
+More views (toolbar, autosave, media library, content quality, preview, setup health): [docs/screenshots.md](docs/screenshots.md). Regenerate with `pnpm screenshots:generate`.
 
 ## What is SourceDraft?
 

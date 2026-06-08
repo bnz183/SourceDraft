@@ -1,0 +1,81 @@
+import { expect, test } from "@playwright/test";
+import {
+  attachPageErrorLogging,
+  ensureScreenshotDir,
+  enterDemoMode,
+  screenshotPath,
+  STUDIO_VIEWPORT,
+} from "./helpers.js";
+
+test.describe("release screenshots", () => {
+  test.describe.configure({ mode: "serial" });
+
+  test.beforeAll(() => {
+    ensureScreenshotDir();
+  });
+
+  test.use({ viewport: STUDIO_VIEWPORT });
+
+  test("generates docs/assets screenshots from demo mode", async ({ page }) => {
+    test.setTimeout(120_000);
+    attachPageErrorLogging(page);
+
+    await enterDemoMode(page);
+    await page.screenshot({
+      path: screenshotPath("studio-overview.png"),
+      fullPage: false,
+    });
+
+    await page.getByRole("button", { name: "Getting started with SourceDraft" }).click();
+    await expect(page.locator(".writing-canvas__body")).toBeVisible();
+
+    await page.screenshot({
+      path: screenshotPath("editor.png"),
+      fullPage: false,
+    });
+
+    await page.locator(".editor-toolbar-wrap").screenshot({
+      path: screenshotPath("toolbar.png"),
+    });
+
+    await page.getByPlaceholder("Post title").fill("Screenshot autosave example");
+    await expect(page.getByText("Unsaved changes", { exact: false })).toBeVisible({
+      timeout: 5000,
+    });
+    await page.locator(".app-bar").screenshot({
+      path: screenshotPath("autosave.png"),
+    });
+
+    await page.locator(".media-library").screenshot({
+      path: screenshotPath("media-library.png"),
+    });
+
+    await page.locator(".content-quality").screenshot({
+      path: screenshotPath("content-quality.png"),
+    });
+
+    await page.locator(".preview-panel").screenshot({
+      path: screenshotPath("preview.png"),
+    });
+
+    await page.getByRole("button", { name: "New post" }).click();
+    await page.getByPlaceholder("Post title").fill("Screenshot publish example");
+    await page.getByPlaceholder("Short description or subtitle").fill(
+      "Summary used for automated publish-success screenshot.",
+    );
+    await page.locator(".writing-canvas__body").fill(
+      "# Screenshot publish example\n\nBody for release screenshot capture.",
+    );
+    await page.getByRole("button", { name: "Simulate publish" }).click();
+    await expect(page.getByText("Publish simulated")).toBeVisible({ timeout: 10_000 });
+    await page.locator(".publish-bar").screenshot({
+      path: screenshotPath("publish-success.png"),
+    });
+
+    await page.getByRole("button", { name: "Settings" }).click();
+    await expect(page.getByRole("heading", { name: "Setup health" })).toBeVisible();
+    await page.locator(".setup-health").screenshot({
+      path: screenshotPath("setup-health.png"),
+    });
+  });
+});

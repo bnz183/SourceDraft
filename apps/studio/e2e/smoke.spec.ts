@@ -1,23 +1,9 @@
-import { expect, test, type Page } from "@playwright/test";
-
-function attachPageErrorLogging(page: Page): void {
-  page.on("pageerror", (error) => {
-    console.error("Page error:", error.message);
-  });
-}
-
-async function waitForStudioRoot(page: Page): Promise<void> {
-  await page.goto("/");
-  await expect(page.locator("#root")).not.toBeEmpty({ timeout: 30_000 });
-}
-
-async function enterDemoMode(page: Page): Promise<void> {
-  attachPageErrorLogging(page);
-  await waitForStudioRoot(page);
-  await expect(page.getByRole("heading", { name: "SourceDraft Studio" })).toBeVisible();
-  await page.getByRole("button", { name: "Explore demo mode" }).click();
-  await expect(page.getByText("Demo mode — no GitHub commits are made")).toBeVisible();
-}
+import { expect, test } from "@playwright/test";
+import {
+  attachPageErrorLogging,
+  enterDemoMode,
+  waitForStudioRoot,
+} from "./helpers.js";
 
 test.describe("Studio smoke", () => {
   test("login/demo entry renders", async ({ page }) => {

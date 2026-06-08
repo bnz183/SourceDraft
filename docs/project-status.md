@@ -15,8 +15,8 @@ Early open-source MVP — usable for single-editor writing and GitHub publishing
 - Server-side password auth for Studio and API
 - **Demo mode** with sample posts and simulated publish/upload (no GitHub writes)
 - **Setup health** checks in Settings and `GET /api/health/setup`
-- CI: build and unit tests on push/PR
-- Optional Playwright smoke tests (demo mode, local only — not in CI yet)
+- CI: build, unit tests, and Playwright smoke tests (demo mode) on push/PR
+- Release screenshots in `docs/assets/` (regenerate with `pnpm screenshots:generate`)
 
 ## What does not work yet
 

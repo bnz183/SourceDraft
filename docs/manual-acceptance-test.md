@@ -7,18 +7,20 @@ Run this checklist before promoting SourceDraft v0.1. Use a **test** GitHub repo
 - [ ] `pnpm install`
 - [ ] `pnpm build` — exit 0
 - [ ] `pnpm test` — exit 0
+- [ ] `pnpm test:e2e` — exit 0 (Playwright smoke tests, demo mode)
 
 ```bash
-pnpm install --lockfile-only
+pnpm install --frozen-lockfile
 pnpm build
 pnpm test
+pnpm exec playwright install chromium   # first time only
+CI=true pnpm test:e2e
 ```
 
-Optional Playwright smoke tests (demo mode, from `apps/studio`):
+Optional: regenerate README screenshots before release if UI changed:
 
 ```bash
-pnpm exec playwright install chromium
-pnpm test:e2e
+pnpm screenshots:generate
 ```
 
 ## Demo mode checklist

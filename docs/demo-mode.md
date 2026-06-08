@@ -67,12 +67,14 @@ Demo edits are **temporary for the running API process**. This is expected. Pers
 - [screenshots.md](screenshots.md) — capture guide using demo mode
 - [security.md](security.md) — secrets and request protection
 
-## Smoke tests
+## Smoke tests and screenshots
 
-Playwright smoke tests run against demo mode:
+Playwright smoke tests and screenshot generation run against demo mode:
 
 ```bash
-cd apps/studio
-pnpm exec playwright install chromium
+pnpm exec playwright install chromium   # first time only
 pnpm test:e2e
+pnpm screenshots:generate              # writes docs/assets/*.png
 ```
+
+CI runs `pnpm test:e2e` on every push/PR to `main`.

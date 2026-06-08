@@ -89,15 +89,22 @@ How that commit works: [github-publishing.md](github-publishing.md)
 
 ## Smoke tests (Playwright)
 
-Optional browser smoke tests run against demo mode — no live GitHub credentials required:
+Browser smoke tests run against demo mode — no live GitHub credentials required:
 
 ```bash
-cd apps/studio
-pnpm exec playwright install chromium
+pnpm exec playwright install chromium   # first time only
 pnpm test:e2e
 ```
 
-These tests cover sign-in/demo entry, post list, editor, toolbar, autosave status, media library, content quality, setup health, and simulated publish. They are not part of default CI yet; run them locally before release promotion.
+From `apps/studio`, use the same commands. CI runs `pnpm test:e2e` after build and unit tests on every push/PR to `main`.
+
+These tests cover sign-in/demo entry, post list, editor, toolbar, autosave status, media library, content quality, setup health, and simulated publish.
+
+Regenerate README screenshots (writes to `docs/assets/`):
+
+```bash
+pnpm screenshots:generate
+```
 
 Unit tests (default):
 
