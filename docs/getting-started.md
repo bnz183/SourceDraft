@@ -66,7 +66,7 @@ Use demo mode to explore Studio before connecting a repository:
 1. **Environment flag:** set `SOURCEDRAFT_DEMO_MODE=true` in `.env` and restart the API, or
 2. **Opt-in:** leave `GITHUB_TOKEN`, `GITHUB_OWNER`, and `GITHUB_REPO` unset and click **Explore demo mode** on the sign-in screen.
 
-Demo mode provides sample posts, local editing, simulated media upload paths, and simulated publish success. A banner reads: **Demo mode — no GitHub commits are made**.
+Demo mode provides sample posts from repository fixtures, local editing, simulated media upload paths, and simulated publish success. A banner reads: **Demo mode — no GitHub commits are made**. Session edits are temporary; restarting the API reloads the same seed content. See [demo-mode.md](demo-mode.md).
 
 Demo mode never sends your GitHub token to the browser and never commits to GitHub, even if credentials are present while `SOURCEDRAFT_DEMO_MODE=true`.
 

@@ -92,7 +92,7 @@ pnpm dev
 
 Sign in, click **New post**, preview the output, publish. The file lands at `contentDir/<slug>.mdx` or `.md` depending on your adapter (default: `src/content/blog/`).
 
-**Try without GitHub:** set `SOURCEDRAFT_DEMO_MODE=true` in `.env`, or leave GitHub vars empty and click **Explore demo mode** on the sign-in screen.
+**Try without GitHub:** set `SOURCEDRAFT_DEMO_MODE=true` in `.env`, or leave GitHub vars empty and click **Explore demo mode** on the sign-in screen. Demo content reloads from repository fixtures on each API start. See [docs/demo-mode.md](docs/demo-mode.md).
 
 Full walkthrough: [docs/getting-started.md](docs/getting-started.md)
 
@@ -141,6 +141,7 @@ Issues and pull requests are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) fo
 ## Documentation
 
 - [Getting started](docs/getting-started.md)
+- [Demo mode](docs/demo-mode.md)
 - [Non-technical overview](docs/non-technical-overview.md) — for writers
 - [GitHub publishing](docs/github-publishing.md)
 - [Media uploads](docs/media.md)

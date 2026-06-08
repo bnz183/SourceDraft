@@ -1,8 +1,5 @@
-import type { DemoFixtureMedia, DemoFixturePost } from "./demoFixtures.js";
-import {
-  DEMO_FIXTURE_MEDIA,
-  DEMO_FIXTURE_POSTS,
-} from "./demoFixtures.js";
+import { loadDemoMediaFixtures, loadDemoPostFixtures } from "./demo/loadFixtures.js";
+import type { DemoFixtureMedia, DemoFixturePost } from "./demo/types.js";
 import type { PostSummary } from "./posts.js";
 import type { MediaFileSummary } from "./listMedia.js";
 
@@ -11,20 +8,17 @@ type StoredPost = DemoFixturePost;
 let posts = new Map<string, StoredPost>();
 let media: DemoFixtureMedia[] = [];
 
-function clonePosts(source: DemoFixturePost[]): Map<string, StoredPost> {
+function loadPostsFromFixtures(): Map<string, StoredPost> {
   const next = new Map<string, StoredPost>();
-  for (const fixture of source) {
-    next.set(fixture.summary.path, {
-      summary: { ...fixture.summary },
-      content: fixture.content,
-    });
+  for (const fixture of loadDemoPostFixtures()) {
+    next.set(fixture.summary.path, fixture);
   }
   return next;
 }
 
 export function resetDemoStore(): void {
-  posts = clonePosts(DEMO_FIXTURE_POSTS);
-  media = DEMO_FIXTURE_MEDIA.map((file) => ({ ...file }));
+  posts = loadPostsFromFixtures();
+  media = loadDemoMediaFixtures();
 }
 
 resetDemoStore();
