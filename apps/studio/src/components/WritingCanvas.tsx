@@ -55,6 +55,8 @@ export function WritingCanvas({
           value={title}
           onChange={(event) => onTitleChange(event.target.value)}
           placeholder="Post title"
+          aria-label="Post title"
+          data-testid="post-title-input"
           aria-invalid={fieldErrors.title ? true : undefined}
         />
         {fieldErrors.title && (
@@ -76,6 +78,8 @@ export function WritingCanvas({
           value={description}
           onChange={(event) => onDescriptionChange(event.target.value)}
           placeholder="Short description or subtitle"
+          aria-label="Description"
+          data-testid="post-description-input"
           aria-invalid={fieldErrors.description ? true : undefined}
         />
         {fieldErrors.description && (

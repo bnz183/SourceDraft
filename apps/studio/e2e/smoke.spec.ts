@@ -2,6 +2,8 @@ import { expect, test } from "@playwright/test";
 import {
   attachPageErrorLogging,
   enterDemoMode,
+  postDescriptionInput,
+  postTitleInput,
   waitForStudioRoot,
 } from "./helpers.js";
 
@@ -22,8 +24,8 @@ test.describe("Studio smoke", () => {
   test("new post form and editor accept text", async ({ page }) => {
     await enterDemoMode(page);
     await page.getByRole("button", { name: "New post" }).click();
-    await page.getByPlaceholder("Post title").fill("Smoke test post");
-    await page.getByPlaceholder("Short description or subtitle").fill(
+    await postTitleInput(page).fill("Smoke test post");
+    await postDescriptionInput(page).fill(
       "A short summary for the smoke test post.",
     );
     const body = page.locator(".writing-canvas__body");
@@ -44,7 +46,7 @@ test.describe("Studio smoke", () => {
   test("autosave status appears after edits", async ({ page }) => {
     await enterDemoMode(page);
     await page.getByRole("button", { name: "New post" }).click();
-    await page.getByPlaceholder("Post title").fill("Autosave smoke test");
+    await postTitleInput(page).fill("Autosave smoke test");
     await expect(page.getByText("Unsaved changes", { exact: false })).toBeVisible({
       timeout: 5000,
     });
@@ -67,8 +69,8 @@ test.describe("Studio smoke", () => {
   test("publish success can be simulated in demo mode", async ({ page }) => {
     await enterDemoMode(page);
     await page.getByRole("button", { name: "New post" }).click();
-    await page.getByPlaceholder("Post title").fill("Demo publish smoke test");
-    await page.getByPlaceholder("Short description or subtitle").fill(
+    await postTitleInput(page).fill("Demo publish smoke test");
+    await postDescriptionInput(page).fill(
       "Summary for demo publish smoke test.",
     );
     await page.locator(".writing-canvas__body").fill("# Demo publish\n\nBody content.");

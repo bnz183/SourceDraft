@@ -18,6 +18,14 @@ export async function waitForStudioRoot(page: Page): Promise<void> {
   await expect(page.locator("#root")).not.toBeEmpty({ timeout: 30_000 });
 }
 
+export function postTitleInput(page: Page) {
+  return page.getByTestId("post-title-input");
+}
+
+export function postDescriptionInput(page: Page) {
+  return page.getByTestId("post-description-input");
+}
+
 export async function enterDemoMode(page: Page): Promise<void> {
   attachPageErrorLogging(page);
   await waitForStudioRoot(page);

@@ -3,6 +3,8 @@ import {
   attachPageErrorLogging,
   ensureScreenshotDir,
   enterDemoMode,
+  postDescriptionInput,
+  postTitleInput,
   screenshotPath,
   STUDIO_VIEWPORT,
 } from "./helpers.js";
@@ -38,7 +40,7 @@ test.describe("release screenshots", () => {
       path: screenshotPath("toolbar.png"),
     });
 
-    await page.getByPlaceholder("Post title").fill("Screenshot autosave example");
+    await postTitleInput(page).fill("Screenshot autosave example");
     await expect(page.getByText("Unsaved changes", { exact: false })).toBeVisible({
       timeout: 5000,
     });
@@ -59,8 +61,8 @@ test.describe("release screenshots", () => {
     });
 
     await page.getByRole("button", { name: "New post" }).click();
-    await page.getByPlaceholder("Post title").fill("Screenshot publish example");
-    await page.getByPlaceholder("Short description or subtitle").fill(
+    await postTitleInput(page).fill("Screenshot publish example");
+    await postDescriptionInput(page).fill(
       "Summary used for automated publish-success screenshot.",
     );
     await page.locator(".writing-canvas__body").fill(
