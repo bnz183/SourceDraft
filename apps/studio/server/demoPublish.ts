@@ -1,5 +1,7 @@
-import { getAstroMdxPath, toAstroMdx } from "@sourcedraft/adapter-astro-mdx";
-import { getMarkdownPath, toMarkdown } from "@sourcedraft/adapter-markdown";
+import {
+  getAdapterPostPath,
+  renderAdapterOutput,
+} from "@sourcedraft/adapters";
 import {
   normalizeArticle,
   validateArticle,
@@ -11,24 +13,20 @@ import { demoCommitSha, upsertDemoPost } from "./demoStore.js";
 import { safePostPath } from "./postPaths.js";
 import type { PublishRequestBody, PublishResponse } from "./publish.js";
 
-function renderArticle(article: Article, adapter: PublishEnvConfig["adapter"]): string {
-  if (adapter === "markdown") {
-    return toMarkdown(article);
-  }
-
-  return toAstroMdx(article);
+function renderArticle(article: Article, env: Omit<PublishEnvConfig, "token">): string {
+  return renderAdapterOutput(env.adapter, article, env.adapterOptions);
 }
 
 function defaultPostPath(
   article: Article,
-  adapter: PublishEnvConfig["adapter"],
-  contentDir: string,
+  env: Omit<PublishEnvConfig, "token">,
 ): string {
-  if (adapter === "markdown") {
-    return getMarkdownPath(article, { contentDir });
-  }
-
-  return getAstroMdxPath(article, { contentDir });
+  return getAdapterPostPath(env.adapter, article, {
+    contentDir: env.contentDir,
+    ...(env.adapterOptions !== undefined
+      ? { adapterOptions: env.adapterOptions }
+      : {}),
+  });
 }
 
 export async function publishDemoArticle(
@@ -65,11 +63,11 @@ export async function publishDemoArticle(
 
     path = safe.path;
   } else {
-    path = defaultPostPath(article, env.adapter, env.contentDir);
+    path = defaultPostPath(article, env);
     created = true;
   }
 
-  const content = renderArticle(article, env.adapter);
+  const content = renderArticle(article, env);
   const commitSha = demoCommitSha();
 
   upsertDemoPost(path, content, {

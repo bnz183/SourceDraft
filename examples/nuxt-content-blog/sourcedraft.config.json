@@ -1,0 +1,12 @@
+{
+  "adapter": "nuxt-content-markdown",
+  "publisher": "github",
+  "contentDir": "content/blog",
+  "mediaDir": "public/images",
+  "publicMediaPath": "/images",
+  "defaultBranch": "main",
+  "categories": ["Guides", "Notes", "Reviews", "Tutorials", "Reference"],
+  "adapterOptions": {
+    "navigation": true
+  }
+}

@@ -1,6 +1,11 @@
 import { useState } from "react";
-import { getAstroMdxPath, toAstroMdx } from "@sourcedraft/adapter-astro-mdx";
-import { getMarkdownPath, toMarkdown } from "@sourcedraft/adapter-markdown";
+import {
+  getAdapterPostPath,
+  getAdapterPreviewMeta,
+  getAdapterPreviewNavHint,
+  isAdapterId,
+  renderAdapterOutput,
+} from "@sourcedraft/adapters";
 import type { Article, ValidationIssue } from "@sourcedraft/core";
 
 type AstroMdxPreviewProps = {
@@ -9,12 +14,9 @@ type AstroMdxPreviewProps = {
   article: Article | null;
   contentDir: string;
   adapter: string;
+  adapterOptions?: Record<string, unknown>;
   outputPath?: string | null;
 };
-
-function previewLabel(adapter: string): string {
-  return adapter === "markdown" ? "Markdown preview" : "MDX preview";
-}
 
 export function AstroMdxPreview({
   valid,
@@ -22,32 +24,44 @@ export function AstroMdxPreview({
   article,
   contentDir,
   adapter,
+  adapterOptions,
   outputPath,
 }: AstroMdxPreviewProps) {
   const [collapsed, setCollapsed] = useState(false);
+  const adapterId = isAdapterId(adapter) ? adapter : "astro-mdx";
+  const previewMeta = getAdapterPreviewMeta(adapterId);
 
   const resolvedOutputPath =
     valid && article
       ? outputPath && outputPath.length > 0
         ? outputPath
-        : adapter === "markdown"
-          ? getMarkdownPath(article, { contentDir })
-          : getAstroMdxPath(article, { contentDir })
+        : getAdapterPostPath(adapterId, article, {
+            contentDir,
+            ...(adapterOptions !== undefined ? { adapterOptions } : {}),
+          })
       : null;
 
   const fileOutput =
     valid && article
-      ? adapter === "markdown"
-        ? toMarkdown(article)
-        : toAstroMdx(article)
+      ? renderAdapterOutput(adapterId, article, adapterOptions)
       : null;
+
+  const navHint =
+    valid && article && resolvedOutputPath
+      ? getAdapterPreviewNavHint(
+          adapterId,
+          article,
+          resolvedOutputPath,
+          adapterOptions,
+        ) ?? previewMeta.navHint
+      : previewMeta.navHint;
 
   return (
     <section className="preview-panel" aria-labelledby="preview-panel-title">
       <div className="preview-panel__header">
         <div>
           <h2 className="preview-panel__title" id="preview-panel-title">
-            {previewLabel(adapter)}
+            {previewMeta.label}
           </h2>
           <p className="preview-panel__meta">
             {valid
@@ -74,6 +88,11 @@ export function AstroMdxPreview({
                 <span className="preview-panel__path-label">Output file</span>
                 <code>{resolvedOutputPath}</code>
               </div>
+              {navHint && (
+                <p className="preview-panel__meta" role="note">
+                  {navHint}
+                </p>
+              )}
               <pre className="preview-panel__code">
                 <code>{fileOutput}</code>
               </pre>

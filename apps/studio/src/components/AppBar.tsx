@@ -13,7 +13,24 @@ type AppBarProps = {
 };
 
 function adapterLabel(adapter: string): string {
-  return adapter === "markdown" ? "Markdown" : "MDX";
+  switch (adapter) {
+    case "markdown":
+      return "Markdown";
+    case "nextjs-mdx":
+      return "Next.js MDX";
+    case "hugo-markdown":
+      return "Hugo Markdown";
+    case "eleventy-jekyll-markdown":
+      return "Eleventy/Jekyll";
+    case "docusaurus-mdx":
+      return "Docusaurus MDX";
+    case "mkdocs-markdown":
+      return "MkDocs";
+    case "nuxt-content-markdown":
+      return "Nuxt Content";
+    default:
+      return "MDX";
+  }
 }
 
 export function AppBar({

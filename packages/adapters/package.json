@@ -1,0 +1,36 @@
+{
+  "name": "@sourcedraft/adapters",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Built-in adapter registry for SourceDraft.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "check": "tsc --noEmit",
+    "test": "node --import tsx --test src/**/*.test.ts"
+  },
+  "dependencies": {
+    "@sourcedraft/adapter-astro-mdx": "workspace:*",
+    "@sourcedraft/adapter-docusaurus-mdx": "workspace:*",
+    "@sourcedraft/adapter-eleventy-jekyll-markdown": "workspace:*",
+    "@sourcedraft/adapter-hugo-markdown": "workspace:*",
+    "@sourcedraft/adapter-markdown": "workspace:*",
+    "@sourcedraft/adapter-mkdocs-markdown": "workspace:*",
+    "@sourcedraft/adapter-nextjs-mdx": "workspace:*",
+    "@sourcedraft/adapter-nuxt-content-markdown": "workspace:*",
+    "@sourcedraft/core": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
+  }
+}

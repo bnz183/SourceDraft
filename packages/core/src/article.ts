@@ -9,6 +9,11 @@ export type ArticleInput = {
   draft?: unknown;
   heroImage?: unknown;
   body?: unknown;
+  author?: unknown;
+  metaTitle?: unknown;
+  metaDescription?: unknown;
+  canonicalUrl?: unknown;
+  socialImage?: unknown;
 };
 
 export type Article = {
@@ -22,6 +27,11 @@ export type Article = {
   body: string;
   updatedDate?: string;
   heroImage?: string;
+  author?: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  canonicalUrl?: string;
+  socialImage?: string;
 };
 
 export type ValidationIssue = {

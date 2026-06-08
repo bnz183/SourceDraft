@@ -26,9 +26,21 @@ importers:
       '@sourcedraft/adapter-astro-mdx':
         specifier: workspace:*
         version: link:../../packages/adapter-astro-mdx
+      '@sourcedraft/adapter-eleventy-jekyll-markdown':
+        specifier: workspace:*
+        version: link:../../packages/adapter-eleventy-jekyll-markdown
+      '@sourcedraft/adapter-hugo-markdown':
+        specifier: workspace:*
+        version: link:../../packages/adapter-hugo-markdown
       '@sourcedraft/adapter-markdown':
         specifier: workspace:*
         version: link:../../packages/adapter-markdown
+      '@sourcedraft/adapter-nextjs-mdx':
+        specifier: workspace:*
+        version: link:../../packages/adapter-nextjs-mdx
+      '@sourcedraft/adapters':
+        specifier: workspace:*
+        version: link:../../packages/adapters
       '@sourcedraft/config':
         specifier: workspace:*
         version: link:../../packages/config
@@ -38,6 +50,9 @@ importers:
       '@sourcedraft/github-publisher':
         specifier: workspace:*
         version: link:../../packages/github-publisher
+      '@sourcedraft/publishers':
+        specifier: workspace:*
+        version: link:../../packages/publishers
       busboy:
         specifier: ^1.6.0
         version: 1.6.0
@@ -119,8 +134,123 @@ importers:
         specifier: ^5.8.3
         version: 5.9.3
 
+  packages/adapter-docusaurus-mdx:
+    dependencies:
+      '@sourcedraft/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      tsx:
+        specifier: ^4.20.3
+        version: 4.22.4
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+
+  packages/adapter-eleventy-jekyll-markdown:
+    dependencies:
+      '@sourcedraft/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      tsx:
+        specifier: ^4.20.3
+        version: 4.22.4
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+
+  packages/adapter-hugo-markdown:
+    dependencies:
+      '@sourcedraft/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      tsx:
+        specifier: ^4.20.3
+        version: 4.22.4
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+
   packages/adapter-markdown:
     dependencies:
+      '@sourcedraft/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      tsx:
+        specifier: ^4.20.3
+        version: 4.22.4
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+
+  packages/adapter-mkdocs-markdown:
+    dependencies:
+      '@sourcedraft/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      tsx:
+        specifier: ^4.20.3
+        version: 4.22.4
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+
+  packages/adapter-nextjs-mdx:
+    dependencies:
+      '@sourcedraft/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      tsx:
+        specifier: ^4.20.3
+        version: 4.22.4
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+
+  packages/adapter-nuxt-content-markdown:
+    dependencies:
+      '@sourcedraft/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      tsx:
+        specifier: ^4.20.3
+        version: 4.22.4
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+
+  packages/adapters:
+    dependencies:
+      '@sourcedraft/adapter-astro-mdx':
+        specifier: workspace:*
+        version: link:../adapter-astro-mdx
+      '@sourcedraft/adapter-docusaurus-mdx':
+        specifier: workspace:*
+        version: link:../adapter-docusaurus-mdx
+      '@sourcedraft/adapter-eleventy-jekyll-markdown':
+        specifier: workspace:*
+        version: link:../adapter-eleventy-jekyll-markdown
+      '@sourcedraft/adapter-hugo-markdown':
+        specifier: workspace:*
+        version: link:../adapter-hugo-markdown
+      '@sourcedraft/adapter-markdown':
+        specifier: workspace:*
+        version: link:../adapter-markdown
+      '@sourcedraft/adapter-mkdocs-markdown':
+        specifier: workspace:*
+        version: link:../adapter-mkdocs-markdown
+      '@sourcedraft/adapter-nextjs-mdx':
+        specifier: workspace:*
+        version: link:../adapter-nextjs-mdx
+      '@sourcedraft/adapter-nuxt-content-markdown':
+        specifier: workspace:*
+        version: link:../adapter-nuxt-content-markdown
       '@sourcedraft/core':
         specifier: workspace:*
         version: link:../core
@@ -155,6 +285,19 @@ importers:
       '@types/node':
         specifier: ^22.15.30
         version: 22.19.19
+      tsx:
+        specifier: ^4.20.3
+        version: 4.22.4
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+
+  packages/publishers:
+    dependencies:
+      '@sourcedraft/github-publisher':
+        specifier: workspace:*
+        version: link:../github-publisher
+    devDependencies:
       tsx:
         specifier: ^4.20.3
         version: 4.22.4

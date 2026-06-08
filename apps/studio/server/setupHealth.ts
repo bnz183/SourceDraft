@@ -1,9 +1,7 @@
+import { isAdapterId } from "@sourcedraft/adapters";
+import { isPublisherId } from "@sourcedraft/publishers";
 import { isAuthConfigured } from "./auth.js";
-import {
-  loadProjectConfig,
-  loadPublicConfig,
-  type SupportedAdapter,
-} from "./config.js";
+import { loadProjectConfig, loadPublicConfig } from "./config.js";
 import {
   isDemoModeAvailable,
   isDemoModeForced,
@@ -30,6 +28,7 @@ export type SetupHealthReport = {
   mediaDirConfigured: boolean;
   publicMediaPathConfigured: boolean;
   adapterValid: boolean;
+  publisherValid: boolean;
   demoModeForced: boolean;
   demoModeAvailable: boolean;
   githubReady: boolean;
@@ -37,21 +36,13 @@ export type SetupHealthReport = {
   nextAction: string | null;
 };
 
-const SUPPORTED_ADAPTERS = new Set<string>(["astro-mdx", "markdown"]);
-
-function resolveAdapter(rawAdapter: string): SupportedAdapter | null {
-  if (SUPPORTED_ADAPTERS.has(rawAdapter)) {
-    return rawAdapter as SupportedAdapter;
-  }
-
-  return null;
-}
-
 export function getSetupHealth(): SetupHealthReport {
   const project = loadProjectConfig();
   const runtime = loadPublicConfig();
   const rawAdapter = process.env.CMS_ADAPTER?.trim() || project.adapter;
-  const adapter = resolveAdapter(rawAdapter);
+  const rawPublisher = process.env.CMS_PUBLISHER?.trim() || project.publisher;
+  const adapter = isAdapterId(rawAdapter) ? rawAdapter : null;
+  const publisher = isPublisherId(rawPublisher) ? rawPublisher : null;
   const contentDir = runtime.contentDir.trim();
   const mediaDir = runtime.mediaDir.trim();
   const publicMediaPath = runtime.publicMediaPath.trim();
@@ -64,13 +55,15 @@ export function getSetupHealth(): SetupHealthReport {
   const mediaDirConfigured = mediaDir.length > 0;
   const publicMediaPathConfigured = publicMediaPath.length > 0;
   const adapterValid = adapter !== null;
+  const publisherValid = publisher !== null;
   const demoModeForced = isDemoModeForced();
   const demoModeAvailable = isDemoModeAvailable();
   const githubReady =
     githubOwnerConfigured &&
     githubRepoConfigured &&
     githubTokenConfigured &&
-    adapterValid;
+    adapterValid &&
+    publisherValid;
 
   const checks: SetupHealthCheck[] = [
     {
@@ -135,7 +128,15 @@ export function getSetupHealth(): SetupHealthReport {
       ok: adapterValid,
       detail: adapterValid
         ? `Using ${adapter} adapter.`
-        : `Unsupported adapter "${rawAdapter}". Use astro-mdx or markdown.`,
+        : `Unsupported adapter "${rawAdapter}". Use a built-in adapter id from docs/adapters.md.`,
+    },
+    {
+      id: "publisher",
+      label: "Publisher",
+      ok: publisherValid,
+      detail: publisherValid
+        ? `Using ${publisher} publisher.`
+        : `Unsupported publisher "${rawPublisher}". Use a built-in publisher id from docs/configuration.md.`,
     },
     {
       id: "demo-mode",
@@ -176,6 +177,7 @@ export function getSetupHealth(): SetupHealthReport {
     mediaDirConfigured,
     publicMediaPathConfigured,
     adapterValid,
+    publisherValid,
     demoModeForced,
     demoModeAvailable,
     githubReady,

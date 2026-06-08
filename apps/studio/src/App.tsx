@@ -1,5 +1,4 @@
-import { getAstroMdxPath } from "@sourcedraft/adapter-astro-mdx";
-import { getMarkdownPath } from "@sourcedraft/adapter-markdown";
+import { getAdapterPostPath, isAdapterId } from "@sourcedraft/adapters";
 import { normalizeArticle, validateArticle } from "@sourcedraft/core";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AppBar } from "./components/AppBar";
@@ -160,18 +159,22 @@ function App() {
       return editingPath;
     }
 
-    return studioConfig.adapter === "markdown"
-      ? getMarkdownPath(normalizedArticle, {
-          contentDir: studioConfig.contentDir,
-        })
-      : getAstroMdxPath(normalizedArticle, {
-          contentDir: studioConfig.contentDir,
-        });
+    const adapterId = isAdapterId(studioConfig.adapter)
+      ? studioConfig.adapter
+      : "astro-mdx";
+
+    return getAdapterPostPath(adapterId, normalizedArticle, {
+      contentDir: studioConfig.contentDir,
+      ...(studioConfig.adapterOptions !== undefined
+        ? { adapterOptions: studioConfig.adapterOptions }
+        : {}),
+    });
   }, [
     validation.valid,
     normalizedArticle,
     editingPath,
     studioConfig.adapter,
+    studioConfig.adapterOptions,
     studioConfig.contentDir,
   ]);
 
@@ -496,6 +499,7 @@ function App() {
               article={normalizedArticle}
               contentDir={studioConfig.contentDir}
               adapter={studioConfig.adapter}
+              adapterOptions={studioConfig.adapterOptions}
               outputPath={editingPath}
             />
 

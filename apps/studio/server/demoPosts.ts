@@ -55,6 +55,7 @@ export async function loadDemoPost(
     safe.path,
     parsed.frontmatter,
     parsed.body,
+    env.adapter,
   );
   const validation = validateArticle(article);
   if (!validation.valid) {

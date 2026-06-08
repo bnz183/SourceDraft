@@ -27,7 +27,7 @@ Early open-source MVP — usable for single-editor writing and GitHub publishing
 | Hosting | You run Studio locally or on your own server |
 | Publishers | GitHub Contents API only (no Git Trees API yet) |
 | Large repos | Directory listings capped at 1000 entries per folder; inline files capped at ~1 MB |
-| Adapters | `astro-mdx` and `markdown` only |
+| Adapters | `astro-mdx`, `markdown`, `nextjs-mdx`, `hugo-markdown`, `eleventy-jekyll-markdown`, `docusaurus-mdx`, `mkdocs-markdown`, `nuxt-content-markdown` |
 | Media | GitHub repo uploads only; no Cloudinary/S3/R2 |
 | Teams | No roles, review workflow, or multi-editor accounts |
 | Demo mode | Fixture-backed seed content; session edits are temporary; not a hosted demo SaaS |

@@ -5,6 +5,7 @@ export type StudioConfig = {
   publicMediaPath: string;
   defaultBranch: string;
   categories: string[];
+  adapterOptions?: Record<string, unknown>;
   githubOwner: string;
   githubRepo: string;
   demoMode?: boolean;
@@ -40,6 +41,9 @@ export async function fetchStudioConfig(): Promise<StudioConfig> {
         data.categories?.length > 0
           ? data.categories
           : FALLBACK_STUDIO_CONFIG.categories,
+      ...(data.adapterOptions !== undefined
+        ? { adapterOptions: data.adapterOptions }
+        : {}),
       githubOwner: data.githubOwner || "",
       githubRepo: data.githubRepo || "",
       demoMode: data.demoMode === true,

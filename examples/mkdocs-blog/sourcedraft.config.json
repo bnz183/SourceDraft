@@ -1,0 +1,12 @@
+{
+  "adapter": "mkdocs-markdown",
+  "publisher": "github",
+  "contentDir": "docs",
+  "mediaDir": "docs/images",
+  "publicMediaPath": "/images",
+  "defaultBranch": "main",
+  "categories": ["Guides", "Notes", "Reviews", "Tutorials", "Reference"],
+  "adapterOptions": {
+    "navSection": "Blog"
+  }
+}

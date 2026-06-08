@@ -1,0 +1,11 @@
+{
+  "adapter": "hugo-markdown",
+  "contentDir": "content/posts",
+  "mediaDir": "static/images",
+  "publicMediaPath": "/images",
+  "defaultBranch": "main",
+  "categories": ["Guides", "Notes", "Reviews", "Tutorials", "Reference"],
+  "adapterOptions": {
+    "frontmatterFormat": "yaml"
+  }
+}

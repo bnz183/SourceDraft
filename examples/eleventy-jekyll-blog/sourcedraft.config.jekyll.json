@@ -1,0 +1,12 @@
+{
+  "adapter": "eleventy-jekyll-markdown",
+  "contentDir": "_posts",
+  "mediaDir": "assets/images",
+  "publicMediaPath": "/images",
+  "defaultBranch": "main",
+  "categories": ["Guides", "Notes", "Reviews", "Tutorials", "Reference"],
+  "adapterOptions": {
+    "layout": "post",
+    "jekyllFilename": true
+  }
+}

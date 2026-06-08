@@ -1,6 +1,6 @@
 import { joinPublicMediaPath } from "@sourcedraft/config";
-import { createGitHubPublisher } from "@sourcedraft/github-publisher";
 import type { PublishEnvConfig } from "./config.js";
+import { createPublisherFromEnv } from "./publisherRuntime.js";
 import { filenameFromRepoPath, normalizeMediaDir, safeMediaPath } from "./mediaPaths.js";
 import {
   mediaKindFromExtension,
@@ -39,14 +39,9 @@ export async function listMedia(
     };
   }
 
-  const publisher = createGitHubPublisher({
-    token: env.token,
-    owner: env.owner,
-    repo: env.repo,
-    branch: env.branch,
-  });
+  const publisher = createPublisherFromEnv(env);
 
-  const listed = await publisher.listFiles({ path: mediaDir, contentDir: mediaDir });
+  const listed = await publisher.listPosts({ contentDir: mediaDir });
   if (!listed.ok) {
     return {
       status: listed.status === 404 ? 404 : 502,

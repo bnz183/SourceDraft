@@ -2,8 +2,8 @@ import { randomBytes } from "node:crypto";
 import type { Request } from "express";
 import Busboy from "busboy";
 import { joinPublicMediaPath } from "@sourcedraft/config";
-import { createGitHubPublisher } from "@sourcedraft/github-publisher";
 import type { PublishEnvConfig } from "./config.js";
+import { createPublisherFromEnv } from "./publisherRuntime.js";
 import { normalizeMediaDir } from "./mediaPaths.js";
 import {
   ALLOWED_MIME_TYPES,
@@ -203,18 +203,12 @@ export async function uploadMedia(
   const repoPath = `${mediaDir}/${repoFilename}`;
   const publicPath = joinPublicMediaPath(env.publicMediaPath, repoFilename);
 
-  const publisher = createGitHubPublisher({
-    token: env.token,
-    owner: env.owner,
-    repo: env.repo,
-    branch: env.branch,
-  });
+  const publisher = createPublisherFromEnv(env);
 
-  const result = await publisher.publishFile({
-    path: repoPath,
+  const result = await publisher.uploadMedia({
+    repoPath,
     contentBase64: parsed.buffer.toString("base64"),
     message: `Upload media: ${repoFilename}`,
-    purpose: "media",
   });
 
   if (!result.ok) {

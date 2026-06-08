@@ -1,0 +1,12 @@
+{
+  "adapter": "docusaurus-mdx",
+  "publisher": "github",
+  "contentDir": "blog",
+  "mediaDir": "static/img",
+  "publicMediaPath": "/img",
+  "defaultBranch": "main",
+  "categories": ["Guides", "Notes", "Reviews", "Tutorials", "Reference"],
+  "adapterOptions": {
+    "filenameConvention": "date-slug"
+  }
+}
