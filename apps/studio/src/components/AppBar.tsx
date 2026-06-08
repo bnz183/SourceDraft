@@ -1,5 +1,9 @@
+import { DocumentStatusIndicator } from "./DocumentStatus";
+import type { DocumentStatus } from "../lib/autosave.js";
+
 type AppBarProps = {
   adapter: string;
+  documentStatus: DocumentStatus | null;
   githubOwner: string;
   githubRepo: string;
   githubReady: boolean;
@@ -14,6 +18,7 @@ function adapterLabel(adapter: string): string {
 
 export function AppBar({
   adapter,
+  documentStatus,
   githubOwner,
   githubRepo,
   githubReady,
@@ -33,6 +38,7 @@ export function AppBar({
       </div>
 
       <div className="app-bar__meta">
+        {documentStatus && <DocumentStatusIndicator status={documentStatus} />}
         <span
           className={
             githubReady ? "app-bar__badge" : "app-bar__badge app-bar__badge--muted"

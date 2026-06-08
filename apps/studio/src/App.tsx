@@ -8,8 +8,10 @@ import { LoginScreen } from "./components/LoginScreen";
 import { PostDetailsPanel } from "./components/PostDetailsPanel";
 import { PostSidebar } from "./components/PostSidebar";
 import { PublishGate } from "./components/PublishGate";
+import { RestoreDraftBanner } from "./components/RestoreDraftBanner";
 import { SettingsPanel } from "./components/SettingsPanel";
 import { WritingCanvas } from "./components/WritingCanvas";
+import { useDocumentAutosave } from "./hooks/useDocumentAutosave";
 import {
   fetchAuthStatus,
   login as loginToStudio,
@@ -161,6 +163,28 @@ function App() {
     studioConfig.contentDir,
   ]);
 
+  const documentSnapshot = useMemo(
+    () => ({
+      form,
+      editingPath,
+      slugAuto,
+    }),
+    [form, editingPath, slugAuto],
+  );
+
+  const {
+    documentStatus,
+    restorePrompt,
+    applyRestore,
+    discardDraft,
+    commitBaseline,
+    checkRestorePrompt,
+  } = useDocumentAutosave({
+    snapshot: documentSnapshot,
+    publishing,
+    enabled: authenticated && view === "editor",
+  });
+
   function resetEditor(defaultCategory?: string) {
     setEditingPath(null);
     setLoadPostError(null);
@@ -168,9 +192,40 @@ function App() {
     setPublishError(null);
     setPublishSuccess(null);
     setView("editor");
-    setForm(
-      createInitialFormState(defaultCategory ?? studioConfig.categories[0]),
+    const nextForm = createInitialFormState(
+      defaultCategory ?? studioConfig.categories[0],
     );
+    setForm(nextForm);
+
+    const nextSnapshot = {
+      form: nextForm,
+      editingPath: null,
+      slugAuto: true,
+    };
+    commitBaseline(nextSnapshot, {
+      remoteSync: false,
+      clearLocalDraft: false,
+    });
+    checkRestorePrompt(nextSnapshot);
+  }
+
+  function handleRestoreDraft() {
+    const restored = applyRestore();
+    if (!restored) {
+      return;
+    }
+
+    setForm(restored.form);
+    setEditingPath(restored.editingPath);
+    setSlugAuto(restored.slugAuto);
+    setPublishError(null);
+    setPublishSuccess(null);
+    setLoadPostError(null);
+    setView("editor");
+  }
+
+  function handleDiscardDraft() {
+    discardDraft();
   }
 
   function handleFieldChange(
@@ -225,16 +280,26 @@ function App() {
       return;
     }
 
-    setForm(
-      articleInputToFormState(
-        result.article,
-        studioConfig.categories[0] ?? "Guides",
-      ),
+    const loadedForm = articleInputToFormState(
+      result.article,
+      studioConfig.categories[0] ?? "Guides",
     );
+    setForm(loadedForm);
     setSlugAuto(false);
     setEditingPath(result.path);
     setPublishError(null);
     setPublishSuccess(null);
+
+    const nextSnapshot = {
+      form: loadedForm,
+      editingPath: result.path,
+      slugAuto: false,
+    };
+    commitBaseline(nextSnapshot, {
+      remoteSync: true,
+      clearLocalDraft: false,
+    });
+    checkRestorePrompt(nextSnapshot);
   }
 
   async function handleLogin(password: string) {
@@ -281,6 +346,17 @@ function App() {
         `${action} ${result.path} (commit ${result.commitSha.slice(0, 7)}).`,
       );
       setEditingPath(result.path);
+      commitBaseline(
+        {
+          form,
+          editingPath: result.path,
+          slugAuto,
+        },
+        {
+          remoteSync: true,
+          clearLocalDraft: true,
+        },
+      );
       await refreshPosts();
     } catch {
       setPublishError(
@@ -311,6 +387,7 @@ function App() {
     <div className="studio">
       <AppBar
         adapter={studioConfig.adapter}
+        documentStatus={view === "editor" ? documentStatus : null}
         githubOwner={studioConfig.githubOwner}
         githubRepo={studioConfig.githubRepo}
         githubReady={githubReady}
@@ -344,6 +421,14 @@ function App() {
           />
 
           <main className="studio__canvas-column">
+            {restorePrompt && (
+              <RestoreDraftBanner
+                autosave={restorePrompt}
+                onRestore={handleRestoreDraft}
+                onDiscard={handleDiscardDraft}
+              />
+            )}
+
             <WritingCanvas
               title={form.title}
               description={form.description}
