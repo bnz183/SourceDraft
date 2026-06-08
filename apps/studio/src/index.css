@@ -198,6 +198,7 @@ code {
   padding: 10px 12px;
   border-bottom: 1px solid var(--border);
   background: var(--bg-raised);
+  flex-wrap: wrap;
 }
 
 .panel__title {
@@ -252,6 +253,132 @@ code {
 .article-pipeline__badge--ready {
   border-color: var(--ok);
   color: var(--ok);
+}
+
+.article-pipeline__refresh {
+  margin-left: auto;
+}
+
+.article-pipeline__table-wrap {
+  overflow-x: auto;
+}
+
+.article-pipeline__title {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--text);
+}
+
+.article-pipeline__path {
+  display: block;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.article-pipeline__mono {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.article-pipeline__actions {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.article-pipeline__error {
+  margin: 0;
+  padding: 10px 12px;
+  font-size: 12px;
+  color: var(--danger);
+  font-family: var(--mono);
+  border-bottom: 1px solid var(--border);
+}
+
+.article-pipeline__error--banner {
+  border: 1px solid var(--border);
+  background: var(--bg-panel);
+  padding: 10px 12px;
+}
+
+.editor-notice {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  background: var(--bg-raised);
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.editor-notice code {
+  color: var(--accent);
+}
+
+.media-dropzone {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.media-dropzone__target {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1px dashed var(--border-strong);
+  background: var(--bg);
+}
+
+.media-dropzone__target--active {
+  border-color: var(--accent-muted);
+  background: #15130f;
+}
+
+.media-dropzone__label {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text);
+}
+
+.media-dropzone__hint {
+  margin: 0;
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.media-dropzone__input {
+  display: none;
+}
+
+.media-dropzone__message {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.media-dropzone__message--error {
+  color: var(--danger);
+  font-family: var(--mono);
+}
+
+.media-dropzone__message--success {
+  color: var(--ok);
+}
+
+.media-dropzone__result {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.media-dropzone__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 .editor-workspace {

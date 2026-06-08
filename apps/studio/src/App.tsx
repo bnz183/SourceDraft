@@ -1,5 +1,5 @@
 import { normalizeArticle, validateArticle } from "@sourcedraft/core";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { AdapterStatus } from "./components/AdapterStatus";
 import { ArticlePipeline } from "./components/ArticlePipeline";
 import { CommandBar } from "./components/CommandBar";
@@ -14,11 +14,13 @@ import {
   logout as logoutFromStudio,
 } from "./lib/auth";
 import {
+  articleInputToFormState,
   createInitialFormState,
   formStateToArticleInput,
   slugFromTitle,
   type ArticleFormState,
 } from "./lib/articleForm";
+import { fetchPost, fetchPosts, type PostSummary } from "./lib/posts";
 import { publishArticle as publishArticleToGitHub } from "./lib/publish";
 import {
   FALLBACK_STUDIO_CONFIG,
@@ -51,6 +53,11 @@ function App() {
     createInitialFormState(FALLBACK_STUDIO_CONFIG.categories[0]),
   );
   const [slugAuto, setSlugAuto] = useState(true);
+  const [editingPath, setEditingPath] = useState<string | null>(null);
+  const [posts, setPosts] = useState<PostSummary[]>([]);
+  const [postsLoading, setPostsLoading] = useState(false);
+  const [postsError, setPostsError] = useState<string | null>(null);
+  const [loadPostError, setLoadPostError] = useState<string | null>(null);
   const [publishing, setPublishing] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
   const [publishSuccess, setPublishSuccess] = useState<string | null>(null);
@@ -64,6 +71,20 @@ function App() {
     () => issuesByField(validation.issues),
     [validation.issues],
   );
+
+  const refreshPosts = useCallback(async () => {
+    setPostsLoading(true);
+    setPostsError(null);
+
+    const result = await fetchPosts();
+    if (result.ok) {
+      setPosts(result.posts);
+    } else {
+      setPostsError(result.error);
+    }
+
+    setPostsLoading(false);
+  }, []);
 
   useEffect(() => {
     fetchAuthStatus().then((status) => {
@@ -91,7 +112,9 @@ function App() {
         };
       });
     });
-  }, [authenticated]);
+
+    void refreshPosts();
+  }, [authenticated, refreshPosts]);
 
   const githubReady = useMemo(
     () =>
@@ -111,6 +134,23 @@ function App() {
       return null;
     }
   }, [articleInput, validation.valid]);
+
+  function resetEditor(defaultCategory?: string) {
+    setEditingPath(null);
+    setLoadPostError(null);
+    setSlugAuto(true);
+    setPublishError(null);
+    setPublishSuccess(null);
+    setForm(createInitialFormState(defaultCategory ?? studioConfig.categories[0]));
+  }
+
+  function handleViewChange(next: View) {
+    if (next === "new-article" && view !== "new-article") {
+      resetEditor();
+    }
+
+    setView(next);
+  }
 
   function handleFieldChange(
     field: keyof ArticleFormState,
@@ -140,6 +180,43 @@ function App() {
     setForm((current) => ({ ...current, slug: slugFromTitle(current.title) }));
   }
 
+  function handleUseHeroImage(publicPath: string) {
+    setForm((current) => ({ ...current, heroImage: publicPath }));
+  }
+
+  function handleInsertImage(publicPath: string) {
+    const alt = form.title.trim() || "Image";
+    const snippet = `\n\n![${alt}](${publicPath})\n`;
+
+    setForm((current) => ({
+      ...current,
+      body: `${current.body}${snippet}`,
+    }));
+  }
+
+  async function handleEditPost(path: string) {
+    setLoadPostError(null);
+
+    const result = await fetchPost(path);
+    if (!result.ok) {
+      setLoadPostError(result.error);
+      setView("overview");
+      return;
+    }
+
+    setForm(
+      articleInputToFormState(
+        result.article,
+        studioConfig.categories[0] ?? "Guides",
+      ),
+    );
+    setSlugAuto(false);
+    setEditingPath(result.path);
+    setPublishError(null);
+    setPublishSuccess(null);
+    setView("new-article");
+  }
+
   async function handleLogin(password: string) {
     const result = await loginToStudio(password);
     if (result.ok) {
@@ -151,6 +228,8 @@ function App() {
   async function handleLogout() {
     await logoutFromStudio();
     setAuthenticated(false);
+    setPosts([]);
+    setEditingPath(null);
     setPublishError(null);
     setPublishSuccess(null);
   }
@@ -165,7 +244,7 @@ function App() {
     setPublishSuccess(null);
 
     try {
-      const result = await publishArticleToGitHub(articleInput);
+      const result = await publishArticleToGitHub(articleInput, editingPath);
 
       if (!result.ok) {
         const issueSummary =
@@ -178,6 +257,8 @@ function App() {
 
       const action = result.created ? "Created" : "Updated";
       setPublishSuccess(`${action} ${result.path} (${result.commitSha.slice(0, 7)})`);
+      setEditingPath(result.path);
+      await refreshPosts();
     } catch {
       setPublishError("Could not reach the publish API. Is the server running?");
     } finally {
@@ -203,14 +284,29 @@ function App() {
     <div className="studio">
       <CommandBar
         currentView={view}
-        onViewChange={setView}
+        onViewChange={handleViewChange}
         onLogout={handleLogout}
       />
 
       <main className="studio__main">
         {view === "overview" && (
           <div className="studio__stack">
-            <ArticlePipeline />
+            {loadPostError && (
+              <p className="article-pipeline__error article-pipeline__error--banner">
+                {loadPostError}
+              </p>
+            )}
+            <ArticlePipeline
+              posts={posts}
+              loading={postsLoading}
+              error={postsError}
+              onRefresh={() => {
+                void refreshPosts();
+              }}
+              onEdit={(path) => {
+                void handleEditPost(path);
+              }}
+            />
             <AdapterStatus
               adapter={studioConfig.adapter}
               githubOwner={studioConfig.githubOwner}
@@ -223,6 +319,12 @@ function App() {
         {view === "new-article" && (
           <div className="studio__editor-layout">
             <div className="studio__editor-column">
+              {editingPath && (
+                <p className="editor-notice">
+                  Editing <code>{editingPath}</code>. Publishing will update this
+                  file in GitHub.
+                </p>
+              )}
               <EditorWorkspace body={form.body} onBodyChange={handleBodyChange} />
               {fieldErrors.body && (
                 <p className="editor-workspace__error">{fieldErrors.body}</p>
@@ -232,6 +334,8 @@ function App() {
                 issues={validation.issues}
                 article={normalizedArticle}
                 contentDir={studioConfig.contentDir}
+                adapter={studioConfig.adapter}
+                outputPath={editingPath}
               />
               <PublishGate
                 ready={validation.valid}
@@ -245,11 +349,14 @@ function App() {
             <FrontmatterInspector
               values={form}
               categories={studioConfig.categories}
+              mediaDir={studioConfig.mediaDir}
               fieldErrors={fieldErrors}
               slugAuto={slugAuto}
               onChange={handleFieldChange}
               onSlugManualEdit={handleSlugManualEdit}
               onSlugResync={handleSlugResync}
+              onUseHeroImage={handleUseHeroImage}
+              onInsertImage={handleInsertImage}
             />
           </div>
         )}

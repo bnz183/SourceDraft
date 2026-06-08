@@ -1,28 +1,48 @@
 import { getAstroMdxPath, toAstroMdx } from "@sourcedraft/adapter-astro-mdx";
+import { getMarkdownPath, toMarkdown } from "@sourcedraft/adapter-markdown";
 import type { Article, ValidationIssue } from "@sourcedraft/core";
+
 type AstroMdxPreviewProps = {
   valid: boolean;
   issues: ValidationIssue[];
   article: Article | null;
   contentDir: string;
+  adapter: string;
+  outputPath?: string | null;
 };
+
+function previewLabel(adapter: string): string {
+  return adapter === "markdown" ? "Markdown output" : "Astro MDX output";
+}
 
 export function AstroMdxPreview({
   valid,
   issues,
   article,
   contentDir,
+  adapter,
+  outputPath,
 }: AstroMdxPreviewProps) {
-  const outputPath =
+  const resolvedOutputPath =
     valid && article
-      ? getAstroMdxPath(article, { contentDir })
+      ? outputPath && outputPath.length > 0
+        ? outputPath
+        : adapter === "markdown"
+          ? getMarkdownPath(article, { contentDir })
+          : getAstroMdxPath(article, { contentDir })
       : null;
-  const mdxOutput = valid && article ? toAstroMdx(article) : null;
+
+  const fileOutput =
+    valid && article
+      ? adapter === "markdown"
+        ? toMarkdown(article)
+        : toAstroMdx(article)
+      : null;
 
   return (
     <section className="panel mdx-output">
       <div className="panel__header">
-        <h2 className="panel__title">Astro MDX output</h2>
+        <h2 className="panel__title">{previewLabel(adapter)}</h2>
         <p className="panel__meta">
           {valid
             ? "Preview of the file that will be committed"
@@ -30,14 +50,14 @@ export function AstroMdxPreview({
         </p>
       </div>
 
-      {valid && outputPath && mdxOutput ? (
+      {valid && resolvedOutputPath && fileOutput ? (
         <div className="mdx-output__content">
           <div className="mdx-output__path">
             <span className="mdx-output__path-label">Output path</span>
-            <code>{outputPath}</code>
+            <code>{resolvedOutputPath}</code>
           </div>
           <pre className="mdx-output__code">
-            <code>{mdxOutput}</code>
+            <code>{fileOutput}</code>
           </pre>
         </div>
       ) : (

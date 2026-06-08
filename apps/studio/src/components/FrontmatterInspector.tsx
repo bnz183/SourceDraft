@@ -1,23 +1,30 @@
 import type { ArticleFormState } from "../lib/articleForm";
+import { MediaDropzone } from "./MediaDropzone";
 
 type FrontmatterInspectorProps = {
   values: ArticleFormState;
   categories: string[];
+  mediaDir: string;
   fieldErrors: Record<string, string>;
   slugAuto: boolean;
   onChange: (field: keyof ArticleFormState, value: string | boolean) => void;
   onSlugManualEdit: () => void;
   onSlugResync: () => void;
+  onUseHeroImage: (publicPath: string) => void;
+  onInsertImage: (publicPath: string) => void;
 };
 
 export function FrontmatterInspector({
   values,
   categories,
+  mediaDir,
   fieldErrors,
   slugAuto,
   onChange,
   onSlugManualEdit,
   onSlugResync,
+  onUseHeroImage,
+  onInsertImage,
 }: FrontmatterInspectorProps) {
   function fieldClass(field: string): string {
     return fieldErrors[field]
@@ -154,7 +161,7 @@ export function FrontmatterInspector({
           )}
         </label>
 
-        <label className="field">
+        <label className="field field--full">
           <span className="field__label">Hero image</span>
           <input
             className={`${fieldClass("heroImage")} field__input--mono`}
@@ -166,6 +173,11 @@ export function FrontmatterInspector({
           {fieldErrors.heroImage && (
             <span className="field__error">{fieldErrors.heroImage}</span>
           )}
+          <MediaDropzone
+            mediaDir={mediaDir}
+            onUseAsHero={onUseHeroImage}
+            onInsertIntoBody={onInsertImage}
+          />
         </label>
 
         <label className="field field--checkbox">
