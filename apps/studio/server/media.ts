@@ -257,12 +257,16 @@ export async function uploadMedia(
     path: repoPath,
     contentBase64: parsed.buffer.toString("base64"),
     message: `Upload media: ${repoFilename}`,
+    purpose: "media",
   });
 
   if (!result.ok) {
     return {
       status: 502,
-      body: { ok: false, error: result.error },
+      body: {
+        ok: false,
+        error: result.error || "Media upload to GitHub failed.",
+      },
     };
   }
 

@@ -28,7 +28,11 @@ export async function uploadMedia(file: File): Promise<MediaUploadResponse> {
 
     if (!response.ok || !data.ok) {
       return data.ok
-        ? { ok: false, error: "Image upload failed." }
+        ? {
+            ok: false,
+            error:
+              "Media upload failed. Check token, owner/repo, and mediaDir.",
+          }
         : data;
     }
 
