@@ -2,6 +2,7 @@ import { randomBytes, timingSafeEqual } from "node:crypto";
 import type { NextFunction, Request, Response } from "express";
 
 const SESSION_COOKIE = "sourcedraft_session";
+/** 24 hours — in-memory MVP sessions, not durable account auth. */
 const SESSION_TTL_MS = 24 * 60 * 60 * 1000;
 
 type SessionRecord = {
@@ -37,19 +38,53 @@ function readCookie(req: Request, name: string): string | null {
   return null;
 }
 
-function setSessionCookie(res: Response, token: string): void {
-  const maxAge = Math.floor(SESSION_TTL_MS / 1000);
-  res.setHeader(
-    "Set-Cookie",
-    `${SESSION_COOKIE}=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${maxAge}`,
-  );
+export function isSecureCookieEnvironment(req: Request): boolean {
+  const explicit = process.env.STUDIO_SECURE_COOKIES?.trim().toLowerCase();
+  if (explicit === "true") {
+    return true;
+  }
+  if (explicit === "false") {
+    return false;
+  }
+
+  const forwardedProto = req.headers["x-forwarded-proto"];
+  if (typeof forwardedProto === "string") {
+    const proto = forwardedProto.split(",")[0]?.trim().toLowerCase();
+    if (proto === "https") {
+      return true;
+    }
+  }
+
+  return process.env.NODE_ENV === "production";
 }
 
-function clearSessionCookie(res: Response): void {
-  res.setHeader(
-    "Set-Cookie",
-    `${SESSION_COOKIE}=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0`,
-  );
+function buildSessionCookie(
+  value: string,
+  maxAge: number,
+  req: Request,
+): string {
+  const parts = [
+    `${SESSION_COOKIE}=${encodeURIComponent(value)}`,
+    "Path=/",
+    "HttpOnly",
+    "SameSite=Lax",
+    `Max-Age=${maxAge}`,
+  ];
+
+  if (isSecureCookieEnvironment(req)) {
+    parts.push("Secure");
+  }
+
+  return parts.join("; ");
+}
+
+function setSessionCookie(req: Request, res: Response, token: string): void {
+  const maxAge = Math.floor(SESSION_TTL_MS / 1000);
+  res.setHeader("Set-Cookie", buildSessionCookie(token, maxAge, req));
+}
+
+function clearSessionCookie(req: Request, res: Response): void {
+  res.setHeader("Set-Cookie", buildSessionCookie("", 0, req));
 }
 
 function purgeExpiredSessions(): void {
@@ -135,7 +170,11 @@ export function requireAuth(req: Request, res: Response, next: NextFunction): vo
   next();
 }
 
-export function login(password: string, res: Response): { ok: boolean; error?: string } {
+export function login(
+  req: Request,
+  password: string,
+  res: Response,
+): { ok: boolean; error?: string } {
   if (!isAuthConfigured()) {
     return { ok: false, error: "Studio auth is not configured." };
   }
@@ -145,11 +184,11 @@ export function login(password: string, res: Response): { ok: boolean; error?: s
   }
 
   const token = createSession();
-  setSessionCookie(res, token);
+  setSessionCookie(req, res, token);
   return { ok: true };
 }
 
 export function logout(req: Request, res: Response): void {
   destroySession(getSessionToken(req));
-  clearSessionCookie(res);
+  clearSessionCookie(req, res);
 }
