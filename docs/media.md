@@ -1,17 +1,17 @@
 # Media uploads
 
-SourceDraft can upload hero and inline images to your GitHub repository through the publish API. Uploads are server-side only — the browser never sees your GitHub token.
+SourceDraft can upload cover and inline images to your GitHub repository through the publish API. Uploads are server-side only — the browser never sees your GitHub token.
 
 See also: [Configuration](configuration.md) · [Security](security.md) · [Getting started](getting-started.md)
 
 ## Upload flow
 
-1. In Studio, open **New Article** or edit an existing post.
-2. Under **Hero image**, use the upload area: drag an image in or click **Choose image**.
+1. In Studio, open **Write** or edit an existing post from **Posts**.
+2. Under **Cover image**, use the upload area: drag an image in or click **Choose image**.
 3. The browser sends the file to `POST /api/media/upload` (multipart field name: `file`).
 4. The server validates type, size, and file signature, sanitizes the filename, and commits the image to `mediaDir` via the GitHub Contents API.
 5. On success, Studio shows the public path (for example `/images/my-photo-a1b2c3d4.png`).
-6. Click **Use as hero image** to fill the hero field, or **Insert into body** to add a Markdown image line.
+6. Click **Use as cover image** to fill the cover field (`heroImage` in frontmatter), or **Insert into body** to add a Markdown image line.
 
 Your static site must serve files from the path your site expects — SourceDraft only writes into the repo.
 

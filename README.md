@@ -145,6 +145,7 @@ Issues and pull requests are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) fo
 - [Architecture](docs/architecture.md)
 - [Adapters](docs/adapters.md)
 - [Project status](docs/project-status.md)
+- [Manual acceptance test](docs/manual-acceptance-test.md)
 - [Security](docs/security.md)
 - [Screenshots guide](docs/screenshots.md)
 - [Changelog](CHANGELOG.md)

@@ -16,8 +16,9 @@ SourceDraft keeps the writing and publish steps in one interface.
 
 1. Sign in with the admin password (set once by whoever installed SourceDraft)
 2. Write your post — title, description, category, tags, body
-3. Preview the exact MDX file SourceDraft will commit
-4. Publish to GitHub when validation passes
+3. Upload cover and inline images to your repo (optional)
+4. Preview the exact output file SourceDraft will commit (MDX or Markdown)
+5. Publish to GitHub when validation passes
 
 There are no traffic charts, billing screens, or account tiers.
 
@@ -25,7 +26,7 @@ There are no traffic charts, billing screens, or account tiers.
 
 - Host or serve your public website
 - Replace Astro or your current site builder
-- Upload images (you type a path such as `/images/photo.jpg`)
+- Host images on external CDNs (uploads go to your GitHub repo's media folder)
 - Manage comments, email lists, or analytics
 
 After publish, your normal site build and deploy process runs unchanged.

@@ -40,7 +40,7 @@ Studio (browser)
 Publish API (server)
     → listFiles / readFile (@sourcedraft/github-publisher)
     → parse frontmatter, validate (@sourcedraft/core)
-    → JSON for Overview and edit flow
+    → JSON for Posts list and edit flow
 ```
 
 ## Packages
