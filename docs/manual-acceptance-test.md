@@ -25,7 +25,7 @@ pnpm screenshots:generate
 
 ## Demo mode checklist
 
-- [ ] With GitHub unset or `SOURCEDRAFT_DEMO_MODE=true`, **Explore demo mode** appears on sign-in
+- [ ] With GitHub unset or `SOURCEDRAFT_DEMO_MODE=true`, **Demo mode** toggle and **Continue in demo** appear on sign-in
 - [ ] Demo banner reads **Demo mode — no GitHub commits are made**
 - [ ] Sample posts load in the **Posts** sidebar
 - [ ] Opening and editing a sample post works

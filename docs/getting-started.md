@@ -12,6 +12,14 @@ cd SourceDraft
 pnpm install
 ```
 
+**Try demo mode first (no publisher setup):**
+
+```bash
+pnpm demo
+```
+
+Open **http://localhost:5173** — enable **Demo mode**, then **Continue in demo** (default password `admin`; change in `.env`). See [demo-mode.md](demo-mode.md).
+
 ## 2. Configure SourceDraft
 
 **Recommended — setup wizard**
@@ -83,7 +91,7 @@ Sign in with `SOURCEDRAFT_ADMIN_PASSWORD`.
 Use demo mode to explore Studio before connecting a repository:
 
 1. **Environment flag:** set `SOURCEDRAFT_DEMO_MODE=true` in `.env` and restart the API, or
-2. **Opt-in:** leave `GITHUB_TOKEN`, `GITHUB_OWNER`, and `GITHUB_REPO` unset and click **Explore demo mode** on the sign-in screen.
+2. **Opt-in:** leave `GITHUB_TOKEN`, `GITHUB_OWNER`, and `GITHUB_REPO` unset, enable **Demo mode** on the sign-in screen, then **Continue in demo** (default password `admin` — change in `.env`).
 
 Demo mode provides sample posts from repository fixtures, local editing, simulated media upload paths, and simulated publish success. A banner reads: **Demo mode — no GitHub commits are made**. Session edits are temporary; restarting the API reloads the same seed content. See [demo-mode.md](demo-mode.md).
 

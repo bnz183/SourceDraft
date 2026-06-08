@@ -1,0 +1,44 @@
+# OPTIONAL — Docker Compose for development. Default path: pnpm dev or pnpm demo (no Docker).
+# Demo mode: docker compose -f docker-compose.yml -f docker-compose.demo.yml up
+
+name: sourcedraft
+
+services:
+  studio:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: sourcedraft-studio:dev
+    working_dir: /workspace
+    user: "${DOCKER_UID:-1000}:${DOCKER_GID:-1000}"
+    ports:
+      - "${STUDIO_PORT:-5173}:5173"
+      - "${STUDIO_API_PORT:-8787}:8787"
+    volumes:
+      - .:/workspace:cached
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      STUDIO_API_PORT: "${STUDIO_API_PORT:-8787}"
+    stdin_open: true
+    tty: true
+    command:
+      - /bin/bash
+      - -lc
+      - |
+        set -euo pipefail
+        if [ ! -d node_modules ]; then
+          pnpm install
+        fi
+        cd apps/studio
+        pnpm run predev
+        exec pnpm exec concurrently -n web,api -c blue,gray --kill-others \
+          "pnpm exec vite --host 0.0.0.0 --port 5173" \
+          "pnpm exec tsx server/index.ts"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:5173/"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 45s

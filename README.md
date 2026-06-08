@@ -79,9 +79,22 @@ Full matrices: [adapters](docs/adapters.md) · [publishers](docs/publishers.md) 
 
 Requirements: Node.js 22+, pnpm 11+
 
+### Try demo mode (no GitHub credentials)
+
 ```bash
 git clone https://github.com/bnz183/SourceDraft.git
 cd SourceDraft
+pnpm install
+pnpm demo
+```
+
+Open **http://localhost:5173** → enable **Demo mode**, then **Continue in demo** (or sign in with password `admin` — change it in `.env` before production use).
+
+`pnpm demo` sets demo env vars for that process only (no publisher credentials required). To persist demo settings: `cp .env.demo.example .env` then `pnpm dev`. See [docs/demo-mode.md](docs/demo-mode.md).
+
+### Full local setup (publish to your repo)
+
+```bash
 pnpm install
 pnpm setup    # guided wizard — or copy example files manually (below)
 ```
@@ -102,7 +115,7 @@ GITHUB_OWNER=your-github-username-or-org
 GITHUB_REPO=your-site-repo
 ```
 
-Start Studio (UI + publish API):
+Start Studio (UI on **http://localhost:5173**, publish API on **http://localhost:8787**):
 
 ```bash
 pnpm dev
@@ -110,9 +123,17 @@ pnpm dev
 
 Sign in, click **New post**, preview the output, publish. The file lands at `contentDir/<slug>.mdx` or `.md` depending on your adapter (default: `src/content/blog/`).
 
-**Try without GitHub:** set `SOURCEDRAFT_DEMO_MODE=true` in `.env`, or leave GitHub vars empty and click **Explore demo mode** on the sign-in screen. Demo content reloads from repository fixtures on each API start. See [docs/demo-mode.md](docs/demo-mode.md).
+Validate config: `pnpm validate:config` · Wizard: [docs/setup-wizard.md](docs/setup-wizard.md) · Walkthrough: [docs/getting-started.md](docs/getting-started.md)
 
-Validate config: `pnpm validate:config` · Wizard details: [docs/setup-wizard.md](docs/setup-wizard.md) · Full walkthrough: [docs/getting-started.md](docs/getting-started.md)
+## Optional: Docker / Dev Container
+
+Docker is **optional** — useful when you want an isolated toolchain without installing Node on the host. Local `pnpm install && pnpm dev` (or `pnpm demo`) is the default path.
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.demo.yml up --build
+```
+
+Dev Container: Command Palette → **Dev Containers: Reopen in Container**. Details: [docs/docker.md](docs/docker.md) · [docs/dev-container.md](docs/dev-container.md)
 
 ## Beginner path
 
@@ -159,6 +180,8 @@ Issues and pull requests are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) fo
 ## Documentation
 
 - [Getting started](docs/getting-started.md)
+- [Docker](docs/docker.md) (optional)
+- [Dev Container](docs/dev-container.md) (optional)
 - [Quickstart recipes](docs/quickstart-recipes.md) — Astro+GitHub, Hugo+GitLab, WordPress, Cloudinary, deploy hooks, …
 - [Plugins](docs/plugins.md)
 - [SEO fields](docs/seo-fields.md)

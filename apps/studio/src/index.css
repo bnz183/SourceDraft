@@ -1704,10 +1704,20 @@ select.field__input:focus-visible {
   color: var(--text-dim);
 }
 
+.login-screen__demo-toggle {
+  margin: 0 0 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
 .login-screen__demo {
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+.login-screen__form--inline {
+  margin-top: 8px;
   padding-top: 16px;
   border-top: 1px solid var(--border);
 }

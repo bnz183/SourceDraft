@@ -1,0 +1,37 @@
+{
+  "name": "SourceDraft",
+  "build": {
+    "dockerfile": ".devcontainer/Dockerfile",
+    "context": ".."
+  },
+  "workspaceFolder": "/workspace",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+  "remoteUser": "node",
+  "updateRemoteUserUID": true,
+  "forwardPorts": [5173, 8787],
+  "portsAttributes": {
+    "5173": {
+      "label": "SourceDraft Studio",
+      "onAutoForward": "notify"
+    },
+    "8787": {
+      "label": "SourceDraft Publish API",
+      "onAutoForward": "silent"
+    }
+  },
+  "postCreateCommand": "pnpm install && pnpm --filter studio exec playwright install chromium",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "ms-playwright.playwright"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
+    }
+  },
+  "containerEnv": {
+    "STUDIO_API_PORT": "8787"
+  }
+}

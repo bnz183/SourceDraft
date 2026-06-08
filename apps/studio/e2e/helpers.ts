@@ -30,7 +30,17 @@ export async function enterDemoMode(page: Page): Promise<void> {
   attachPageErrorLogging(page);
   await waitForStudioRoot(page);
   await expect(page.getByRole("heading", { name: "SourceDraft Studio" })).toBeVisible();
-  await page.getByRole("button", { name: "Explore demo mode" }).click();
+
+  const demoToggle = page.getByRole("checkbox", { name: "Demo mode" });
+  if (await demoToggle.isVisible()) {
+    if (!(await demoToggle.isChecked())) {
+      await demoToggle.check();
+    }
+    await page.getByRole("button", { name: "Continue in demo" }).click();
+  } else {
+    await page.getByRole("button", { name: "Sign in" }).click();
+  }
+
   await expect(page.getByText("Demo mode — no GitHub commits are made")).toBeVisible();
 }
 

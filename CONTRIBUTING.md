@@ -39,8 +39,11 @@ From the repository root:
 pnpm install    # install workspace dependencies
 pnpm build      # build all packages and Studio (including server TypeScript)
 pnpm test       # run unit tests
-pnpm dev        # start Studio UI + publish API locally
+pnpm dev        # start Studio UI + publish API locally (http://localhost:5173)
+pnpm demo       # demo mode — no publisher credentials required
 ```
+
+Docker is optional. See [docs/docker.md](docs/docker.md) if you prefer Compose or a Dev Container.
 
 Optional:
 

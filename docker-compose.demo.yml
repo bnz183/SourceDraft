@@ -1,0 +1,10 @@
+# Demo override — no GitHub/GitLab/Bitbucket/WordPress/Ghost credentials required.
+# Usage: docker compose -f docker-compose.yml -f docker-compose.demo.yml up
+
+name: sourcedraft
+
+services:
+  studio:
+    environment:
+      SOURCEDRAFT_DEMO_MODE: "true"
+      SOURCEDRAFT_ADMIN_PASSWORD: "${SOURCEDRAFT_ADMIN_PASSWORD:-admin}"

@@ -56,7 +56,7 @@ These files are maintained under `docs/assets/`:
 
 1. Set `SOURCEDRAFT_DEMO_MODE=true` in `.env`, or leave GitHub vars empty.
 2. Start Studio: `pnpm dev`.
-3. Click **Explore demo mode** on the sign-in screen.
+3. Enable **Demo mode** on the sign-in screen, then **Continue in demo**.
 4. Capture the same views using sample posts and **Simulate publish**.
 
 ### General tips

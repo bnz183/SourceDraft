@@ -12,7 +12,8 @@ test.describe("Studio smoke", () => {
     attachPageErrorLogging(page);
     await waitForStudioRoot(page);
     await expect(page.getByRole("heading", { name: "SourceDraft Studio" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Explore demo mode" })).toBeVisible();
+    await expect(page.getByRole("checkbox", { name: "Demo mode" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Continue in demo" })).toBeVisible();
   });
 
   test("overview/post list renders in demo mode", async ({ page }) => {

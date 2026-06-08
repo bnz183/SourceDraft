@@ -4,16 +4,25 @@ Demo mode lets you explore SourceDraft Studio without GitHub credentials. It is 
 
 ## How to enable
 
-1. **Environment flag:** set `SOURCEDRAFT_DEMO_MODE=true` in `.env` and restart the API, or
-2. **Opt-in:** leave `GITHUB_TOKEN`, `GITHUB_OWNER`, and `GITHUB_REPO` unset and click **Explore demo mode** on the sign-in screen.
-
-Start Studio with:
+1. **Fastest (no `.env` edit):** from the repository root:
 
 ```bash
+pnpm demo
+```
+
+Opens Studio at **http://localhost:5173** with `SOURCEDRAFT_DEMO_MODE=true` and password `admin` for that process. **Change `SOURCEDRAFT_ADMIN_PASSWORD` in `.env` before shared or production use.**
+
+2. **Persistent demo `.env`:** copy the example and use normal dev:
+
+```bash
+cp .env.demo.example .env
 pnpm dev
 ```
 
-Use `pnpm dev` from the repository root so both the Vite UI and publish API run together.
+3. **Environment flag:** set `SOURCEDRAFT_DEMO_MODE=true` in `.env` and restart the API, or
+4. **Opt-in:** leave publisher credentials unset, enable **Demo mode** on the sign-in screen, then **Continue in demo**.
+
+Use `pnpm dev` or `pnpm demo` from the repository root so both the Vite UI and publish API run together.
 
 ## What demo mode does
 
