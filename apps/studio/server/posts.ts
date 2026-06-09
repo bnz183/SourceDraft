@@ -1,9 +1,13 @@
+import { slugFromFilename } from "@sourcedraft/adapter-eleventy-jekyll-markdown";
+import {
+  frontmatterToArticleInput as adapterFrontmatterToArticleInput,
+} from "@sourcedraft/adapters";
 import {
   validateArticle,
   type ArticleInput,
 } from "@sourcedraft/core";
-import { createGitHubPublisher } from "@sourcedraft/github-publisher";
 import type { PublishEnvConfig } from "./config.js";
+import { createPublisherFromEnv } from "./publisherRuntime.js";
 import { normalizeContentDir, safePostPath } from "./postPaths.js";
 
 export type PostSummary = {
@@ -24,17 +28,12 @@ export type PostLoadResponse =
   | { ok: false; error: string; issues?: { field: string; message: string }[] };
 
 function createPublisher(env: PublishEnvConfig) {
-  return createGitHubPublisher({
-    token: env.token,
-    owner: env.owner,
-    repo: env.repo,
-    branch: env.branch,
-  });
+  return createPublisherFromEnv(env);
 }
 
 export function slugFromPath(path: string): string {
   const filename = path.split("/").pop() ?? "";
-  return filename.replace(/\.(mdx|md)$/iu, "");
+  return slugFromFilename(filename);
 }
 
 function parseScalar(value: string): string {
@@ -150,24 +149,9 @@ export function frontmatterToArticleInput(
   path: string,
   frontmatter: Record<string, unknown>,
   body: string,
+  adapter: PublishEnvConfig["adapter"],
 ): ArticleInput {
-  const slug =
-    typeof frontmatter.slug === "string" && frontmatter.slug.trim().length > 0
-      ? frontmatter.slug.trim()
-      : slugFromPath(path);
-
-  return {
-    title: frontmatter.title,
-    slug,
-    description: frontmatter.description,
-    pubDate: frontmatter.pubDate,
-    updatedDate: frontmatter.updatedDate,
-    category: frontmatter.category,
-    tags: frontmatter.tags,
-    draft: frontmatter.draft,
-    heroImage: frontmatter.heroImage,
-    body,
-  };
+  return adapterFrontmatterToArticleInput(adapter, path, frontmatter, body);
 }
 
 export async function listPosts(
@@ -175,7 +159,7 @@ export async function listPosts(
 ): Promise<{ status: number; body: PostsListResponse }> {
   const publisher = createPublisher(env);
   const contentDir = normalizeContentDir(env.contentDir);
-  const listed = await publisher.listFiles({ path: contentDir, contentDir });
+  const listed = await publisher.listPosts({ contentDir });
 
   if (!listed.ok) {
     return {
@@ -192,7 +176,7 @@ export async function listPosts(
       continue;
     }
 
-    const loaded = await publisher.readFile({ path: safe.path });
+    const loaded = await publisher.readPost({ path: safe.path });
     if (!loaded.ok) {
       continue;
     }
@@ -206,6 +190,7 @@ export async function listPosts(
       safe.path,
       parsed.frontmatter,
       parsed.body,
+      env.adapter,
     );
     const validation = validateArticle(article);
     if (!validation.valid) {
@@ -243,7 +228,7 @@ export async function loadPost(
   }
 
   const publisher = createPublisher(env);
-  const loaded = await publisher.readFile({ path: safe.path });
+  const loaded = await publisher.readPost({ path: safe.path });
 
   if (!loaded.ok) {
     const status = loaded.status === 404 ? 404 : 502;
@@ -265,6 +250,7 @@ export async function loadPost(
     safe.path,
     parsed.frontmatter,
     parsed.body,
+    env.adapter,
   );
   const validation = validateArticle(article);
   if (!validation.valid) {

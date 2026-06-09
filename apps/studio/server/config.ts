@@ -4,8 +4,21 @@ import {
   normalizePublicMediaPath,
 } from "@sourcedraft/config";
 import type { SourceDraftConfig } from "@sourcedraft/config";
+import {
+  isAdapterId,
+  listAdapterIds,
+  supportedAdapterSummary,
+  type AdapterId,
+} from "@sourcedraft/adapters";
+import {
+  isPublisherId,
+  listPublisherIds,
+  supportedPublisherSummary,
+  type PublisherId,
+} from "@sourcedraft/publishers";
 
-export type SupportedAdapter = "astro-mdx" | "markdown";
+export type SupportedAdapter = AdapterId;
+export type SupportedPublisher = PublisherId;
 
 export type PublishEnvConfig = {
   token: string;
@@ -16,6 +29,9 @@ export type PublishEnvConfig = {
   mediaDir: string;
   publicMediaPath: string;
   adapter: SupportedAdapter;
+  publisher: SupportedPublisher;
+  adapterOptions?: Record<string, unknown>;
+  publisherOptions?: Record<string, unknown>;
   categories: string[];
 };
 
@@ -23,18 +39,24 @@ export type PublishEnvResult =
   | { ok: true; config: PublishEnvConfig }
   | { ok: false; error: string };
 
-const SUPPORTED_ADAPTERS = new Set<string>(["astro-mdx", "markdown"]);
+export function loadProjectConfig(): SourceDraftConfig {
+  return loadSourceDraftConfig();
+}
 
 function resolveAdapter(rawAdapter: string): SupportedAdapter | null {
-  if (SUPPORTED_ADAPTERS.has(rawAdapter)) {
-    return rawAdapter as SupportedAdapter;
+  if (isAdapterId(rawAdapter)) {
+    return rawAdapter;
   }
 
   return null;
 }
 
-export function loadProjectConfig(): SourceDraftConfig {
-  return loadSourceDraftConfig();
+function resolvePublisher(rawPublisher: string): SupportedPublisher | null {
+  if (isPublisherId(rawPublisher)) {
+    return rawPublisher;
+  }
+
+  return null;
 }
 
 function resolvePublicMediaPath(
@@ -66,7 +88,9 @@ export function loadPublishEnv(): PublishEnvResult {
   const mediaDir = process.env.CMS_MEDIA_DIR?.trim() || project.mediaDir;
   const publicMediaPath = resolvePublicMediaPath(mediaDir, project);
   const rawAdapter = process.env.CMS_ADAPTER?.trim() || project.adapter;
+  const rawPublisher = process.env.CMS_PUBLISHER?.trim() || project.publisher;
   const adapter = resolveAdapter(rawAdapter);
+  const publisher = resolvePublisher(rawPublisher);
 
   if (!token) {
     return { ok: false, error: "GITHUB_TOKEN is not configured." };
@@ -83,7 +107,14 @@ export function loadPublishEnv(): PublishEnvResult {
   if (adapter === null) {
     return {
       ok: false,
-      error: `Unsupported adapter "${rawAdapter}". Supported adapters: astro-mdx, markdown.`,
+      error: `Unsupported adapter "${rawAdapter}". Supported adapters: ${supportedAdapterSummary()}.`,
+    };
+  }
+
+  if (publisher === null) {
+    return {
+      ok: false,
+      error: `Unsupported publisher "${rawPublisher}". Supported publishers: ${supportedPublisherSummary()}.`,
     };
   }
 
@@ -98,15 +129,26 @@ export function loadPublishEnv(): PublishEnvResult {
       mediaDir,
       publicMediaPath,
       adapter,
+      publisher,
+      ...(project.adapterOptions !== undefined
+        ? { adapterOptions: project.adapterOptions }
+        : {}),
+      ...(project.publisherOptions !== undefined
+        ? { publisherOptions: project.publisherOptions }
+        : {}),
       categories: project.categories,
     },
   };
 }
 
-export function loadPublicConfig(): Omit<PublishEnvConfig, "token"> {
+export type PublicStudioConfig = Omit<PublishEnvConfig, "token">;
+
+export function loadPublicConfig(): PublicStudioConfig {
   const project = loadProjectConfig();
   const rawAdapter = process.env.CMS_ADAPTER?.trim() || project.adapter;
+  const rawPublisher = process.env.CMS_PUBLISHER?.trim() || project.publisher;
   const adapter = resolveAdapter(rawAdapter) ?? "astro-mdx";
+  const publisher = resolvePublisher(rawPublisher) ?? "github";
   const mediaDir = process.env.CMS_MEDIA_DIR?.trim() || project.mediaDir;
 
   return {
@@ -117,6 +159,21 @@ export function loadPublicConfig(): Omit<PublishEnvConfig, "token"> {
     mediaDir,
     publicMediaPath: resolvePublicMediaPath(mediaDir, project),
     adapter,
+    publisher,
+    ...(project.adapterOptions !== undefined
+      ? { adapterOptions: project.adapterOptions }
+      : {}),
+    ...(project.publisherOptions !== undefined
+      ? { publisherOptions: project.publisherOptions }
+      : {}),
     categories: project.categories,
   };
+}
+
+export function listSupportedAdapters(): SupportedAdapter[] {
+  return listAdapterIds();
+}
+
+export function listSupportedPublishers(): SupportedPublisher[] {
+  return listPublisherIds();
 }

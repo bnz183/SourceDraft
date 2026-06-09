@@ -1,8 +1,11 @@
 {
   "adapter": "astro-mdx",
+  "publisher": "github",
   "contentDir": "src/content/blog",
   "mediaDir": "public/images",
   "publicMediaPath": "/images",
   "defaultBranch": "main",
-  "categories": ["Guides", "Notes", "Reviews", "Tutorials", "Reference"]
+  "categories": ["Guides", "Notes", "Reviews", "Tutorials", "Reference"],
+  "adapterOptions": {},
+  "publisherOptions": {}
 }

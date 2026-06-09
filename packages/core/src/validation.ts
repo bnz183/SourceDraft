@@ -139,6 +139,19 @@ export function validateArticle(input: ArticleInput): ValidationResult {
     issues.push(issue("heroImage", "Hero image must be a non-empty string."));
   }
 
+  for (const [field, label] of [
+    ["author", "Author"],
+    ["metaTitle", "Meta title"],
+    ["metaDescription", "Meta description"],
+    ["canonicalUrl", "Canonical URL"],
+    ["socialImage", "Social image"],
+  ] as const) {
+    const value = input[field];
+    if (value !== undefined && value !== null && !isNonEmptyString(value)) {
+      issues.push(issue(field, `${label} must be a non-empty string.`));
+    }
+  }
+
   if (!isNonEmptyString(input.body)) {
     issues.push(issue("body", "Body is required."));
   }
@@ -181,6 +194,19 @@ export function normalizeArticle(input: ArticleInput): Article {
 
   if (isNonEmptyString(input.heroImage)) {
     article.heroImage = input.heroImage.trim();
+  }
+
+  for (const field of [
+    "author",
+    "metaTitle",
+    "metaDescription",
+    "canonicalUrl",
+    "socialImage",
+  ] as const) {
+    const value = input[field];
+    if (isNonEmptyString(value)) {
+      article[field] = value.trim();
+    }
   }
 
   return article;

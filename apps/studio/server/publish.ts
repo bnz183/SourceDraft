@@ -1,13 +1,15 @@
-import { getAstroMdxPath, toAstroMdx } from "@sourcedraft/adapter-astro-mdx";
-import { getMarkdownPath, toMarkdown } from "@sourcedraft/adapter-markdown";
+import {
+  getAdapterPostPath,
+  renderAdapterOutput,
+} from "@sourcedraft/adapters";
 import {
   normalizeArticle,
   validateArticle,
   type Article,
   type ArticleInput,
 } from "@sourcedraft/core";
-import { createGitHubPublisher } from "@sourcedraft/github-publisher";
 import type { PublishEnvConfig } from "./config.js";
+import { createPublisherFromEnv } from "./publisherRuntime.js";
 import { safePostPath } from "./postPaths.js";
 
 export type PublishRequestBody = ArticleInput & {
@@ -31,24 +33,17 @@ export type PublishErrorResponse = {
 
 export type PublishResponse = PublishSuccessResponse | PublishErrorResponse;
 
-function renderArticle(article: Article, adapter: PublishEnvConfig["adapter"]): string {
-  if (adapter === "markdown") {
-    return toMarkdown(article);
-  }
-
-  return toAstroMdx(article);
+function renderArticle(article: Article, env: PublishEnvConfig): string {
+  return renderAdapterOutput(env.adapter, article, env.adapterOptions);
 }
 
-function defaultPostPath(
-  article: Article,
-  adapter: PublishEnvConfig["adapter"],
-  contentDir: string,
-): string {
-  if (adapter === "markdown") {
-    return getMarkdownPath(article, { contentDir });
-  }
-
-  return getAstroMdxPath(article, { contentDir });
+function defaultPostPath(article: Article, env: PublishEnvConfig): string {
+  return getAdapterPostPath(env.adapter, article, {
+    contentDir: env.contentDir,
+    ...(env.adapterOptions !== undefined
+      ? { adapterOptions: env.adapterOptions }
+      : {}),
+  });
 }
 
 export async function publishArticle(
@@ -84,23 +79,17 @@ export async function publishArticle(
 
     path = safe.path;
   } else {
-    path = defaultPostPath(article, env.adapter, env.contentDir);
+    path = defaultPostPath(article, env);
   }
 
-  const content = renderArticle(article, env.adapter);
+  const content = renderArticle(article, env);
 
-  const publisher = createGitHubPublisher({
-    token: env.token,
-    owner: env.owner,
-    repo: env.repo,
-    branch: env.branch,
-  });
+  const publisher = createPublisherFromEnv(env);
 
-  const result = await publisher.publishFile({
+  const result = await publisher.publishArticle({
     path,
     content,
     message: `Publish: ${article.slug}`,
-    purpose: "post",
   });
 
   if (!result.ok) {

@@ -99,6 +99,9 @@ app.get("/api/config", requireAuth, (req, res) => {
     publicMediaPath: runtime.publicMediaPath,
     defaultBranch: runtime.branch,
     categories: runtime.categories,
+    ...(runtime.adapterOptions !== undefined
+      ? { adapterOptions: runtime.adapterOptions }
+      : {}),
     githubOwner: demoMode ? "demo" : runtime.owner,
     githubRepo: demoMode ? "sample-posts" : runtime.repo,
     demoMode,

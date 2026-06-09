@@ -9,7 +9,8 @@ SourceDraft uses two files on purpose:
 **`sourcedraft.config.json`** — shareable project settings
 
 - Content paths (`contentDir`, `mediaDir`, `publicMediaPath`)
-- Adapter name (`astro-mdx` or `markdown`)
+- Adapter name — see [adapters.md](adapters.md) compatibility matrix
+- Publisher name (`github` today)
 - Category list for Studio
 - Default branch name when `GITHUB_BRANCH` is unset
 
@@ -41,13 +42,17 @@ Example:
   "mediaDir": "public/images",
   "publicMediaPath": "/images",
   "defaultBranch": "main",
+  "publisher": "github",
   "categories": ["Guides", "Notes", "Reviews", "Tutorials", "Reference"]
 }
 ```
 
 | Field | Purpose |
 |-------|---------|
-| `adapter` | Output format: `astro-mdx` (`.mdx`) or `markdown` (`.md`) |
+| `adapter` | Output format — see [adapters.md](adapters.md) |
+| `publisher` | Publishing target — see [Publishers](#publishers) below |
+| `adapterOptions` | Optional adapter-specific settings (layout, Hugo TOML, Jekyll filenames, etc.) |
+| `publisherOptions` | Optional publisher-specific settings (reserved for future targets) |
 | `contentDir` | Directory for generated post files |
 | `mediaDir` | Repository path where Studio commits uploaded images |
 | `publicMediaPath` | Site-relative URL path inserted into `heroImage` and body Markdown |
@@ -60,8 +65,26 @@ Example:
 |-------|---------|--------|
 | `astro-mdx` | `@sourcedraft/adapter-astro-mdx` | `contentDir/<slug>.mdx` |
 | `markdown` | `@sourcedraft/adapter-markdown` | `contentDir/<slug>.md` |
+| `nextjs-mdx` | `@sourcedraft/adapter-nextjs-mdx` | `contentDir/<slug>.mdx` |
+| `hugo-markdown` | `@sourcedraft/adapter-hugo-markdown` | `contentDir/<slug>.md` |
+| `eleventy-jekyll-markdown` | `@sourcedraft/adapter-eleventy-jekyll-markdown` | `contentDir/<slug>.md` or `contentDir/YYYY-MM-DD-<slug>.md` |
+| `docusaurus-mdx` | `@sourcedraft/adapter-docusaurus-mdx` | `contentDir/<slug>.mdx` (filename conventions via `adapterOptions`) |
+| `mkdocs-markdown` | `@sourcedraft/adapter-mkdocs-markdown` | `contentDir/<slug>.md` |
+| `nuxt-content-markdown` | `@sourcedraft/adapter-nuxt-content-markdown` | `contentDir/<slug>.md` |
+
+Full compatibility matrix and options: [adapters.md](adapters.md).
 
 Set in `sourcedraft.config.json`, or override with `CMS_ADAPTER` in `.env`.
+
+### Publishers
+
+| Value | Package | Capabilities |
+|-------|---------|--------------|
+| `github` | `@sourcedraft/publishers` → `@sourcedraft/github-publisher` | Publish posts, upload media, list/read files via GitHub Contents API |
+
+Set in `sourcedraft.config.json`, or override with `CMS_PUBLISHER` in `.env`. Default: `github`.
+
+Studio resolves publishers through `publisherRegistry`. Unknown publisher ids return a clear configuration error before any API call.
 
 ### `mediaDir` and `publicMediaPath`
 
@@ -101,6 +124,7 @@ CMS_CONTENT_DIR=
 CMS_MEDIA_DIR=
 CMS_PUBLIC_MEDIA_PATH=
 CMS_ADAPTER=
+CMS_PUBLISHER=
 ```
 
 | Variable | Required | Purpose |
@@ -113,7 +137,8 @@ CMS_ADAPTER=
 | `CMS_CONTENT_DIR` | No | Overrides `contentDir` |
 | `CMS_MEDIA_DIR` | No | Overrides `mediaDir` |
 | `CMS_PUBLIC_MEDIA_PATH` | No | Overrides `publicMediaPath` |
-| `CMS_ADAPTER` | No | Overrides `adapter` (`astro-mdx` or `markdown`) |
+| `CMS_ADAPTER` | No | Overrides `adapter` |
+| `CMS_PUBLISHER` | No | Overrides `publisher` (default `github`) |
 
 ## Precedence
 

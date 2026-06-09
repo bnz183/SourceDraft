@@ -47,10 +47,27 @@ export function normalizeSourceDraftConfig(
     ? normalizePublicMediaPath(input.publicMediaPath.trim())
     : undefined;
 
+  const adapterOptions =
+    input.adapterOptions !== null &&
+    typeof input.adapterOptions === "object" &&
+    !Array.isArray(input.adapterOptions)
+      ? (input.adapterOptions as Record<string, unknown>)
+      : undefined;
+
+  const publisherOptions =
+    input.publisherOptions !== null &&
+    typeof input.publisherOptions === "object" &&
+    !Array.isArray(input.publisherOptions)
+      ? (input.publisherOptions as Record<string, unknown>)
+      : undefined;
+
   return {
     adapter: isNonEmptyString(input.adapter)
       ? input.adapter.trim()
       : DEFAULT_SOURCEDRAFT_CONFIG.adapter,
+    publisher: isNonEmptyString(input.publisher)
+      ? input.publisher.trim()
+      : DEFAULT_SOURCEDRAFT_CONFIG.publisher,
     contentDir: isNonEmptyString(input.contentDir)
       ? input.contentDir.trim()
       : DEFAULT_SOURCEDRAFT_CONFIG.contentDir,
@@ -64,6 +81,8 @@ export function normalizeSourceDraftConfig(
       ? input.defaultBranch.trim()
       : DEFAULT_SOURCEDRAFT_CONFIG.defaultBranch,
     categories: categories ?? DEFAULT_SOURCEDRAFT_CONFIG.categories,
+    ...(adapterOptions !== undefined ? { adapterOptions } : {}),
+    ...(publisherOptions !== undefined ? { publisherOptions } : {}),
   };
 }
 

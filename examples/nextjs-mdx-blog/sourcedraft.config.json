@@ -1,0 +1,8 @@
+{
+  "adapter": "nextjs-mdx",
+  "contentDir": "content/posts",
+  "mediaDir": "public/images",
+  "publicMediaPath": "/images",
+  "defaultBranch": "main",
+  "categories": ["Guides", "Notes", "Reviews", "Tutorials", "Reference"]
+}
