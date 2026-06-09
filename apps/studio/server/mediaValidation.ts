@@ -36,8 +36,12 @@ const EXTENSION_TO_MIME: Record<string, string> = {
 };
 
 export function normalizeExtension(filename: string): string {
-  const match = filename.match(/\.([^.]+)$/u);
-  return match?.[1]?.toLowerCase() ?? "";
+  const dotIndex = filename.lastIndexOf(".");
+  if (dotIndex <= 0 || dotIndex === filename.length - 1) {
+    return "";
+  }
+
+  return filename.slice(dotIndex + 1).toLowerCase();
 }
 
 export function mediaKindFromMime(mimeType: string): MediaKind | null {

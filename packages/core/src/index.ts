@@ -7,6 +7,14 @@ export type {
 
 export { createSlug } from "./slug.js";
 export {
+  collapseSlashes,
+  fileExtension,
+  hasFileExtension,
+  trimLeadingSlashes,
+  trimSlashes,
+  trimTrailingSlashes,
+} from "./path.js";
+export {
   appendSeoFrontmatterLines,
   mergeArticleInputWithSeo,
   parseSeoFromFrontmatter,

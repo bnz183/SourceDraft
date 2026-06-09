@@ -1,5 +1,12 @@
+import {
+  collapseSlashes,
+  trimLeadingSlashes,
+  trimSlashes,
+  trimTrailingSlashes,
+} from "@sourcedraft/core";
+
 export function normalizePublicMediaPath(publicMediaPath: string): string {
-  const trimmed = publicMediaPath.trim().replace(/\/+$/u, "");
+  const trimmed = trimTrailingSlashes(publicMediaPath.trim());
   if (trimmed.length === 0) {
     return "/";
   }
@@ -8,7 +15,7 @@ export function normalizePublicMediaPath(publicMediaPath: string): string {
 }
 
 export function derivePublicMediaPath(mediaDir: string): string {
-  const normalized = mediaDir.replace(/^\/+/u, "").replace(/\/+$/u, "").trim();
+  const normalized = trimSlashes(mediaDir.trim());
 
   if (normalized.length === 0) {
     return "/media";
@@ -27,10 +34,10 @@ export function joinPublicMediaPath(
   filename: string,
 ): string {
   const base = normalizePublicMediaPath(publicMediaPath);
-  const cleanFilename = filename.replace(/^\/+/u, "");
+  const cleanFilename = trimLeadingSlashes(filename);
   if (cleanFilename.length === 0) {
     return base;
   }
 
-  return `${base}/${cleanFilename}`.replace(/\/+/gu, "/");
+  return collapseSlashes(`${base}/${cleanFilename}`);
 }

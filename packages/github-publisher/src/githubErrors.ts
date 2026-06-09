@@ -53,7 +53,8 @@ export function formatGitHubApiError(
   }
 
   if (status === 403) {
-    if (/rate limit/i.test(message)) {
+    const lowerMessage = message.toLowerCase();
+    if (lowerMessage.includes("rate limit")) {
       return "GitHub API rate limit reached. Wait a few minutes and try again.";
     }
 
@@ -61,7 +62,11 @@ export function formatGitHubApiError(
   }
 
   if (status === 404) {
-    if (/repository.*not found/i.test(message) || /not found.*repository/i.test(message)) {
+    const lowerMessage = message.toLowerCase();
+    if (
+      lowerMessage.includes("repository") &&
+      lowerMessage.includes("not found")
+    ) {
       return `Repository ${target} was not found. Check GITHUB_OWNER and GITHUB_REPO in .env.`;
     }
 

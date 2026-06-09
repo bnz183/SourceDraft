@@ -1,9 +1,4 @@
-import { createHmac } from "node:crypto";
-
-function base64UrlEncode(value: string | Buffer): string {
-  const buffer = typeof value === "string" ? Buffer.from(value, "utf8") : value;
-  return buffer.toString("base64url");
-}
+import { SignJWT } from "jose";
 
 export function parseGhostAdminApiKey(
   apiKey: string,
@@ -34,28 +29,20 @@ export function parseGhostAdminApiKey(
   }
 }
 
-export function createGhostAdminJwt(
+export async function createGhostAdminJwt(
   apiKey: string,
   nowSeconds: number = Math.floor(Date.now() / 1000),
-): { token: string } | { ok: false; error: string } {
+): Promise<{ token: string } | { ok: false; error: string }> {
   const parsed = parseGhostAdminApiKey(apiKey);
   if ("ok" in parsed) {
     return parsed;
   }
 
-  const header = base64UrlEncode(
-    JSON.stringify({ alg: "HS256", typ: "JWT", kid: parsed.id }),
-  );
-  const payload = base64UrlEncode(
-    JSON.stringify({
-      iat: nowSeconds,
-      exp: nowSeconds + 5 * 60,
-      aud: "/admin/",
-    }),
-  );
-  const signature = createHmac("sha256", parsed.secret)
-    .update(`${header}.${payload}`)
-    .digest("base64url");
+  const token = await new SignJWT({ aud: "/admin/" })
+    .setProtectedHeader({ alg: "HS256", typ: "JWT", kid: parsed.id })
+    .setIssuedAt(nowSeconds)
+    .setExpirationTime(nowSeconds + 5 * 60)
+    .sign(parsed.secret);
 
-  return { token: `${header}.${payload}.${signature}` };
+  return { token };
 }

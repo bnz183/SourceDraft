@@ -1,10 +1,11 @@
+import { trimLeadingSlashes, trimSlashes } from "@sourcedraft/core";
 import {
   isAllowedMediaExtension,
   normalizeExtension,
 } from "./mediaValidation.js";
 
 export function normalizeMediaDir(mediaDir: string): string {
-  return mediaDir.replace(/^\/+/u, "").replace(/\/+$/u, "").trim();
+  return trimSlashes(mediaDir).trim();
 }
 
 export function safeMediaPath(
@@ -16,7 +17,7 @@ export function safeMediaPath(
     return { ok: false, error: "Media directory is not configured." };
   }
 
-  const path = inputPath.replace(/^\/+/u, "").trim();
+  const path = trimLeadingSlashes(inputPath).trim();
   if (path.length === 0) {
     return { ok: false, error: "Path is required." };
   }

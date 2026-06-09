@@ -156,7 +156,7 @@ export function createGhostPublisher(config: GhostPublisherConfig): GhostPublish
     body?: Record<string, unknown>,
     postId?: string,
   ): Promise<{ ok: true; bodyText: string } | PublishPostError> {
-    const jwt = createGhostAdminJwt(config.adminApiKey);
+    const jwt = await createGhostAdminJwt(config.adminApiKey);
     if ("ok" in jwt) {
       return jwt;
     }

@@ -23,6 +23,19 @@ describe("formatGitHubApiError", () => {
     assert.match(error, /403/);
   });
 
+  it("maps rate limit 403 messages without regex", () => {
+    const error = formatGitHubApiError(403, "API rate limit exceeded", "publish");
+    assert.match(error, /rate limit/i);
+  });
+
+  it("maps repository-not-found 404 messages without regex", () => {
+    const error = formatGitHubApiError(404, "Repository not found", "publish", {
+      owner: "acme",
+      repo: "blog",
+    });
+    assert.match(error, /GITHUB_OWNER/);
+  });
+
   it("maps listPosts 404 to contentDir guidance", () => {
     const error = formatGitHubApiError(404, "Not Found", "listPosts", {
       owner: "acme",

@@ -1,4 +1,5 @@
 import type { Article } from "@sourcedraft/core";
+import { trimTrailingSlashes } from "@sourcedraft/core";
 import { resolveEleventyJekyllOptions } from "./options.js";
 
 export type EleventyJekyllMarkdownPathConfig = {
@@ -21,7 +22,7 @@ export function getEleventyJekyllMarkdownPath(
   article: Article,
   config: EleventyJekyllMarkdownPathConfig,
 ): string {
-  const contentDir = config.contentDir.replace(/\/+$/u, "");
+  const contentDir = trimTrailingSlashes(config.contentDir);
   const rawExtension = config.extension ?? "md";
   const extension = rawExtension.startsWith(".")
     ? rawExtension.slice(1)
