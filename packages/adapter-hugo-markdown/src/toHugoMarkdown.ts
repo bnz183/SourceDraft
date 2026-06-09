@@ -1,4 +1,9 @@
-import type { Article, ArticleInput } from "@sourcedraft/core";
+import {
+  appendSeoFrontmatterLines,
+  mergeArticleInputWithSeo,
+  type Article,
+  type ArticleInput,
+} from "@sourcedraft/core";
 import { resolveHugoOptions } from "./options.js";
 import { formatTomlArray, tomlString } from "./toml.js";
 import {
@@ -36,10 +41,7 @@ function renderYamlFrontmatter(article: Article): string[] {
     frontmatter.push(...formatYamlImages(article.heroImage));
   }
 
-  pushYamlOptional(frontmatter, "metaTitle", article.metaTitle);
-  pushYamlOptional(frontmatter, "metaDescription", article.metaDescription);
-  pushYamlOptional(frontmatter, "canonicalUrl", article.canonicalUrl);
-  pushYamlOptional(frontmatter, "socialImage", article.socialImage);
+  appendSeoFrontmatterLines(frontmatter, article, yamlScalar);
   frontmatter.push("---");
 
   return frontmatter;
@@ -64,20 +66,25 @@ function renderTomlFrontmatter(article: Article): string[] {
     lines.push(formatTomlArray("images", [article.heroImage]));
   }
 
-  if (article.metaTitle !== undefined) {
-    lines.push(`metaTitle = ${tomlString(article.metaTitle)}`);
+  for (const [field, key] of [
+    [article.author, "author"],
+    [article.metaTitle, "metaTitle"],
+    [article.metaDescription, "metaDescription"],
+    [article.canonicalUrl, "canonicalUrl"],
+    [article.socialImage, "socialImage"],
+    [article.coverImageAlt, "coverImageAlt"],
+  ] as const) {
+    if (field !== undefined) {
+      lines.push(`${key} = ${tomlString(field)}`);
+    }
   }
 
-  if (article.metaDescription !== undefined) {
-    lines.push(`metaDescription = ${tomlString(article.metaDescription)}`);
+  if (article.noindex === true) {
+    lines.push("noindex = true");
   }
 
-  if (article.canonicalUrl !== undefined) {
-    lines.push(`canonicalUrl = ${tomlString(article.canonicalUrl)}`);
-  }
-
-  if (article.socialImage !== undefined) {
-    lines.push(`socialImage = ${tomlString(article.socialImage)}`);
+  if (article.readingTime !== undefined && article.readingTime > 0) {
+    lines.push(`readingTime = ${article.readingTime}`);
   }
 
   lines.push("+++");
@@ -129,20 +136,19 @@ export function hugoMarkdownFromFrontmatter(
       ? frontmatter.heroImage
       : firstStringFromArray(frontmatter.images);
 
-  return {
-    title: frontmatter.title,
-    slug,
-    description: frontmatter.description,
-    pubDate: frontmatter.date ?? frontmatter.pubDate,
-    updatedDate: frontmatter.lastmod ?? frontmatter.updatedDate,
-    category,
-    tags: frontmatter.tags,
-    draft: frontmatter.draft,
-    heroImage,
-    body,
-    metaTitle: frontmatter.metaTitle,
-    metaDescription: frontmatter.metaDescription,
-    canonicalUrl: frontmatter.canonicalUrl,
-    socialImage: frontmatter.socialImage,
-  };
+  return mergeArticleInputWithSeo(
+    {
+      title: frontmatter.title,
+      slug,
+      description: frontmatter.description,
+      pubDate: frontmatter.date ?? frontmatter.pubDate,
+      updatedDate: frontmatter.lastmod ?? frontmatter.updatedDate,
+      category,
+      tags: frontmatter.tags,
+      draft: frontmatter.draft,
+      heroImage,
+      body,
+    },
+    frontmatter,
+  );
 }

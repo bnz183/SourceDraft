@@ -1,3 +1,4 @@
+import { resolveMetaDescription, resolveMetaTitle } from "@sourcedraft/core";
 import { resolveCmsStatus } from "../cmsPayload.js";
 import {
   type HttpFetcher,
@@ -16,6 +17,8 @@ export type WordPressPublisherConfig = {
   defaultAuthor?: number;
   categoryIds?: Record<string, number>;
   tagIds?: Record<string, number>;
+  /** WordPress post meta keys mapped to article field names (e.g. Yoast/Rank Math). */
+  seoMetaKeys?: Record<string, keyof CmsArticlePayload>;
   fetch?: HttpFetcher;
 };
 
@@ -161,6 +164,35 @@ export function createWordPressPublisher(config: WordPressPublisherConfig): Word
 
     if (config.defaultAuthor !== undefined) {
       payload.author = config.defaultAuthor;
+    }
+
+    if (config.seoMetaKeys && Object.keys(config.seoMetaKeys).length > 0) {
+      const meta: Record<string, string> = {};
+      const resolved = {
+        metaTitle: resolveMetaTitle({
+          title: article.title,
+          ...(article.metaTitle !== undefined ? { metaTitle: article.metaTitle } : {}),
+        }),
+        metaDescription: resolveMetaDescription({
+          description: article.description,
+          ...(article.metaDescription !== undefined
+            ? { metaDescription: article.metaDescription }
+            : {}),
+        }),
+        canonicalUrl: article.canonicalUrl ?? "",
+      };
+
+      for (const [metaKey, articleField] of Object.entries(config.seoMetaKeys)) {
+        const raw = resolved[articleField as keyof typeof resolved] ??
+          (typeof article[articleField] === "string" ? article[articleField] : "");
+        if (typeof raw === "string" && raw.trim().length > 0) {
+          meta[metaKey] = raw.trim();
+        }
+      }
+
+      if (Object.keys(meta).length > 0) {
+        payload.meta = meta;
+      }
     }
 
     return payload;

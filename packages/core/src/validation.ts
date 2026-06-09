@@ -4,6 +4,7 @@ import type {
   ValidationIssue,
   ValidationResult,
 } from "./article.js";
+import { computeReadingTimeMinutes, isValidCanonicalUrl } from "./seo.js";
 import { isValidSlug } from "./slug.js";
 
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
@@ -143,13 +144,50 @@ export function validateArticle(input: ArticleInput): ValidationResult {
     ["author", "Author"],
     ["metaTitle", "Meta title"],
     ["metaDescription", "Meta description"],
-    ["canonicalUrl", "Canonical URL"],
     ["socialImage", "Social image"],
+    ["coverImageAlt", "Cover image alt text"],
   ] as const) {
     const value = input[field];
     if (value !== undefined && value !== null && !isNonEmptyString(value)) {
       issues.push(issue(field, `${label} must be a non-empty string.`));
     }
+  }
+
+  if (
+    input.canonicalUrl !== undefined &&
+    input.canonicalUrl !== null &&
+    isNonEmptyString(input.canonicalUrl) &&
+    !isValidCanonicalUrl(input.canonicalUrl.trim())
+  ) {
+    issues.push(
+      issue("canonicalUrl", "Canonical URL must be a valid http(s) URL."),
+    );
+  }
+
+  if (
+    input.canonicalUrl !== undefined &&
+    input.canonicalUrl !== null &&
+    !isNonEmptyString(input.canonicalUrl)
+  ) {
+    issues.push(issue("canonicalUrl", "Canonical URL must be a non-empty string."));
+  }
+
+  if (
+    input.noindex !== undefined &&
+    input.noindex !== null &&
+    typeof input.noindex !== "boolean"
+  ) {
+    issues.push(issue("noindex", "Noindex must be a boolean."));
+  }
+
+  if (
+    input.readingTime !== undefined &&
+    input.readingTime !== null &&
+    (typeof input.readingTime !== "number" ||
+      !Number.isFinite(input.readingTime) ||
+      input.readingTime < 0)
+  ) {
+    issues.push(issue("readingTime", "Reading time must be a non-negative number."));
   }
 
   if (!isNonEmptyString(input.body)) {
@@ -202,11 +240,21 @@ export function normalizeArticle(input: ArticleInput): Article {
     "metaDescription",
     "canonicalUrl",
     "socialImage",
+    "coverImageAlt",
   ] as const) {
     const value = input[field];
     if (isNonEmptyString(value)) {
       article[field] = value.trim();
     }
+  }
+
+  if (input.noindex === true) {
+    article.noindex = true;
+  }
+
+  const computedReadingTime = computeReadingTimeMinutes(article.body);
+  if (computedReadingTime > 0) {
+    article.readingTime = computedReadingTime;
   }
 
   return article;

@@ -31,6 +31,7 @@ import {
   nuxtContentMarkdownFromFrontmatter,
   toNuxtContentMarkdown,
 } from "@sourcedraft/adapter-nuxt-content-markdown";
+import { mergeArticleInputWithSeo } from "@sourcedraft/core";
 import { registerAdapter } from "./adapterRegistry.js";
 
 function astroFromFrontmatter(
@@ -44,18 +45,21 @@ function astroFromFrontmatter(
       ? frontmatter.slug.trim()
       : slugFromPath(path);
 
-  return {
-    title: frontmatter.title,
-    slug,
-    description: frontmatter.description,
-    pubDate: frontmatter.pubDate,
-    updatedDate: frontmatter.updatedDate,
-    category: frontmatter.category,
-    tags: frontmatter.tags,
-    draft: frontmatter.draft,
-    heroImage: frontmatter.heroImage,
-    body,
-  };
+  return mergeArticleInputWithSeo(
+    {
+      title: frontmatter.title,
+      slug,
+      description: frontmatter.description,
+      pubDate: frontmatter.pubDate,
+      updatedDate: frontmatter.updatedDate,
+      category: frontmatter.category,
+      tags: frontmatter.tags,
+      draft: frontmatter.draft,
+      heroImage: frontmatter.heroImage,
+      body,
+    },
+    frontmatter,
+  );
 }
 
 export function registerBuiltInAdapters(): void {

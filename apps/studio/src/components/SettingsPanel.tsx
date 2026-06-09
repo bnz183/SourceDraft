@@ -20,10 +20,10 @@ export function SettingsPanel({ config }: SettingsPanelProps) {
         </div>
 
         <p className="settings-panel__note">
-          These values are read-only here. Edit{" "}
-          <code>sourcedraft.config.json</code> for folders and categories, and{" "}
-          <code>.env</code> for GitHub credentials. The token never reaches the
-          browser.
+          These values are read-only here. Run <code>pnpm setup</code> for a
+          guided wizard, or edit <code>sourcedraft.config.json</code> for folders
+          and categories and <code>.env</code> for credentials. Secrets never
+          reach the browser.
         </p>
 
         <div className="settings-panel__grid">

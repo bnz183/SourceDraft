@@ -56,6 +56,9 @@ importers:
       '@sourcedraft/publishers':
         specifier: workspace:*
         version: link:../../packages/publishers
+      '@sourcedraft/setup':
+        specifier: workspace:*
+        version: link:../../packages/setup
       busboy:
         specifier: ^1.6.0
         version: 1.6.0
@@ -309,9 +312,37 @@ importers:
 
   packages/publishers:
     dependencies:
+      '@sourcedraft/core':
+        specifier: workspace:*
+        version: link:../core
       '@sourcedraft/github-publisher':
         specifier: workspace:*
         version: link:../github-publisher
+    devDependencies:
+      '@types/node':
+        specifier: ^22.15.30
+        version: 22.19.19
+      tsx:
+        specifier: ^4.20.3
+        version: 4.22.4
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+
+  packages/setup:
+    dependencies:
+      '@sourcedraft/adapters':
+        specifier: workspace:*
+        version: link:../adapters
+      '@sourcedraft/config':
+        specifier: workspace:*
+        version: link:../config
+      '@sourcedraft/media-providers':
+        specifier: workspace:*
+        version: link:../media-providers
+      '@sourcedraft/publishers':
+        specifier: workspace:*
+        version: link:../publishers
     devDependencies:
       '@types/node':
         specifier: ^22.15.30

@@ -4,8 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "predev": "pnpm --filter @sourcedraft/core --filter @sourcedraft/adapter-astro-mdx --filter @sourcedraft/adapter-markdown --filter @sourcedraft/adapter-nextjs-mdx --filter @sourcedraft/adapter-hugo-markdown --filter @sourcedraft/adapter-eleventy-jekyll-markdown --filter @sourcedraft/adapter-docusaurus-mdx --filter @sourcedraft/adapter-mkdocs-markdown --filter @sourcedraft/adapter-nuxt-content-markdown --filter @sourcedraft/adapters --filter @sourcedraft/publishers --filter @sourcedraft/media-providers --filter @sourcedraft/github-publisher --filter @sourcedraft/config build",
-    "prebuild": "pnpm --filter @sourcedraft/core --filter @sourcedraft/adapter-astro-mdx --filter @sourcedraft/adapter-markdown --filter @sourcedraft/adapter-nextjs-mdx --filter @sourcedraft/adapter-hugo-markdown --filter @sourcedraft/adapter-eleventy-jekyll-markdown --filter @sourcedraft/adapter-docusaurus-mdx --filter @sourcedraft/adapter-mkdocs-markdown --filter @sourcedraft/adapter-nuxt-content-markdown --filter @sourcedraft/adapters --filter @sourcedraft/publishers --filter @sourcedraft/media-providers --filter @sourcedraft/github-publisher --filter @sourcedraft/config build",
+    "predev": "pnpm --filter @sourcedraft/core --filter @sourcedraft/adapter-astro-mdx --filter @sourcedraft/adapter-markdown --filter @sourcedraft/adapter-nextjs-mdx --filter @sourcedraft/adapter-hugo-markdown --filter @sourcedraft/adapter-eleventy-jekyll-markdown --filter @sourcedraft/adapter-docusaurus-mdx --filter @sourcedraft/adapter-mkdocs-markdown --filter @sourcedraft/adapter-nuxt-content-markdown --filter @sourcedraft/adapters --filter @sourcedraft/publishers --filter @sourcedraft/media-providers --filter @sourcedraft/setup --filter @sourcedraft/github-publisher --filter @sourcedraft/config build",
+    "prebuild": "pnpm --filter @sourcedraft/core --filter @sourcedraft/adapter-astro-mdx --filter @sourcedraft/adapter-markdown --filter @sourcedraft/adapter-nextjs-mdx --filter @sourcedraft/adapter-hugo-markdown --filter @sourcedraft/adapter-eleventy-jekyll-markdown --filter @sourcedraft/adapter-docusaurus-mdx --filter @sourcedraft/adapter-mkdocs-markdown --filter @sourcedraft/adapter-nuxt-content-markdown --filter @sourcedraft/adapters --filter @sourcedraft/publishers --filter @sourcedraft/media-providers --filter @sourcedraft/setup --filter @sourcedraft/github-publisher --filter @sourcedraft/config build",
     "dev": "concurrently -n web,api -c blue,gray \"vite\" \"tsx watch server/index.ts\"",
     "dev:web": "vite",
     "dev:server": "tsx watch server/index.ts",
@@ -33,6 +33,7 @@
     "@sourcedraft/core": "workspace:*",
     "@sourcedraft/github-publisher": "workspace:*",
     "@sourcedraft/media-providers": "workspace:*",
+    "@sourcedraft/setup": "workspace:*",
     "busboy": "^1.6.0",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",

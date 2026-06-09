@@ -62,6 +62,8 @@ export type CmsArticlePayload = {
   metaDescription?: string;
   canonicalUrl?: string;
   socialImage?: string;
+  coverImageAlt?: string;
+  noindex?: boolean;
 };
 
 export type PublishArticleInput = {

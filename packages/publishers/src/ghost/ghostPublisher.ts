@@ -1,3 +1,8 @@
+import {
+  resolveMetaDescription,
+  resolveMetaTitle,
+  resolveSocialImage,
+} from "@sourcedraft/core";
 import { resolveCmsStatus, resolveFeatureImageUrl } from "../cmsPayload.js";
 import {
   type HttpFetcher,
@@ -99,16 +104,38 @@ function buildGhostPostPayload(
     post.feature_image = featureImage;
   }
 
-  if (article.metaTitle) {
-    post.meta_title = article.metaTitle;
-  }
+  const metaTitle = resolveMetaTitle({
+    title: article.title,
+    ...(article.metaTitle !== undefined ? { metaTitle: article.metaTitle } : {}),
+  });
+  const metaDescription = resolveMetaDescription({
+    description: article.description,
+    ...(article.metaDescription !== undefined
+      ? { metaDescription: article.metaDescription }
+      : {}),
+  });
 
-  if (article.metaDescription) {
-    post.meta_description = article.metaDescription;
-  }
+  post.meta_title = metaTitle;
+  post.meta_description = metaDescription;
 
   if (article.canonicalUrl) {
     post.canonical_url = article.canonicalUrl;
+  }
+
+  if (article.coverImageAlt) {
+    post.feature_image_alt = article.coverImageAlt;
+  }
+
+  const socialImage = resolveSocialImage({
+    ...(article.heroImage !== undefined ? { heroImage: article.heroImage } : {}),
+    ...(article.socialImage !== undefined ? { socialImage: article.socialImage } : {}),
+  });
+  if (
+    socialImage &&
+    /^https?:\/\//iu.test(socialImage) &&
+    socialImage !== featureImage
+  ) {
+    post.og_image = socialImage;
   }
 
   if (article.updatedDate) {

@@ -47,7 +47,9 @@ You need a GitHub repo for your blog and a token with permission to add or updat
 
 **`.env`** — password, GitHub token, and which repository to write to. Private; never commit.
 
-Your technical contact sets both up once. Writers typically only need the Studio address and password.
+Your technical contact can run **`pnpm setup`** once — a guided wizard that creates both files with plain-language questions — or edit them manually. Writers typically only need the Studio address and password.
+
+In Studio **Settings**, a read-only status panel shows whether adapter, publisher, and credentials look complete (without showing secrets).
 
 ## Who sets it up?
 

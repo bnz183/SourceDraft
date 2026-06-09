@@ -1,4 +1,9 @@
-import type { Article, ArticleInput } from "@sourcedraft/core";
+import {
+  appendSeoFrontmatterLines,
+  mergeArticleInputWithSeo,
+  type Article,
+  type ArticleInput,
+} from "@sourcedraft/core";
 import { resolveDocusaurusMdxOptions } from "./options.js";
 import {
   formatYamlAuthors,
@@ -45,10 +50,9 @@ export function toDocusaurusMdx(
 
   frontmatter.push(...formatYamlTags(article.tags));
   pushOptional(frontmatter, "image", article.heroImage);
-  pushOptional(frontmatter, "metaTitle", article.metaTitle);
-  pushOptional(frontmatter, "metaDescription", article.metaDescription);
-  pushOptional(frontmatter, "canonicalUrl", article.canonicalUrl);
-  pushOptional(frontmatter, "socialImage", article.socialImage);
+  appendSeoFrontmatterLines(frontmatter, article, yamlScalar, {
+    skipFields: ["author"],
+  });
 
   if (resolved.hideTableOfContents) {
     frontmatter.push("hide_table_of_contents: true");
@@ -75,20 +79,19 @@ export function docusaurusMdxFromFrontmatter(
       ? frontmatter.author
       : firstStringFromArray(frontmatter.authors);
 
-  return {
-    title: frontmatter.title,
-    slug,
-    description: frontmatter.description,
-    pubDate: frontmatter.date ?? frontmatter.pubDate,
-    category: frontmatter.category,
-    tags: frontmatter.tags,
-    draft: frontmatter.draft,
-    heroImage: frontmatter.image ?? frontmatter.heroImage,
-    body,
-    author,
-    metaTitle: frontmatter.metaTitle,
-    metaDescription: frontmatter.metaDescription,
-    canonicalUrl: frontmatter.canonicalUrl,
-    socialImage: frontmatter.socialImage,
-  };
+  return mergeArticleInputWithSeo(
+    {
+      title: frontmatter.title,
+      slug,
+      description: frontmatter.description,
+      pubDate: frontmatter.date ?? frontmatter.pubDate,
+      category: frontmatter.category,
+      tags: frontmatter.tags,
+      draft: frontmatter.draft,
+      heroImage: frontmatter.image ?? frontmatter.heroImage,
+      body,
+      author,
+    },
+    frontmatter,
+  );
 }

@@ -70,6 +70,19 @@ SourceDraft does **not** auto-create WordPress terms. Map Studio category/tag na
 
 Unmapped names are omitted from the API payload.
 
+### SEO plugin meta (optional)
+
+Core REST fields do not include Yoast, Rank Math, or similar SEO plugin keys by default. To send plugin meta, map keys in `publisherOptions.wordpressSeoMeta`:
+
+```json
+"wordpressSeoMeta": {
+  "_yoast_wpseo_title": "metaTitle",
+  "_yoast_wpseo_metadesc": "metaDescription"
+}
+```
+
+Those keys must be registered for REST access in WordPress. Without this mapping, SourceDraft only sends title, content, excerpt, slug, and status. See [seo-fields.md](seo-fields.md).
+
 ### Featured images
 
 `featured_media` is not set automatically. WordPress expects a media attachment id, not a URL. Upload media in WordPress or extend your workflow separately.

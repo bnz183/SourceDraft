@@ -43,9 +43,11 @@ SourceDraft generates short-lived JWTs server-side (HS256, 5-minute expiry) — 
 | `draft: true` | `status: draft` |
 | `draft: false` | `status: GHOST_DEFAULT_STATUS` |
 | `heroImage` / `socialImage` (absolute URL) | `feature_image` |
-| `metaTitle` | `meta_title` |
-| `metaDescription` | `meta_description` |
+| `metaTitle` / `title` | `meta_title` |
+| `metaDescription` / `description` | `meta_description` |
 | `canonicalUrl` | `canonical_url` |
+| `coverImageAlt` | `feature_image_alt` |
+| Absolute `socialImage` (when different from feature image) | `og_image` |
 
 ### HTML content
 

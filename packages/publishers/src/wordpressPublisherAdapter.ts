@@ -1,5 +1,6 @@
 import { requireCmsArticle } from "./cmsPayload.js";
 import type {
+  CmsArticlePayload,
   Publisher,
   PublisherFactory,
   PublisherRuntimeConfig,
@@ -60,6 +61,7 @@ function resolveWordPressConfig(config: PublisherRuntimeConfig) {
   const options = config.publisherOptions ?? {};
   const categoryIds = readTaxonomyMap(options, "wordpressCategoryIds");
   const tagIds = readTaxonomyMap(options, "wordpressTagIds");
+  const seoMetaKeys = readSeoMetaKeys(options.wordpressSeoMeta);
 
   return createWordPressPublisher({
     apiUrl,
@@ -71,7 +73,36 @@ function resolveWordPressConfig(config: PublisherRuntimeConfig) {
       : {}),
     ...(categoryIds !== undefined ? { categoryIds } : {}),
     ...(tagIds !== undefined ? { tagIds } : {}),
+    ...(seoMetaKeys !== undefined ? { seoMetaKeys } : {}),
   });
+}
+
+function readSeoMetaKeys(
+  raw: unknown,
+): Record<string, keyof CmsArticlePayload> | undefined {
+  if (!raw || typeof raw !== "object") {
+    return undefined;
+  }
+
+  const allowed = new Set([
+    "metaTitle",
+    "metaDescription",
+    "canonicalUrl",
+    "socialImage",
+    "coverImageAlt",
+    "title",
+    "description",
+    "slug",
+  ]);
+
+  const map: Record<string, keyof CmsArticlePayload> = {};
+  for (const [metaKey, field] of Object.entries(raw)) {
+    if (typeof field === "string" && allowed.has(field)) {
+      map[metaKey] = field as keyof CmsArticlePayload;
+    }
+  }
+
+  return Object.keys(map).length > 0 ? map : undefined;
 }
 
 function createWordPressPublisherInstance(config: PublisherRuntimeConfig): Publisher {

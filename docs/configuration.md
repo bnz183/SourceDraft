@@ -1,6 +1,18 @@
 # Configuration
 
-See also: [Getting started](getting-started.md) · [GitHub publishing](github-publishing.md) · [Media uploads](media.md)
+See also: [Getting started](getting-started.md) · [Setup wizard](setup-wizard.md) · [GitHub publishing](github-publishing.md) · [Media uploads](media.md)
+
+## Setup wizard and validation
+
+```bash
+pnpm setup              # interactive wizard — writes config + .env
+pnpm validate:config    # check adapter, publisher, env vars, paths
+pnpm validate:config --connections   # optional live API checks
+```
+
+Studio **Settings → Compatibility & status** mirrors validation (adapter, publisher, media provider, missing env var names — never secret values).
+
+Details: [setup-wizard.md](setup-wizard.md).
 
 ## Secrets vs project settings
 

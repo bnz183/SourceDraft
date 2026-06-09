@@ -26,7 +26,7 @@ Unknown adapter ids fail validation in `loadPublishEnv()` with a list of support
 | `mkdocs-markdown` | `.md` | `docs` | MkDocs documentation sites | same (no `draft` in output) |
 | `nuxt-content-markdown` | `.md` | `content/blog` | Nuxt Content v2 collections | same |
 
-SEO fields are optional on the universal article schema and emitted when present. Studio UI for editing them is still limited — see [seo-fields-roadmap.md](seo-fields-roadmap.md).
+Optional SEO fields (`metaTitle`, `metaDescription`, `canonicalUrl`, `socialImage`, `coverImageAlt`, `noindex`, `author`, computed `readingTime`) are emitted when present. Edit them in Studio under **SEO / Sharing**. See [seo-fields.md](seo-fields.md).
 
 ## Shared adapter options
 

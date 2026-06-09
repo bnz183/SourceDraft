@@ -14,6 +14,9 @@ export type ArticleInput = {
   metaDescription?: unknown;
   canonicalUrl?: unknown;
   socialImage?: unknown;
+  coverImageAlt?: unknown;
+  noindex?: unknown;
+  readingTime?: unknown;
 };
 
 export type Article = {
@@ -32,6 +35,9 @@ export type Article = {
   metaDescription?: string;
   canonicalUrl?: string;
   socialImage?: string;
+  coverImageAlt?: string;
+  noindex?: boolean;
+  readingTime?: number;
 };
 
 export type ValidationIssue = {

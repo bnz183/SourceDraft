@@ -13,6 +13,9 @@ const article: Article = {
   tags: ["alpha", "beta"],
   draft: true,
   heroImage: "/images/hero.png",
+  metaTitle: "SEO title",
+  coverImageAlt: "Cover alt",
+  noindex: true,
   body: "## Intro\n\nParagraph one.",
 };
 
@@ -29,6 +32,10 @@ describe("toAstroMdx", () => {
     assert.match(output, /tags:\n  - alpha\n  - beta\n/);
     assert.match(output, /draft: true\n/);
     assert.match(output, /heroImage: \/images\/hero\.png\n/);
+    assert.match(output, /metaTitle: SEO title\n/);
+    assert.match(output, /coverImageAlt: Cover alt\n/);
+    assert.match(output, /noindex: true\n/);
+    assert.match(output, /readingTime: 1\n/);
     assert.match(output, /---\n\n## Intro\n\nParagraph one\.$/);
   });
 

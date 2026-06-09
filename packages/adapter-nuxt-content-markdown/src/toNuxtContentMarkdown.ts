@@ -1,4 +1,9 @@
-import type { Article, ArticleInput } from "@sourcedraft/core";
+import {
+  appendSeoFrontmatterLines,
+  mergeArticleInputWithSeo,
+  type Article,
+  type ArticleInput,
+} from "@sourcedraft/core";
 import { resolveNuxtContentMarkdownOptions } from "./options.js";
 import { formatYamlTags, yamlScalar } from "./yaml.js";
 
@@ -43,10 +48,7 @@ export function toNuxtContentMarkdown(
     ...formatYamlTags(article.tags),
   ];
 
-  pushOptional(frontmatter, "metaTitle", article.metaTitle);
-  pushOptional(frontmatter, "metaDescription", article.metaDescription);
-  pushOptional(frontmatter, "canonicalUrl", article.canonicalUrl);
-  pushOptional(frontmatter, "socialImage", article.socialImage);
+  appendSeoFrontmatterLines(frontmatter, article, yamlScalar);
   frontmatter.push("---");
 
   return `${frontmatter.join("\n")}\n\n${article.body}`;
@@ -58,18 +60,17 @@ export function nuxtContentMarkdownFromFrontmatter(
   body: string,
   slugFromPath: (path: string) => string,
 ): ArticleInput {
-  return {
-    title: frontmatter.title,
-    slug: slugFromPath(path),
-    description: frontmatter.description,
-    pubDate: frontmatter.date ?? frontmatter.pubDate,
-    category: frontmatter.category,
-    tags: frontmatter.tags,
-    draft: frontmatter.draft,
-    body,
-    metaTitle: frontmatter.metaTitle,
-    metaDescription: frontmatter.metaDescription,
-    canonicalUrl: frontmatter.canonicalUrl,
-    socialImage: frontmatter.socialImage,
-  };
+  return mergeArticleInputWithSeo(
+    {
+      title: frontmatter.title,
+      slug: slugFromPath(path),
+      description: frontmatter.description,
+      pubDate: frontmatter.date ?? frontmatter.pubDate,
+      category: frontmatter.category,
+      tags: frontmatter.tags,
+      draft: frontmatter.draft,
+      body,
+    },
+    frontmatter,
+  );
 }

@@ -19,6 +19,7 @@
     "test": "node --import tsx --test 'src/**/*.test.ts' 'src/**/**/*.test.ts'"
   },
   "dependencies": {
+    "@sourcedraft/core": "workspace:*",
     "@sourcedraft/github-publisher": "workspace:*"
   },
   "devDependencies": {

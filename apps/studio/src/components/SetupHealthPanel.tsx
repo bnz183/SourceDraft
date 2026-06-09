@@ -3,6 +3,7 @@ import {
   fetchSetupHealth,
   type SetupHealthReport,
 } from "../lib/setupHealth.js";
+import { CompatibilityPanel } from "./CompatibilityPanel.js";
 
 export function SetupHealthPanel() {
   const [report, setReport] = useState<SetupHealthReport | null>(null);
@@ -40,6 +41,8 @@ export function SetupHealthPanel() {
 
       {report && (
         <>
+          <CompatibilityPanel compatibility={report.compatibility} />
+
           {report.nextAction && (
             <div className="notice notice--warning setup-health__next-action" role="status">
               <p className="notice__title">Next action</p>

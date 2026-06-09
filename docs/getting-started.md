@@ -10,21 +10,36 @@ cd SourceDraft
 pnpm install
 ```
 
-## 2. Project settings (`sourcedraft.config.json`)
+## 2. Configure SourceDraft
+
+**Recommended — setup wizard**
+
+```bash
+pnpm setup
+```
+
+The wizard asks which adapter, publisher, and media provider you use, then creates `sourcedraft.config.json` and `.env` with plain-language prompts. Existing `.env` values are kept unless you choose to overwrite them. See [setup-wizard.md](setup-wizard.md).
+
+**Manual — copy example files**
 
 ```bash
 cp sourcedraft.config.example.json sourcedraft.config.json
+cp .env.example .env
 ```
 
 Edit paths, adapter, and categories to match your site. These values are safe to commit.
 
 Use `astro-mdx` for `.mdx` output or `markdown` for `.md` output. See [adapters.md](adapters.md).
 
-## 3. Secrets (`.env`)
+Validate anytime:
 
 ```bash
-cp .env.example .env
+pnpm validate:config
 ```
+
+## 3. Secrets (`.env`)
+
+If you used `pnpm setup`, skip copying `.env` — the wizard already wrote it. Otherwise:
 
 ```env
 SOURCEDRAFT_ADMIN_PASSWORD=your-local-studio-password

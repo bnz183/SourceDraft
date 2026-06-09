@@ -2,6 +2,7 @@ import type { ValidationIssue } from "@sourcedraft/core";
 import type { ArticleFormState } from "../lib/articleForm";
 import { ContentQualityPanel } from "./ContentQualityPanel";
 import { MediaSection } from "./MediaSection";
+import { SeoSharingPanel } from "./SeoSharingPanel";
 
 type PostDetailsPanelProps = {
   values: ArticleFormState;
@@ -207,6 +208,13 @@ export function PostDetailsPanel({
             </p>
           )}
         </div>
+
+        <SeoSharingPanel
+          values={values}
+          fieldErrors={fieldErrors}
+          onChange={onChange}
+          validationIssues={issues}
+        />
 
         <ContentQualityPanel values={values} validationIssues={issues} />
 

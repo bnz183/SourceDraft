@@ -48,6 +48,26 @@ describe("validateArticle", () => {
     );
   });
 
+  it("rejects invalid canonical URL", () => {
+    const result = validateArticle({
+      ...validInput,
+      canonicalUrl: "not-a-valid-url",
+    });
+    assert.equal(result.valid, false);
+    assert.ok(result.issues.some((issue) => issue.field === "canonicalUrl"));
+  });
+
+  it("accepts optional SEO fields", () => {
+    const result = validateArticle({
+      ...validInput,
+      metaTitle: "SEO title",
+      canonicalUrl: "https://example.com/post",
+      coverImageAlt: "Cover description",
+      noindex: true,
+    });
+    assert.equal(result.valid, true);
+  });
+
   it("rejects empty tag entries", () => {
     const result = validateArticle({ ...validInput, tags: ["ok", "  "] });
     assert.equal(result.valid, false);
