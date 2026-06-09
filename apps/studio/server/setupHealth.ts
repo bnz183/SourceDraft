@@ -16,7 +16,12 @@ import {
   isGitLabConfigured,
   isGitLabProjectConfigured,
   isGitLabTokenConfigured,
+  isGhostAdminApiKeyConfigured,
+  isGhostAdminUrlConfigured,
   isPublisherConfigured,
+  isWordPressApiConfigured,
+  isWordPressAppPasswordConfigured,
+  isWordPressUsernameConfigured,
   resolveActivePublisher,
 } from "./demoMode.js";
 
@@ -101,6 +106,61 @@ function publisherCredentialChecks(activePublisher: string): SetupHealthCheck[] 
     ];
   }
 
+  if (activePublisher === "wordpress") {
+    const apiOk = isWordPressApiConfigured();
+    const userOk = isWordPressUsernameConfigured();
+    const passwordOk = isWordPressAppPasswordConfigured();
+    return [
+      {
+        id: "wordpress-api-url",
+        label: "WordPress API URL",
+        ok: apiOk,
+        detail: apiOk
+          ? "WORDPRESS_API_URL is configured."
+          : "Set WORDPRESS_API_URL in .env (e.g. https://example.com/wp-json).",
+      },
+      {
+        id: "wordpress-username",
+        label: "WordPress username",
+        ok: userOk,
+        detail: userOk
+          ? "WORDPRESS_USERNAME is configured."
+          : "Set WORDPRESS_USERNAME in .env.",
+      },
+      {
+        id: "wordpress-app-password",
+        label: "WordPress app password (server-side)",
+        ok: passwordOk,
+        detail: passwordOk
+          ? "WORDPRESS_APP_PASSWORD is present on the server. The value is never sent to the browser."
+          : "Set WORDPRESS_APP_PASSWORD in .env.",
+      },
+    ];
+  }
+
+  if (activePublisher === "ghost") {
+    const urlOk = isGhostAdminUrlConfigured();
+    const keyOk = isGhostAdminApiKeyConfigured();
+    return [
+      {
+        id: "ghost-admin-url",
+        label: "Ghost site URL",
+        ok: urlOk,
+        detail: urlOk
+          ? "GHOST_ADMIN_URL is configured."
+          : "Set GHOST_ADMIN_URL in .env (site root, no /ghost path).",
+      },
+      {
+        id: "ghost-admin-api-key",
+        label: "Ghost Admin API key (server-side)",
+        ok: keyOk,
+        detail: keyOk
+          ? "GHOST_ADMIN_API_KEY is present on the server. The value is never sent to the browser."
+          : "Set GHOST_ADMIN_API_KEY in .env.",
+      },
+    ];
+  }
+
   const ownerOk = isGitHubOwnerConfigured();
   const repoOk = isGitHubRepoConfigured();
   const tokenOk = isGitHubTokenConfigured();
@@ -137,6 +197,14 @@ function publisherSetupMessage(activePublisher: string): string {
 
   if (activePublisher === "bitbucket") {
     return "Complete Bitbucket setup in .env (BITBUCKET_TOKEN, BITBUCKET_WORKSPACE, BITBUCKET_REPO_SLUG) or use demo mode to explore without Bitbucket.";
+  }
+
+  if (activePublisher === "wordpress") {
+    return "Complete WordPress setup in .env (WORDPRESS_API_URL, WORDPRESS_USERNAME, WORDPRESS_APP_PASSWORD) or use demo mode to explore without WordPress.";
+  }
+
+  if (activePublisher === "ghost") {
+    return "Complete Ghost setup in .env (GHOST_ADMIN_URL, GHOST_ADMIN_API_KEY) or use demo mode to explore without Ghost.";
   }
 
   return "Complete GitHub setup in .env (GITHUB_TOKEN, GITHUB_OWNER, GITHUB_REPO) or use demo mode to explore without GitHub.";

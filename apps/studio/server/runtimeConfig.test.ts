@@ -90,6 +90,33 @@ describe("runtime config resolution", () => {
     }
   });
 
+  it("accepts wordpress publisher when credentials are set", () => {
+    process.env.CMS_PUBLISHER = "wordpress";
+    process.env.WORDPRESS_API_URL = "https://example.com/wp-json";
+    process.env.WORDPRESS_USERNAME = "editor";
+    process.env.WORDPRESS_APP_PASSWORD = "abcd EFGH ijkl MNOP qrst UVWX";
+
+    const result = loadPublishEnv();
+    assert.equal(result.ok, true);
+    if (result.ok) {
+      assert.equal(result.config.publisher, "wordpress");
+      assert.equal(result.config.wordpressApiUrl, "https://example.com/wp-json");
+    }
+  });
+
+  it("accepts ghost publisher when credentials are set", () => {
+    process.env.CMS_PUBLISHER = "ghost";
+    process.env.GHOST_ADMIN_URL = "https://example.com";
+    process.env.GHOST_ADMIN_API_KEY = "id:secret";
+
+    const result = loadPublishEnv();
+    assert.equal(result.ok, true);
+    if (result.ok) {
+      assert.equal(result.config.publisher, "ghost");
+      assert.equal(result.config.ghostAdminUrl, "https://example.com");
+    }
+  });
+
   it("rejects gitlab publisher without project reference", () => {
     process.env.CMS_PUBLISHER = "gitlab";
     process.env.GITLAB_TOKEN = "gl-token";

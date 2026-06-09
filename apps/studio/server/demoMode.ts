@@ -65,12 +65,48 @@ export function isBitbucketConfigured(): boolean {
   );
 }
 
+export function isWordPressApiConfigured(): boolean {
+  return (process.env.WORDPRESS_API_URL?.trim().length ?? 0) > 0;
+}
+
+export function isWordPressUsernameConfigured(): boolean {
+  return (process.env.WORDPRESS_USERNAME?.trim().length ?? 0) > 0;
+}
+
+export function isWordPressAppPasswordConfigured(): boolean {
+  return (process.env.WORDPRESS_APP_PASSWORD?.trim().length ?? 0) > 0;
+}
+
+export function isWordPressConfigured(): boolean {
+  return (
+    isWordPressApiConfigured() &&
+    isWordPressUsernameConfigured() &&
+    isWordPressAppPasswordConfigured()
+  );
+}
+
+export function isGhostAdminUrlConfigured(): boolean {
+  return (process.env.GHOST_ADMIN_URL?.trim().length ?? 0) > 0;
+}
+
+export function isGhostAdminApiKeyConfigured(): boolean {
+  return (process.env.GHOST_ADMIN_API_KEY?.trim().length ?? 0) > 0;
+}
+
+export function isGhostConfigured(): boolean {
+  return isGhostAdminUrlConfigured() && isGhostAdminApiKeyConfigured();
+}
+
 export function isPublisherConfigured(): boolean {
   switch (resolveActivePublisher()) {
     case "gitlab":
       return isGitLabConfigured();
     case "bitbucket":
       return isBitbucketConfigured();
+    case "wordpress":
+      return isWordPressConfigured();
+    case "ghost":
+      return isGhostConfigured();
     default:
       return isGitHubConfigured();
   }

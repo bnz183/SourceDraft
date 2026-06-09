@@ -36,6 +36,15 @@ export type PublishEnvConfig = {
   gitlabProjectRef?: string;
   gitlabBaseUrl?: string;
   bitbucketUsername?: string;
+  wordpressApiUrl?: string;
+  wordpressUsername?: string;
+  wordpressAppPassword?: string;
+  wordpressDefaultStatus?: string;
+  wordpressDefaultAuthor?: number;
+  ghostAdminUrl?: string;
+  ghostAdminApiKey?: string;
+  ghostAcceptVersion?: string;
+  ghostDefaultStatus?: string;
 };
 
 export type PublishEnvResult =
@@ -88,8 +97,26 @@ type PublisherCredentialsResult =
       gitlabProjectRef?: string;
       gitlabBaseUrl?: string;
       bitbucketUsername?: string;
+      wordpressApiUrl?: string;
+      wordpressUsername?: string;
+      wordpressAppPassword?: string;
+      wordpressDefaultStatus?: string;
+      wordpressDefaultAuthor?: number;
+      ghostAdminUrl?: string;
+      ghostAdminApiKey?: string;
+      ghostAcceptVersion?: string;
+      ghostDefaultStatus?: string;
     }
   | { ok: false; error: string };
+
+function parseOptionalAuthorId(raw: string | undefined): number | undefined {
+  if (!raw) {
+    return undefined;
+  }
+
+  const parsed = Number.parseInt(raw, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
+}
 
 function resolvePublisherCredentials(
   publisher: SupportedPublisher,
@@ -123,6 +150,73 @@ function resolvePublisherCredentials(
       branch,
       gitlabProjectRef,
       gitlabBaseUrl,
+    };
+  }
+
+  if (publisher === "wordpress") {
+    const apiUrl = process.env.WORDPRESS_API_URL?.trim();
+    const username = process.env.WORDPRESS_USERNAME?.trim();
+    const appPassword = process.env.WORDPRESS_APP_PASSWORD?.trim();
+    const defaultStatus =
+      process.env.WORDPRESS_DEFAULT_STATUS?.trim() || "draft";
+    const defaultAuthor = parseOptionalAuthorId(
+      process.env.WORDPRESS_DEFAULT_AUTHOR?.trim(),
+    );
+
+    if (!apiUrl) {
+      return { ok: false, error: "WORDPRESS_API_URL is not configured." };
+    }
+
+    if (!username) {
+      return { ok: false, error: "WORDPRESS_USERNAME is not configured." };
+    }
+
+    if (!appPassword) {
+      return {
+        ok: false,
+        error: "WORDPRESS_APP_PASSWORD is not configured.",
+      };
+    }
+
+    return {
+      ok: true,
+      token: "",
+      owner: "",
+      repo: "",
+      branch: defaultBranch,
+      wordpressApiUrl: apiUrl,
+      wordpressUsername: username,
+      wordpressAppPassword: appPassword,
+      wordpressDefaultStatus: defaultStatus,
+      ...(defaultAuthor !== undefined ? { wordpressDefaultAuthor: defaultAuthor } : {}),
+    };
+  }
+
+  if (publisher === "ghost") {
+    const adminUrl = process.env.GHOST_ADMIN_URL?.trim();
+    const adminApiKey = process.env.GHOST_ADMIN_API_KEY?.trim();
+    const acceptVersion =
+      process.env.GHOST_ACCEPT_VERSION?.trim() || "v5.126";
+    const defaultStatus = process.env.GHOST_DEFAULT_STATUS?.trim() || "draft";
+
+    if (!adminUrl) {
+      return { ok: false, error: "GHOST_ADMIN_URL is not configured." };
+    }
+
+    if (!adminApiKey) {
+      return { ok: false, error: "GHOST_ADMIN_API_KEY is not configured." };
+    }
+
+    return {
+      ok: true,
+      token: "",
+      owner: "",
+      repo: "",
+      branch: defaultBranch,
+      ghostAdminUrl: adminUrl,
+      ghostAdminApiKey: adminApiKey,
+      ghostAcceptVersion: acceptVersion,
+      ghostDefaultStatus: defaultStatus,
     };
   }
 
@@ -233,6 +327,33 @@ export function loadPublishEnv(): PublishEnvResult {
       ...(credentials.bitbucketUsername !== undefined
         ? { bitbucketUsername: credentials.bitbucketUsername }
         : {}),
+      ...(credentials.wordpressApiUrl !== undefined
+        ? { wordpressApiUrl: credentials.wordpressApiUrl }
+        : {}),
+      ...(credentials.wordpressUsername !== undefined
+        ? { wordpressUsername: credentials.wordpressUsername }
+        : {}),
+      ...(credentials.wordpressAppPassword !== undefined
+        ? { wordpressAppPassword: credentials.wordpressAppPassword }
+        : {}),
+      ...(credentials.wordpressDefaultStatus !== undefined
+        ? { wordpressDefaultStatus: credentials.wordpressDefaultStatus }
+        : {}),
+      ...(credentials.wordpressDefaultAuthor !== undefined
+        ? { wordpressDefaultAuthor: credentials.wordpressDefaultAuthor }
+        : {}),
+      ...(credentials.ghostAdminUrl !== undefined
+        ? { ghostAdminUrl: credentials.ghostAdminUrl }
+        : {}),
+      ...(credentials.ghostAdminApiKey !== undefined
+        ? { ghostAdminApiKey: credentials.ghostAdminApiKey }
+        : {}),
+      ...(credentials.ghostAcceptVersion !== undefined
+        ? { ghostAcceptVersion: credentials.ghostAcceptVersion }
+        : {}),
+      ...(credentials.ghostDefaultStatus !== undefined
+        ? { ghostDefaultStatus: credentials.ghostDefaultStatus }
+        : {}),
       categories: project.categories,
     },
   };
@@ -262,6 +383,12 @@ export function loadPublicConfig(): PublicStudioConfig {
     owner = process.env.BITBUCKET_WORKSPACE?.trim() || "";
     repo = process.env.BITBUCKET_REPO_SLUG?.trim() || "";
     branch = process.env.BITBUCKET_BRANCH?.trim() || project.defaultBranch;
+  } else if (publisher === "wordpress") {
+    owner = process.env.WORDPRESS_API_URL?.trim() || "";
+    branch = project.defaultBranch;
+  } else if (publisher === "ghost") {
+    owner = process.env.GHOST_ADMIN_URL?.trim() || "";
+    branch = project.defaultBranch;
   } else {
     owner = process.env.GITHUB_OWNER?.trim() || "";
     repo = process.env.GITHUB_REPO?.trim() || "";

@@ -10,7 +10,7 @@ SourceDraft uses two files on purpose:
 
 - Content paths (`contentDir`, `mediaDir`, `publicMediaPath`)
 - Adapter name — see [adapters.md](adapters.md) compatibility matrix
-- Publisher name (`github`, `gitlab`, or `bitbucket`)
+- Publisher name (`github`, `gitlab`, `bitbucket`, `wordpress`, or `ghost`)
 - Category list for Studio
 - Default branch name when `GITHUB_BRANCH` is unset
 
@@ -83,12 +83,14 @@ Set in `sourcedraft.config.json`, or override with `CMS_ADAPTER` in `.env`.
 | `github` | `@sourcedraft/publishers` → `@sourcedraft/github-publisher` | Publish posts, upload media, list/read files via GitHub Contents API |
 | `gitlab` | `@sourcedraft/publishers` | Publish posts, upload media, list/read files via GitLab Repository Files API |
 | `bitbucket` | `@sourcedraft/publishers` | Publish posts and upload media via Bitbucket commit-upload API (no list/read yet) |
+| `wordpress` | `@sourcedraft/publishers` | Create/update posts via WordPress REST API (remote CMS) |
+| `ghost` | `@sourcedraft/publishers` | Create/update posts via Ghost Admin API (remote CMS) |
 
 Set in `sourcedraft.config.json`, or override with `CMS_PUBLISHER` in `.env`. Default: `github`.
 
 Studio resolves publishers through `publisherRegistry`. Unknown publisher ids return a clear configuration error before any API call.
 
-Publisher-specific env vars and API behavior: [git-publishers.md](git-publishers.md).
+Publisher reference: [publishers.md](publishers.md) · Git: [git-publishers.md](git-publishers.md) · WordPress: [wordpress.md](wordpress.md) · Ghost: [ghost.md](ghost.md).
 
 ### `mediaDir` and `publicMediaPath`
 
@@ -121,6 +123,10 @@ Copy from `.env.example`. Set credentials for the publisher selected in `sourced
 
 **Bitbucket:** `BITBUCKET_TOKEN`, `BITBUCKET_WORKSPACE`, `BITBUCKET_REPO_SLUG`, optional `BITBUCKET_BRANCH`, `BITBUCKET_USERNAME`
 
+**WordPress:** `WORDPRESS_API_URL`, `WORDPRESS_USERNAME`, `WORDPRESS_APP_PASSWORD`, optional `WORDPRESS_DEFAULT_STATUS`, `WORDPRESS_DEFAULT_AUTHOR`
+
+**Ghost:** `GHOST_ADMIN_URL`, `GHOST_ADMIN_API_KEY`, optional `GHOST_ACCEPT_VERSION`, `GHOST_DEFAULT_STATUS`
+
 Shared optional overrides:
 
 ```env
@@ -137,13 +143,40 @@ CMS_PUBLISHER=
 | `GITHUB_*` | When `publisher` is `github` | GitHub API credentials (server only) |
 | `GITLAB_*` | When `publisher` is `gitlab` | GitLab API credentials (server only) |
 | `BITBUCKET_*` | When `publisher` is `bitbucket` | Bitbucket API credentials (server only) |
+| `WORDPRESS_*` | When `publisher` is `wordpress` | WordPress REST API credentials (server only) |
+| `GHOST_*` | When `publisher` is `ghost` | Ghost Admin API credentials (server only) |
 | `CMS_CONTENT_DIR` | No | Overrides `contentDir` |
 | `CMS_MEDIA_DIR` | No | Overrides `mediaDir` |
 | `CMS_PUBLIC_MEDIA_PATH` | No | Overrides `publicMediaPath` |
 | `CMS_ADAPTER` | No | Overrides `adapter` |
 | `CMS_PUBLISHER` | No | Overrides `publisher` (default `github`) |
 
-Full publisher reference: [git-publishers.md](git-publishers.md).
+Full publisher reference: [publishers.md](publishers.md).
+
+### Media providers
+
+Optional — default `github-media` commits uploads through the active git publisher.
+
+| Provider | Env prefix |
+|----------|------------|
+| `github-media` | (uses publisher credentials) |
+| `cloudinary` | `CLOUDINARY_*` |
+| `s3-compatible` | `S3_*` (experimental) |
+
+Set `CMS_MEDIA_PROVIDER` in `.env`. Details: [media.md](media.md).
+
+### Deploy hooks
+
+Optional — trigger a build webhook after successful publish.
+
+| Variable | Purpose |
+|----------|---------|
+| `DEPLOY_HOOK_URL` | Webhook URL (secret) |
+| `DEPLOY_HOOK_METHOD` | Default `POST` |
+| `DEPLOY_HOOK_PROVIDER` | `generic`, `vercel`, `netlify`, `cloudflare-pages` |
+| `DEPLOY_HOOK_STRICT` | `true` to fail publish when hook fails |
+
+Details: [deploy-hooks.md](deploy-hooks.md).
 
 ## Precedence
 
