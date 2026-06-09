@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { createHmac } from "node:crypto";
+import { jwtVerify } from "jose";
 import { describe, it } from "node:test";
 import { createGhostAdminJwt, parseGhostAdminApiKey } from "./ghostJwt.js";
 
@@ -22,32 +22,25 @@ describe("Ghost JWT", () => {
     assert.equal(parsed.ok, false);
   });
 
-  it("generates a JWT with the expected header and signature", () => {
+  it("generates a JWT with the expected header and claims", async () => {
     const now = 1_700_000_000;
-    const result = createGhostAdminJwt(TEST_API_KEY, now);
+    const result = await createGhostAdminJwt(TEST_API_KEY, now);
     assert.equal("ok" in result, false);
 
     if ("ok" in result) {
       return;
     }
 
-    const [header, payload, signature] = result.token.split(".");
-    assert.ok(header);
-    assert.ok(payload);
-    assert.ok(signature);
+    const verified = await jwtVerify(result.token, Buffer.from(TEST_SECRET_HEX, "hex"), {
+      algorithms: ["HS256"],
+      currentDate: new Date(now * 1000),
+    });
 
-    const decodedHeader = JSON.parse(Buffer.from(header, "base64url").toString("utf8"));
-    assert.equal(decodedHeader.alg, "HS256");
-    assert.equal(decodedHeader.kid, TEST_KEY_ID);
-
-    const decodedPayload = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
-    assert.equal(decodedPayload.iat, now);
-    assert.equal(decodedPayload.exp, now + 300);
-    assert.equal(decodedPayload.aud, "/admin/");
-
-    const expectedSignature = createHmac("sha256", Buffer.from(TEST_SECRET_HEX, "hex"))
-      .update(`${header}.${payload}`)
-      .digest("base64url");
-    assert.equal(signature, expectedSignature);
+    assert.equal(verified.protectedHeader.alg, "HS256");
+    assert.equal(verified.protectedHeader.typ, "JWT");
+    assert.equal(verified.protectedHeader.kid, TEST_KEY_ID);
+    assert.equal(verified.payload.iat, now);
+    assert.equal(verified.payload.exp, now + 300);
+    assert.equal(verified.payload.aud, "/admin/");
   });
 });

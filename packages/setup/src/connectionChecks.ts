@@ -1,3 +1,6 @@
+import { trimTrailingSlashes } from "@sourcedraft/core";
+import { createGhostAdminJwt } from "@sourcedraft/publishers";
+
 export type ConnectionCheckResult = {
   ok: boolean;
   detail: string;
@@ -48,7 +51,7 @@ export async function checkGitLabConnection(
   const token = env.GITLAB_TOKEN?.trim();
   const projectId = env.GITLAB_PROJECT_ID?.trim();
   const projectPath = env.GITLAB_PROJECT_PATH?.trim();
-  const baseUrl = (env.GITLAB_BASE_URL?.trim() || "https://gitlab.com").replace(/\/$/u, "");
+  const baseUrl = trimTrailingSlashes(env.GITLAB_BASE_URL?.trim() || "https://gitlab.com");
 
   if (!token) {
     return { ok: false, detail: "Missing GitLab token for connection check." };
@@ -110,7 +113,7 @@ export async function checkBitbucketConnection(
 export async function checkWordPressConnection(
   env: Record<string, string | undefined>,
 ): Promise<ConnectionCheckResult> {
-  const apiUrl = env.WORDPRESS_API_URL?.trim()?.replace(/\/$/u, "");
+  const apiUrl = trimTrailingSlashes(env.WORDPRESS_API_URL?.trim() ?? "");
   const username = env.WORDPRESS_USERNAME?.trim();
   const appPassword = env.WORDPRESS_APP_PASSWORD?.trim();
 
@@ -137,47 +140,23 @@ export async function checkWordPressConnection(
 export async function checkGhostConnection(
   env: Record<string, string | undefined>,
 ): Promise<ConnectionCheckResult> {
-  const adminUrl = env.GHOST_ADMIN_URL?.trim()?.replace(/\/$/u, "");
+  const adminUrl = trimTrailingSlashes(env.GHOST_ADMIN_URL?.trim() ?? "");
   const apiKey = env.GHOST_ADMIN_API_KEY?.trim();
 
   if (!adminUrl || !apiKey) {
     return { ok: false, detail: "Missing Ghost credentials for connection check." };
   }
 
-  const [id, secret] = apiKey.split(":");
-  if (!id || !secret) {
-    return { ok: false, detail: "GHOST_ADMIN_API_KEY must be id:secret format." };
+  const jwt = await createGhostAdminJwt(apiKey);
+  if ("ok" in jwt) {
+    return { ok: false, detail: jwt.error };
   }
 
-  const header = Buffer.from(
-    JSON.stringify({
-      alg: "HS256",
-      typ: "JWT",
-      kid: id,
-    }),
-  ).toString("base64url");
-
-  const now = Math.floor(Date.now() / 1000);
-  const payload = Buffer.from(
-    JSON.stringify({
-      iat: now,
-      exp: now + 5 * 60,
-      aud: "/admin/",
-    }),
-  ).toString("base64url");
-
-  const crypto = await import("node:crypto");
-  const signature = crypto
-    .createHmac("sha256", Buffer.from(secret, "hex"))
-    .update(`${header}.${payload}`)
-    .digest("base64url");
-
-  const token = `${header}.${payload}.${signature}`;
   const version = env.GHOST_ACCEPT_VERSION?.trim() || "v5.126";
 
   const response = await fetch(`${adminUrl}/ghost/api/admin/site/`, {
     headers: {
-      Authorization: `Ghost ${token}`,
+      Authorization: `Ghost ${jwt.token}`,
       Accept: "application/json",
       "Accept-Version": version,
       "User-Agent": "SourceDraft-Setup",

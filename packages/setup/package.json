@@ -19,6 +19,7 @@
     "test": "node --import tsx --test 'src/**/*.test.ts'"
   },
   "dependencies": {
+    "@sourcedraft/core": "workspace:*",
     "@sourcedraft/adapters": "workspace:*",
     "@sourcedraft/config": "workspace:*",
     "@sourcedraft/media-providers": "workspace:*",

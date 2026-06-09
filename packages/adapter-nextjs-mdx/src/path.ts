@@ -1,4 +1,5 @@
 import type { Article } from "@sourcedraft/core";
+import { trimTrailingSlashes } from "@sourcedraft/core";
 
 export type NextjsMdxPathConfig = {
   contentDir: string;
@@ -9,7 +10,7 @@ export function getNextjsMdxPath(
   article: Article,
   config: NextjsMdxPathConfig,
 ): string {
-  const contentDir = config.contentDir.replace(/\/+$/u, "");
+  const contentDir = trimTrailingSlashes(config.contentDir);
   const rawExtension = config.extension ?? "mdx";
   const extension = rawExtension.startsWith(".")
     ? rawExtension.slice(1)

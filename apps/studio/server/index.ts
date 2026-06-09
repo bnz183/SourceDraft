@@ -25,6 +25,12 @@ import { publishArticle, type PublishRequestBody } from "./publish.js";
 import { requireSameSiteRequest } from "./requestProtection.js";
 import { initializePlugins } from "./plugins.js";
 import { getSetupHealth } from "./setupHealth.js";
+import {
+  apiLimiter,
+  readLimiter,
+  strictAuthLimiter,
+  writeLimiter,
+} from "./rateLimit.js";
 
 const envPaths = [
   resolve(process.cwd(), ".env"),
@@ -44,9 +50,10 @@ await initializePlugins();
 const port = Number(process.env.STUDIO_API_PORT ?? 8787);
 const app = express();
 
+app.use(apiLimiter);
 app.use(express.json({ limit: "1mb" }));
 
-app.get("/api/auth/status", (req, res) => {
+app.get("/api/auth/status", readLimiter, (req, res) => {
   const token = getSessionToken(req);
   const authenticated = isSessionValid(token);
 
@@ -60,7 +67,7 @@ app.get("/api/auth/status", (req, res) => {
   });
 });
 
-app.post("/api/auth/login", requireSameSiteRequest, (req, res) => {
+app.post("/api/auth/login", strictAuthLimiter, requireSameSiteRequest, (req, res) => {
   const password = typeof req.body?.password === "string" ? req.body.password : "";
   const result = login(req, password, res);
 
@@ -75,7 +82,7 @@ app.post("/api/auth/login", requireSameSiteRequest, (req, res) => {
   res.json({ ok: true });
 });
 
-app.post("/api/auth/demo", requireSameSiteRequest, (req, res) => {
+app.post("/api/auth/demo", strictAuthLimiter, requireSameSiteRequest, (req, res) => {
   const result = enterDemo(req, res);
 
   if (!result.ok) {
@@ -86,12 +93,12 @@ app.post("/api/auth/demo", requireSameSiteRequest, (req, res) => {
   res.json({ ok: true, demoMode: true });
 });
 
-app.post("/api/auth/logout", requireSameSiteRequest, (req, res) => {
+app.post("/api/auth/logout", writeLimiter, requireSameSiteRequest, (req, res) => {
   logout(req, res);
   res.json({ ok: true });
 });
 
-app.get("/api/config", requireAuth, (req, res) => {
+app.get("/api/config", readLimiter, requireAuth, (req, res) => {
   const runtime = loadPublicConfig();
   const demoMode = isRequestDemoSession(req);
 
@@ -111,11 +118,11 @@ app.get("/api/config", requireAuth, (req, res) => {
   });
 });
 
-app.get("/api/health/setup", requireAuth, (_req, res) => {
+app.get("/api/health/setup", readLimiter, requireAuth, (_req, res) => {
   res.json(getSetupHealth());
 });
 
-app.get("/api/posts", requireAuth, async (req, res) => {
+app.get("/api/posts", readLimiter, requireAuth, async (req, res) => {
   const demoMode = isRequestDemoSession(req);
   const pathParam =
     typeof req.query.path === "string" ? req.query.path.trim() : "";
@@ -150,7 +157,7 @@ app.get("/api/posts", requireAuth, async (req, res) => {
   res.status(result.status).json(result.body);
 });
 
-app.get("/api/media", requireAuth, async (req, res) => {
+app.get("/api/media", readLimiter, requireAuth, async (req, res) => {
   if (isRequestDemoSession(req)) {
     const result = await listDemoMediaHandler();
     res.status(result.status).json(result.body);
@@ -169,6 +176,7 @@ app.get("/api/media", requireAuth, async (req, res) => {
 
 app.post(
   "/api/media/upload",
+  writeLimiter,
   requireSameSiteRequest,
   requireAuth,
   async (req, res) => {
@@ -190,7 +198,7 @@ app.post(
   },
 );
 
-app.post("/api/publish", requireSameSiteRequest, requireAuth, async (req, res) => {
+app.post("/api/publish", writeLimiter, requireSameSiteRequest, requireAuth, async (req, res) => {
   if (isRequestDemoSession(req)) {
     const runtime = loadPublicConfig();
     const result = await publishDemoArticle(

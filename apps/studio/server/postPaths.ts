@@ -1,7 +1,7 @@
-const POST_FILE_PATTERN = /\.(md|mdx)$/iu;
+import { hasFileExtension, trimLeadingSlashes, trimSlashes } from "@sourcedraft/core";
 
 export function normalizeContentDir(contentDir: string): string {
-  return contentDir.replace(/^\/+/u, "").replace(/\/+$/u, "").trim();
+  return trimSlashes(contentDir).trim();
 }
 
 export function safePostPath(
@@ -13,7 +13,7 @@ export function safePostPath(
     return { ok: false, error: "Content directory is not configured." };
   }
 
-  const path = inputPath.replace(/^\/+/u, "").trim();
+  const path = trimLeadingSlashes(inputPath).trim();
   if (path.length === 0) {
     return { ok: false, error: "Path is required." };
   }
@@ -30,7 +30,7 @@ export function safePostPath(
     };
   }
 
-  if (!POST_FILE_PATTERN.test(path)) {
+  if (!hasFileExtension(path, ["md", "mdx"])) {
     return { ok: false, error: "Post path must end with .md or .mdx." };
   }
 

@@ -4,6 +4,128 @@ import { formatEnvValueForDisplay } from "./maskSecrets.js";
 
 export type EnvMap = Map<string, string>;
 
+const ENV_KEY_PATTERN = /^[A-Z_][A-Z0-9_]*$/u;
+
+export function isValidEnvKey(key: string): boolean {
+  return ENV_KEY_PATTERN.test(key);
+}
+
+function assertValidEnvKey(key: string): void {
+  if (!isValidEnvKey(key)) {
+    throw new Error(`Invalid env key: ${key}`);
+  }
+}
+
+function needsQuoting(value: string): boolean {
+  if (value.length === 0) {
+    return true;
+  }
+
+  for (let index = 0; index < value.length; index += 1) {
+    const code = value.charCodeAt(index);
+    if (
+      value[index] === " " ||
+      value[index] === "#" ||
+      value[index] === '"' ||
+      value[index] === "\\" ||
+      value[index] === "\n" ||
+      value[index] === "\r" ||
+      value[index] === "\t" ||
+      code < 32
+    ) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+export function escapeEnvValue(value: string): string {
+  if (!needsQuoting(value)) {
+    return value;
+  }
+
+  let escaped = "";
+  for (let index = 0; index < value.length; index += 1) {
+    const char = value[index];
+    const code = value.charCodeAt(index);
+
+    if (char === "\\" || char === '"') {
+      escaped += `\\${char}`;
+      continue;
+    }
+
+    if (char === "\n") {
+      escaped += "\\n";
+      continue;
+    }
+
+    if (char === "\r") {
+      escaped += "\\r";
+      continue;
+    }
+
+    if (char === "\t") {
+      escaped += "\\t";
+      continue;
+    }
+
+    if (code < 32) {
+      escaped += `\\u${code.toString(16).padStart(4, "0")}`;
+      continue;
+    }
+
+    escaped += char;
+  }
+
+  return `"${escaped}"`;
+}
+
+function unescapeQuotedEnvValue(value: string): string {
+  let unescaped = "";
+
+  for (let index = 0; index < value.length; index += 1) {
+    const char = value[index];
+    if (char !== "\\" || index === value.length - 1) {
+      unescaped += char;
+      continue;
+    }
+
+    const next = value[index + 1];
+    if (next === "n") {
+      unescaped += "\n";
+      index += 1;
+      continue;
+    }
+
+    if (next === "r") {
+      unescaped += "\r";
+      index += 1;
+      continue;
+    }
+
+    if (next === "t") {
+      unescaped += "\t";
+      index += 1;
+      continue;
+    }
+
+    if (next === "u") {
+      const hex = value.slice(index + 2, index + 6);
+      if (/^[0-9a-fA-F]{4}$/u.test(hex)) {
+        unescaped += String.fromCharCode(Number.parseInt(hex, 16));
+        index += 5;
+        continue;
+      }
+    }
+
+    unescaped += next;
+    index += 1;
+  }
+
+  return unescaped;
+}
+
 export function parseEnvFile(content: string): EnvMap {
   const map: EnvMap = new Map();
 
@@ -21,10 +143,9 @@ export function parseEnvFile(content: string): EnvMap {
     const key = trimmed.slice(0, eq).trim();
     let value = trimmed.slice(eq + 1).trim();
 
-    if (
-      (value.startsWith('"') && value.endsWith('"')) ||
-      (value.startsWith("'") && value.endsWith("'"))
-    ) {
+    if (value.startsWith('"') && value.endsWith('"')) {
+      value = unescapeQuotedEnvValue(value.slice(1, -1));
+    } else if (value.startsWith("'") && value.endsWith("'")) {
       value = value.slice(1, -1);
     }
 
@@ -50,9 +171,8 @@ export function serializeEnvFile(map: EnvMap, header?: string): string {
   }
 
   for (const [key, value] of [...map.entries()].sort(([a], [b]) => a.localeCompare(b))) {
-    const escaped =
-      value.includes(" ") || value.includes("#") ? `"${value.replace(/"/gu, '\\"')}"` : value;
-    lines.push(`${key}=${escaped}`);
+    assertValidEnvKey(key);
+    lines.push(`${key}=${escapeEnvValue(value)}`);
   }
 
   lines.push("");

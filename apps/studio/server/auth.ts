@@ -1,10 +1,14 @@
-import { randomBytes, timingSafeEqual } from "node:crypto";
+import { randomBytes } from "node:crypto";
 import type { NextFunction, Request, Response } from "express";
 import {
   isDemoModeAvailable,
   isDemoModeForced,
   isPublisherConfigured,
 } from "./demoMode.js";
+import {
+  verifyPlaintextPassword,
+  verifyScryptPassword,
+} from "./adminPassword.js";
 
 const SESSION_COOKIE = "sourcedraft_session";
 /** 24 hours — in-memory MVP sessions, not durable account auth. */
@@ -17,7 +21,12 @@ type SessionRecord = {
 
 const sessions = new Map<string, SessionRecord>();
 
-function getAdminPassword(): string | null {
+function getAdminPasswordHash(): string | null {
+  const hash = process.env.SOURCEDRAFT_ADMIN_PASSWORD_HASH?.trim();
+  return hash && hash.length > 0 ? hash : null;
+}
+
+function getLegacyAdminPassword(): string | null {
   const password = process.env.SOURCEDRAFT_ADMIN_PASSWORD?.trim();
   return password && password.length > 0 ? password : null;
 }
@@ -103,23 +112,21 @@ function purgeExpiredSessions(): void {
 }
 
 export function isAuthConfigured(): boolean {
-  return getAdminPassword() !== null;
+  return getAdminPasswordHash() !== null || getLegacyAdminPassword() !== null;
 }
 
 export function verifyPassword(password: string): boolean {
-  const expected = getAdminPassword();
-  if (expected === null) {
+  const hash = getAdminPasswordHash();
+  if (hash !== null) {
+    return verifyScryptPassword(password, hash);
+  }
+
+  const legacyPassword = getLegacyAdminPassword();
+  if (legacyPassword === null) {
     return false;
   }
 
-  const provided = Buffer.from(password);
-  const target = Buffer.from(expected);
-
-  if (provided.length !== target.length) {
-    return false;
-  }
-
-  return timingSafeEqual(provided, target);
+  return verifyPlaintextPassword(password, legacyPassword);
 }
 
 export function createSession(options?: { demo?: boolean }): string {
@@ -198,7 +205,8 @@ export function requireAuth(req: Request, res: Response, next: NextFunction): vo
   if (!isAuthConfigured() && !isDemoModeAvailable()) {
     res.status(500).json({
       ok: false,
-      error: "SOURCEDRAFT_ADMIN_PASSWORD is not configured.",
+      error:
+        "Studio auth is not configured. Set SOURCEDRAFT_ADMIN_PASSWORD_HASH or SOURCEDRAFT_ADMIN_PASSWORD.",
     });
     return;
   }
