@@ -36,7 +36,7 @@ GITHUB_BRANCH=main
 
 | File | Holds |
 |------|--------|
-| `sourcedraft.config.json` | `contentDir`, `mediaDir`, categories, adapter |
+| `sourcedraft.config.json` | `contentDir`, `mediaDir`, `publicMediaPath`, categories, adapter |
 | `.env` | Password, GitHub token, repo owner/name |
 
 See [configuration.md](configuration.md) for the full split.
@@ -59,8 +59,8 @@ Sign in with `SOURCEDRAFT_ADMIN_PASSWORD`.
 
 ## 5. Write and publish
 
-1. **Overview** — see existing posts from GitHub; click **Edit**, or use **New Article**
-2. Fill in the form; upload images under **Hero image** if needed ([media.md](media.md))
+1. **Posts** — see existing posts from GitHub; click **Edit**, or open **Write** for a new post
+2. Fill in post details; upload a cover image if needed ([media.md](media.md))
 3. Check the Markdown or MDX preview and output path
 4. **Publish to GitHub**
 

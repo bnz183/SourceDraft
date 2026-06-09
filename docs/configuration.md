@@ -128,3 +128,5 @@ Secrets:
 ```
 .env only (never in sourcedraft.config.json)
 ```
+
+For local development and contributions, see [CONTRIBUTING.md](../CONTRIBUTING.md). Release history: [CHANGELOG.md](../CHANGELOG.md).
