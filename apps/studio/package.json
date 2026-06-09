@@ -9,7 +9,7 @@
     "dev": "concurrently -n web,api -c blue,gray \"vite\" \"tsx watch server/index.ts\"",
     "dev:web": "vite",
     "dev:server": "tsx watch server/index.ts",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && tsc -p server/tsconfig.json",
     "build:server": "tsc -p server/tsconfig.json",
     "start:server": "node dist-server/index.js",
     "lint": "eslint .",

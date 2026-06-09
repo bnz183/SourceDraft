@@ -7,6 +7,41 @@
 
 Studio stores a session cookie after login. It does not store the GitHub token or admin password in the browser.
 
+## Session cookies (MVP)
+
+After login, the server sets an in-memory session cookie:
+
+| Attribute | Behavior |
+|-----------|----------|
+| `HttpOnly` | JavaScript cannot read the cookie — reduces token theft via XSS |
+| `SameSite=Lax` | Browser limits cross-site cookie use on unsafe requests |
+| `Secure` | Set only when running under HTTPS (`NODE_ENV=production`, `X-Forwarded-Proto: https`, or `STUDIO_SECURE_COOKIES=true`) |
+| `Max-Age` | 24 hours |
+
+This is MVP session handling, not durable account auth. Sessions are stored in server memory and reset when the process restarts.
+
+## Request protection for state-changing routes
+
+These routes use lightweight same-site checks before handling the request:
+
+- `POST /api/auth/login`
+- `POST /api/auth/logout`
+- `POST /api/publish`
+- `POST /api/media/upload`
+
+The middleware:
+
+1. Uses `Sec-Fetch-Site` when the browser sends it — allows `same-origin`, `same-site`, and `none`; rejects `cross-site`
+2. Falls back to `Origin` / `Referer` validation when Fetch Metadata is absent
+3. Allows loopback origins during local development (`localhost`, `127.0.0.1`)
+4. Does not enable CORS wildcards
+
+Optional: set `STUDIO_ALLOWED_ORIGINS` (comma-separated full origins) when deploying behind a reverse proxy.
+
+Login uses the same middleware. It is safe for the local Studio UI because the browser issues same-origin requests through the Vite dev proxy (`/api` → publish API). Unauthenticated login still benefits from blocking obvious cross-site POST attempts.
+
+This is basic MVP hardening — not a substitute for CSRF tokens, rate limiting, or full production auth on a public deployment.
+
 ## Server-only GitHub access
 
 All GitHub API calls run in `apps/studio/server`:

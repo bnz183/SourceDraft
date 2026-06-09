@@ -38,7 +38,9 @@ your-astro-blog/
       blog/              ← contentDir (posts land here)
         my-post.mdx
     assets/
-      images/            ← mediaDir (uploads and hero paths; public URLs often /images/...)
+      images/            ← mediaDir when using src/assets (public URLs via publicMediaPath)
+  public/
+    images/              ← alternative mediaDir (public URLs often /images/...)
 ```
 
 The path `examples/astro-blog/` in the SourceDraft repo mirrors that layout so you can see it without cloning a full site.
@@ -51,7 +53,8 @@ The path `examples/astro-blog/` in the SourceDraft repo mirrors that layout so y
 {
   "adapter": "astro-mdx",
   "contentDir": "src/content/blog",
-  "mediaDir": "src/assets/images",
+  "mediaDir": "public/images",
+  "publicMediaPath": "/images",
   "defaultBranch": "main",
   "categories": ["Guides", "Notes", "Reviews", "Tutorials", "Reference"]
 }
@@ -65,7 +68,11 @@ GITHUB_REPO=your-astro-blog
 GITHUB_BRANCH=main
 ```
 
-`mediaDir` is where Studio commits uploaded images. Studio returns paths like `/images/filename.png` for hero and inline Markdown — your Astro site should resolve those to files under `src/assets/images/` (or your chosen layout). See [docs/media.md](../../docs/media.md).
+**`mediaDir`** is where Studio commits uploaded images in your repo (for example `public/images`).
+
+**`publicMediaPath`** is the URL path Studio inserts into `heroImage` and body Markdown (for example `/images/filename.png`). Set both explicitly when your repo path and public URL do not follow the default derivation rules.
+
+See [docs/media.md](../../docs/media.md).
 
 A post with slug `getting-started-with-sourcedraft` is published to:
 
@@ -84,7 +91,7 @@ Your Astro content collection should accept fields such as `title`, `description
 You do **not** copy this whole `examples/astro-blog` folder into SourceDraft as a runnable app. You align **your existing** Astro blog with the same ideas:
 
 1. **Paths** — Put posts where SourceDraft can reach them (usually `src/content/blog/`). Set `contentDir` to that path.
-2. **Config** — Copy `adapter`, `contentDir`, `mediaDir`, `defaultBranch`, and `categories` from the example config into SourceDraft’s `sourcedraft.config.json`. Adjust categories for your site.
+2. **Config** — Copy `adapter`, `contentDir`, `mediaDir`, `publicMediaPath`, `defaultBranch`, and `categories` from the example config into SourceDraft’s `sourcedraft.config.json`. Adjust categories for your site.
 3. **GitHub target** — In SourceDraft’s `.env`, set `GITHUB_OWNER` and `GITHUB_REPO` to your blog repository (not the SourceDraft tool repo, unless you use a monorepo).
 4. **Test publish** — Write a post in Studio, publish once, and confirm the new `.mdx` file appears on GitHub in the right folder.
 5. **Build as usual** — Run your normal Astro build or CI. No change to your deploy pipeline is required.

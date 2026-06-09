@@ -14,6 +14,7 @@ import { loadPublicConfig, loadPublishEnv } from "./config.js";
 import { uploadMedia } from "./media.js";
 import { listPosts, loadPost } from "./posts.js";
 import { publishArticle, type PublishRequestBody } from "./publish.js";
+import { requireSameSiteRequest } from "./requestProtection.js";
 
 const envPaths = [
   resolve(process.cwd(), ".env"),
@@ -41,9 +42,9 @@ app.get("/api/auth/status", (req, res) => {
   });
 });
 
-app.post("/api/auth/login", (req, res) => {
+app.post("/api/auth/login", requireSameSiteRequest, (req, res) => {
   const password = typeof req.body?.password === "string" ? req.body.password : "";
-  const result = login(password, res);
+  const result = login(req, password, res);
 
   if (!result.ok) {
     res.status(result.error === "Invalid password." ? 401 : 500).json({
@@ -56,7 +57,7 @@ app.post("/api/auth/login", (req, res) => {
   res.json({ ok: true });
 });
 
-app.post("/api/auth/logout", (req, res) => {
+app.post("/api/auth/logout", requireSameSiteRequest, (req, res) => {
   logout(req, res);
   res.json({ ok: true });
 });
@@ -68,6 +69,7 @@ app.get("/api/config", requireAuth, (_req, res) => {
     adapter: runtime.adapter,
     contentDir: runtime.contentDir,
     mediaDir: runtime.mediaDir,
+    publicMediaPath: runtime.publicMediaPath,
     defaultBranch: runtime.branch,
     categories: runtime.categories,
     githubOwner: runtime.owner,
@@ -95,18 +97,23 @@ app.get("/api/posts", requireAuth, async (req, res) => {
   res.status(result.status).json(result.body);
 });
 
-app.post("/api/media/upload", requireAuth, async (req, res) => {
-  const envResult = loadPublishEnv();
-  if (!envResult.ok) {
-    res.status(500).json({ ok: false, error: envResult.error });
-    return;
-  }
+app.post(
+  "/api/media/upload",
+  requireSameSiteRequest,
+  requireAuth,
+  async (req, res) => {
+    const envResult = loadPublishEnv();
+    if (!envResult.ok) {
+      res.status(500).json({ ok: false, error: envResult.error });
+      return;
+    }
 
-  const result = await uploadMedia(req, envResult.config);
-  res.status(result.status).json(result.body);
-});
+    const result = await uploadMedia(req, envResult.config);
+    res.status(result.status).json(result.body);
+  },
+);
 
-app.post("/api/publish", requireAuth, async (req, res) => {
+app.post("/api/publish", requireSameSiteRequest, requireAuth, async (req, res) => {
   const envResult = loadPublishEnv();
   if (!envResult.ok) {
     res.status(500).json({ ok: false, error: envResult.error });

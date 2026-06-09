@@ -8,7 +8,7 @@ SourceDraft uses two files on purpose:
 
 **`sourcedraft.config.json`** — shareable project settings
 
-- Content paths (`contentDir`, `mediaDir`)
+- Content paths (`contentDir`, `mediaDir`, `publicMediaPath`)
 - Adapter name (`astro-mdx` or `markdown`)
 - Category list for Studio
 - Default branch name when `GITHUB_BRANCH` is unset
@@ -20,7 +20,7 @@ Safe to commit. Copy from `sourcedraft.config.example.json` and adjust for your 
 - `SOURCEDRAFT_ADMIN_PASSWORD` — Studio login
 - `GITHUB_TOKEN` — publish and media upload permission
 - `GITHUB_OWNER`, `GITHUB_REPO` — which repository receives files
-- Optional overrides: `GITHUB_BRANCH`, `CMS_CONTENT_DIR`, `CMS_MEDIA_DIR`, `CMS_ADAPTER`
+- Optional overrides: `GITHUB_BRANCH`, `CMS_CONTENT_DIR`, `CMS_MEDIA_DIR`, `CMS_PUBLIC_MEDIA_PATH`, `CMS_ADAPTER`
 
 Never commit `.env`. The browser never receives these values.
 
@@ -38,7 +38,8 @@ Example:
 {
   "adapter": "astro-mdx",
   "contentDir": "src/content/blog",
-  "mediaDir": "src/assets/images",
+  "mediaDir": "public/images",
+  "publicMediaPath": "/images",
   "defaultBranch": "main",
   "categories": ["Guides", "Notes", "Reviews", "Tutorials", "Reference"]
 }
@@ -48,7 +49,8 @@ Example:
 |-------|---------|
 | `adapter` | Output format: `astro-mdx` (`.mdx`) or `markdown` (`.md`) |
 | `contentDir` | Directory for generated post files |
-| `mediaDir` | Directory in your site repo where Studio uploads images |
+| `mediaDir` | Repository path where Studio commits uploaded images |
+| `publicMediaPath` | Site-relative URL path inserted into `heroImage` and body Markdown |
 | `defaultBranch` | Branch when `GITHUB_BRANCH` is unset |
 | `categories` | Options in the Studio category dropdown |
 
@@ -61,9 +63,18 @@ Example:
 
 Set in `sourcedraft.config.json`, or override with `CMS_ADAPTER` in `.env`.
 
-### `mediaDir`
+### `mediaDir` and `publicMediaPath`
 
-Folder inside your **site repository** where image uploads are committed. Studio returns a site-relative **public path** derived from the last segment of this value (for example `src/assets/images` → `/images/...`).
+**`mediaDir`** is the folder inside your **site repository** where image uploads are committed (for example `public/images` or `src/assets/images`).
+
+**`publicMediaPath`** is the site-relative URL path Studio inserts into frontmatter and Markdown (for example `/images`). It does not have to mirror the repo folder structure.
+
+If `publicMediaPath` is omitted, SourceDraft derives it from `mediaDir`:
+
+- When `mediaDir` starts with `public/`, strip that prefix (for example `public/images` → `/images`).
+- Otherwise use the last segment (for example `src/assets/images` → `/images`).
+
+Override locally with `CMS_PUBLIC_MEDIA_PATH` in `.env`. The upload API always uses server config — the browser cannot send arbitrary paths.
 
 See [media.md](media.md) for upload flow and path behavior.
 
@@ -86,6 +97,7 @@ Optional overrides:
 ```env
 CMS_CONTENT_DIR=
 CMS_MEDIA_DIR=
+CMS_PUBLIC_MEDIA_PATH=
 CMS_ADAPTER=
 ```
 
@@ -98,6 +110,7 @@ CMS_ADAPTER=
 | `GITHUB_BRANCH` | No | Overrides `defaultBranch` |
 | `CMS_CONTENT_DIR` | No | Overrides `contentDir` |
 | `CMS_MEDIA_DIR` | No | Overrides `mediaDir` |
+| `CMS_PUBLIC_MEDIA_PATH` | No | Overrides `publicMediaPath` |
 | `CMS_ADAPTER` | No | Overrides `adapter` (`astro-mdx` or `markdown`) |
 
 ## Precedence
