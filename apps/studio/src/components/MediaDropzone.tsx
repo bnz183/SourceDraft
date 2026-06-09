@@ -1,29 +1,41 @@
 import { useRef, useState, type DragEvent, type KeyboardEvent } from "react";
-import { uploadMedia } from "../lib/media";
-
-const ACCEPTED_TYPES = new Set([
-  "image/png",
-  "image/jpeg",
-  "image/gif",
-  "image/webp",
-]);
+import {
+  CLIENT_ACCEPTED_TYPES,
+  clientMaxBytesForFile,
+  clientMediaKindForFile,
+  uploadMedia,
+} from "../lib/media";
 
 type MediaDropzoneProps = {
   githubReady: boolean;
   onUseAsHero: (publicPath: string) => void;
-  onInsertIntoBody: (publicPath: string) => void;
+  onInsertImage: (publicPath: string) => void;
+  onInsertPdfLink: (publicPath: string, filename: string) => void;
+  onUploadSuccess?: (publicPath: string) => void;
+  onUploaded?: () => void;
 };
 
 type UploadState =
   | { status: "idle" }
   | { status: "uploading" }
-  | { status: "success"; publicPath: string; repoPath: string }
+  | {
+      status: "success";
+      publicPath: string;
+      repoPath: string;
+      kind: "image" | "pdf";
+      filename: string;
+    }
   | { status: "error"; message: string };
+
+const ACCEPT_ATTRIBUTE = CLIENT_ACCEPTED_TYPES.join(",");
 
 export function MediaDropzone({
   githubReady,
   onUseAsHero,
-  onInsertIntoBody,
+  onInsertImage,
+  onInsertPdfLink,
+  onUploadSuccess,
+  onUploaded,
 }: MediaDropzoneProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragActive, setDragActive] = useState(false);
@@ -36,18 +48,23 @@ export function MediaDropzone({
       return;
     }
 
-    if (!ACCEPTED_TYPES.has(file.type)) {
+    const kind = clientMediaKindForFile(file);
+    if (kind === null) {
       setUpload({
         status: "error",
-        message: "Use a PNG, JPEG, GIF, or WebP image.",
+        message: "Use a PNG, JPEG, GIF, WebP image, or PDF document.",
       });
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
+    const maxBytes = clientMaxBytesForFile(file);
+    if (file.size > maxBytes) {
       setUpload({
         status: "error",
-        message: "Image must be 5 MB or smaller.",
+        message:
+          kind === "pdf"
+            ? "PDF must be 10 MB or smaller."
+            : "Image must be 5 MB or smaller.",
       });
       return;
     }
@@ -64,7 +81,13 @@ export function MediaDropzone({
       status: "success",
       publicPath: result.publicPath,
       repoPath: result.repoPath,
+      kind: result.kind,
+      filename: file.name,
     });
+    if (result.kind === "image") {
+      onUploadSuccess?.(result.publicPath);
+    }
+    onUploaded?.();
   }
 
   function handleDragOver(event: DragEvent<HTMLDivElement>) {
@@ -112,7 +135,7 @@ export function MediaDropzone({
             : "media-dropzone__target"
         }
         role="group"
-        aria-label="Image upload"
+        aria-label="Media upload"
         tabIndex={uploadDisabled ? -1 : 0}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -121,15 +144,15 @@ export function MediaDropzone({
         aria-disabled={uploadDisabled}
       >
         <p className="media-dropzone__label">
-          Drag an image here, or choose a file
+          Drop a file here or choose one to upload
         </p>
         <p className="media-dropzone__hint">
-          PNG, JPEG, GIF, or WebP · max 5 MB. Uploads are committed to your site
-          repo through the server.
+          PNG, JPEG, GIF, WebP (5 MB max) · PDF (10 MB max). Files upload to
+          your repository through the server.
         </p>
         {!githubReady && (
           <p className="media-dropzone__hint media-dropzone__hint--warning" role="status">
-            Configure GitHub in Settings before uploading images.
+            Configure GitHub in Settings before uploading media.
           </p>
         )}
         <button
@@ -139,7 +162,7 @@ export function MediaDropzone({
           aria-describedby={uploadDisabled ? "upload-disabled-reason" : undefined}
           onClick={() => inputRef.current?.click()}
         >
-          {upload.status === "uploading" ? "Uploading…" : "Choose image"}
+          {upload.status === "uploading" ? "Uploading…" : "Choose file"}
         </button>
         {uploadDisabled && githubReady === false && (
           <span id="upload-disabled-reason" className="visually-hidden">
@@ -151,7 +174,7 @@ export function MediaDropzone({
           id="media-upload-input"
           className="media-dropzone__input"
           type="file"
-          accept="image/png,image/jpeg,image/gif,image/webp"
+          accept={ACCEPT_ATTRIBUTE}
           disabled={uploadDisabled}
           onChange={(event) => {
             void handleFile(event.target.files?.item(0));
@@ -171,31 +194,45 @@ export function MediaDropzone({
       {upload.status === "success" && (
         <div className="media-dropzone__result">
           <p className="media-dropzone__message media-dropzone__message--success">
-            Image ready at{" "}
+            {upload.kind === "image" ? "Image" : "PDF"} ready at{" "}
             <code className="media-dropzone__path">{upload.publicPath}</code>
           </p>
           <p className="media-dropzone__hint">
-            Use this path in your cover image field or body Markdown.
+            Use this path in your cover field, body Markdown, or media library.
           </p>
           <div className="media-dropzone__actions">
-            <button
-              type="button"
-              className="button button--compact button--primary"
-              onClick={() => {
-                onUseAsHero(upload.publicPath);
-              }}
-            >
-              Use as cover image
-            </button>
-            <button
-              type="button"
-              className="button button--compact"
-              onClick={() => {
-                onInsertIntoBody(upload.publicPath);
-              }}
-            >
-              Insert into body
-            </button>
+            {upload.kind === "image" ? (
+              <>
+                <button
+                  type="button"
+                  className="button button--compact button--primary"
+                  onClick={() => {
+                    onUseAsHero(upload.publicPath);
+                  }}
+                >
+                  Use as cover image
+                </button>
+                <button
+                  type="button"
+                  className="button button--compact"
+                  onClick={() => {
+                    onInsertImage(upload.publicPath);
+                  }}
+                >
+                  Insert into article
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                className="button button--compact button--primary"
+                onClick={() => {
+                  onInsertPdfLink(upload.publicPath, upload.filename);
+                }}
+              >
+                Insert PDF link
+              </button>
+            )}
             <button
               type="button"
               className="button button--compact"

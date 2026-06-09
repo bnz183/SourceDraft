@@ -12,6 +12,7 @@ import {
 } from "./auth.js";
 import { loadPublicConfig, loadPublishEnv } from "./config.js";
 import { uploadMedia } from "./media.js";
+import { listMedia } from "./listMedia.js";
 import { listPosts, loadPost } from "./posts.js";
 import { publishArticle, type PublishRequestBody } from "./publish.js";
 import { requireSameSiteRequest } from "./requestProtection.js";
@@ -94,6 +95,17 @@ app.get("/api/posts", requireAuth, async (req, res) => {
   }
 
   const result = await listPosts(envResult.config);
+  res.status(result.status).json(result.body);
+});
+
+app.get("/api/media", requireAuth, async (_req, res) => {
+  const envResult = loadPublishEnv();
+  if (!envResult.ok) {
+    res.status(500).json({ ok: false, error: envResult.error });
+    return;
+  }
+
+  const result = await listMedia(envResult.config);
   res.status(result.status).json(result.body);
 });
 

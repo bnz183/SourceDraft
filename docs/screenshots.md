@@ -9,7 +9,7 @@ Maintainers can add these under `docs/assets/` when captured from a real local s
 | File | What to show |
 |------|----------------|
 | `studio-overview.png` | **Posts** view — post list or empty state with publishing setup visible |
-| `editor-preview.png` | **Write** view — body editor, post details panel, and MDX/Markdown preview |
+| `editor-preview.png` | Editor workspace — center canvas, **Post details** panel, and MDX/Markdown preview |
 | `media-upload.png` | Cover image upload area with accepted formats noted |
 | `publish-success.png` | Publish confirmation after a successful commit |
 
@@ -20,7 +20,7 @@ Do not commit placeholder or generated fake screenshots.
 1. Start Studio: `pnpm dev` from the repository root.
 2. Sign in with your local admin password.
 3. Use a **test repository** or sanitized config — not production secrets.
-4. Open the view you want (Posts, Write, Settings).
+4. Open the view you want (editor workspace, Settings).
 5. Capture the browser window at a readable width (about 1280px works well).
 6. Save as PNG with the filenames above into `docs/assets/`.
 7. Review the image: crop out tokens, private repo names, personal paths, or email addresses if needed.
