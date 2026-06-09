@@ -1,0 +1,30 @@
+---
+title: Getting started with SourceDraft
+description: An example MDX post showing the file shape SourceDraft publishes to an Astro content folder.
+pubDate: 2026-06-06
+category: Guides
+tags:
+  - sourcedraft
+  - astro
+draft: false
+---
+
+# Getting started with SourceDraft
+
+This file demonstrates what lands in `src/content/blog/` after you publish from Studio.
+
+SourceDraft validates the article, renders YAML frontmatter, and commits the MDX body to your GitHub repository. Your Astro site reads the file from the content collection like any other post.
+
+## What you control in your Astro project
+
+- Layout and typography
+- Routes and pagination
+- Build and deploy (Cloudflare, Vercel, Netlify, etc.)
+
+## What SourceDraft handles
+
+- Article metadata and slug
+- MDX file path under `contentDir`
+- Create or update via the GitHub API
+
+Replace this example with your own posts from Studio.

@@ -1,0 +1,48 @@
+{
+  "name": "studio",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "predev": "pnpm --filter @sourcedraft/core --filter @sourcedraft/adapter-astro-mdx --filter @sourcedraft/adapter-markdown --filter @sourcedraft/github-publisher --filter @sourcedraft/config build",
+    "prebuild": "pnpm --filter @sourcedraft/core --filter @sourcedraft/adapter-astro-mdx --filter @sourcedraft/adapter-markdown --filter @sourcedraft/github-publisher --filter @sourcedraft/config build",
+    "dev": "concurrently -n web,api -c blue,gray \"vite\" \"tsx watch server/index.ts\"",
+    "dev:web": "vite",
+    "dev:server": "tsx watch server/index.ts",
+    "build": "tsc -b && vite build",
+    "build:server": "tsc -p server/tsconfig.json",
+    "start:server": "node dist-server/index.js",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@sourcedraft/adapter-astro-mdx": "workspace:*",
+    "@sourcedraft/adapter-markdown": "workspace:*",
+    "@sourcedraft/config": "workspace:*",
+    "@sourcedraft/core": "workspace:*",
+    "@sourcedraft/github-publisher": "workspace:*",
+    "busboy": "^1.6.0",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/busboy": "^1.5.4",
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.12.3",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "eslint": "^10.3.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
+    "concurrently": "^9.2.0",
+    "globals": "^17.6.0",
+    "tsx": "^4.20.3",
+    "typescript": "~6.0.2",
+    "typescript-eslint": "^8.59.2",
+    "vite": "^8.0.12"
+  }
+}
