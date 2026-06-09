@@ -27,5 +27,5 @@
     "static-site-generator",
     "git-based-cms"
   ],
-  "license": "MIT"
+  "license": "AGPL-3.0-or-later"
 }

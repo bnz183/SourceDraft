@@ -16,7 +16,7 @@ pnpm test
 
 ## Repository
 
-- [ ] `LICENSE` present (MIT)
+- [ ] `LICENSE` present (AGPL-3.0-or-later)
 - [ ] `CHANGELOG.md` has a `v0.1.0` section
 - [ ] `CONTRIBUTING.md` present
 - [ ] `.env` and `.env.local` are gitignored and not committed
