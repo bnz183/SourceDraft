@@ -117,3 +117,9 @@ When both hash and plaintext are set, the hash is used. Plaintext remains a lega
 **Intended for local/private use.** Do not expose Studio publicly without HTTPS, stronger auth, and deployment hardening.
 
 Report security concerns privately; redact tokens in bug reports. See [CONTRIBUTING.md](../CONTRIBUTING.md).
+
+## Automated security checks
+
+Pull requests and pushes to `main` run GitHub **CodeQL** analysis for JavaScript/TypeScript and Actions workflows. Fix or dismiss open CodeQL alerts before merging release changes.
+
+CI also runs `pnpm build`, `pnpm test`, and Playwright smoke tests (`pnpm test:e2e`). See [RELEASE_CHECKLIST.md](../RELEASE_CHECKLIST.md).
