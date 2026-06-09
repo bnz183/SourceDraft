@@ -75,4 +75,39 @@ describe("content quality metrics", () => {
 
     assert.ok(result.warnings.some((warning) => warning.id === "multiple-h1"));
   });
+
+  it("warns about missing hero alt, short body, and broken internal links", () => {
+    const result = analyzeContentQuality(
+      {
+        title: "Post",
+        description: "Summary",
+        body: "Short post with [broken](/post/missing-slug/).",
+        heroImage: "/images/cover.png",
+        coverImageAlt: "",
+      },
+      [],
+      { knownPostSlugs: ["existing-post"] },
+    );
+
+    assert.ok(result.warnings.some((warning) => warning.id === "hero-alt-missing"));
+    assert.ok(result.warnings.some((warning) => warning.id === "body-short"));
+    assert.ok(
+      result.warnings.some((warning) => warning.id === "internal-links-broken"),
+    );
+  });
+
+  it("warns when long articles have no H2 sections", () => {
+    const words = Array.from({ length: 420 }, (_, index) => `word${index}`).join(" ");
+    const result = analyzeContentQuality(
+      {
+        title: "Long post",
+        description: "Summary",
+        body: `# Title\n\n${words}`,
+        heroImage: "",
+      },
+      [],
+    );
+
+    assert.ok(result.warnings.some((warning) => warning.id === "long-article-no-h2"));
+  });
 });

@@ -24,7 +24,9 @@ import { listPosts, loadPost } from "./posts.js";
 import { publishArticle, type PublishRequestBody } from "./publish.js";
 import { requireSameSiteRequest } from "./requestProtection.js";
 import { initializePlugins } from "./plugins.js";
+import { runContentAudit, runDemoContentAudit } from "./contentAuditHandler.js";
 import { getSetupHealth } from "./setupHealth.js";
+import { runSetupDetection } from "./setupDetection.js";
 import {
   apiLimiter,
   readLimiter,
@@ -124,6 +126,30 @@ app.get("/api/config", readLimiter, requireAuth, (req, res) => {
 
 app.get("/api/health/setup", readLimiter, requireAuth, (_req, res) => {
   res.json(getSetupHealth());
+});
+
+app.get("/api/setup/detect", readLimiter, requireAuth, (_req, res) => {
+  res.json(runSetupDetection());
+});
+
+app.get("/api/content/audit", readLimiter, requireAuth, async (req, res) => {
+  const demoMode = isRequestDemoSession(req);
+
+  if (demoMode) {
+    const runtime = loadPublicConfig();
+    const result = runDemoContentAudit(runtime.adapter, runtime.contentDir);
+    res.status(result.status).json(result.body);
+    return;
+  }
+
+  const envResult = loadPublishEnv();
+  if (!envResult.ok) {
+    res.status(500).json({ ok: false, error: envResult.error });
+    return;
+  }
+
+  const result = await runContentAudit(envResult.config);
+  res.status(result.status).json(result.body);
 });
 
 app.get("/api/posts", readLimiter, requireAuth, async (req, res) => {

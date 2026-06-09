@@ -1,4 +1,7 @@
 import type { PublishMode } from "@sourcedraft/publishers";
+import type { ValidationIssue } from "@sourcedraft/core";
+import type { ArticleFormState } from "../lib/articleForm";
+import { PublishChecklist } from "./PublishChecklist";
 
 type PublishGateProps = {
   ready: boolean;
@@ -14,6 +17,9 @@ type PublishGateProps = {
   outputPath: string | null;
   prBranchPreview: string | null;
   prModeSupported: boolean;
+  validationIssues: ValidationIssue[];
+  formValues: ArticleFormState;
+  knownPostSlugs: string[];
   onPublishModeChange: (mode: PublishMode) => void;
   onPublish: () => void;
 };
@@ -114,6 +120,9 @@ export function PublishGate({
   outputPath,
   prBranchPreview,
   prModeSupported,
+  validationIssues,
+  formValues,
+  knownPostSlugs,
   onPublishModeChange,
   onPublish,
 }: PublishGateProps) {
@@ -172,22 +181,16 @@ export function PublishGate({
         )}
       </div>
 
-      <dl className="publish-bar__details">
-        <div>
-          <dt>Target branch</dt>
-          <dd>{baseBranch}</dd>
-        </div>
-        <div>
-          <dt>Output path</dt>
-          <dd>{outputPath ?? "—"}</dd>
-        </div>
-        {publishMode !== "direct" && (
-          <div>
-            <dt>PR branch</dt>
-            <dd>{prBranchPreview ?? "—"}</dd>
-          </div>
-        )}
-      </dl>
+      <PublishChecklist
+        valid={ready}
+        issues={validationIssues}
+        values={formValues}
+        outputPath={outputPath}
+        publishMode={publishMode}
+        baseBranch={baseBranch}
+        prBranchPreview={prBranchPreview}
+        knownPostSlugs={knownPostSlugs}
+      />
 
       {reason && (
         <p className="publish-bar__hint" id="publish-disabled-reason">

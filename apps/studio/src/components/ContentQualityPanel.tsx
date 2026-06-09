@@ -1,11 +1,13 @@
 import { useMemo } from "react";
 import type { ValidationIssue } from "@sourcedraft/core";
 import type { ArticleFormState } from "../lib/articleForm";
+import type { PostSummary } from "../lib/posts";
 import { analyzeContentQuality } from "../lib/contentQuality.js";
 
 type ContentQualityPanelProps = {
   values: ArticleFormState;
   validationIssues: ValidationIssue[];
+  posts?: PostSummary[];
 };
 
 function metricLabel(value: string | number, suffix = ""): string {
@@ -15,7 +17,13 @@ function metricLabel(value: string | number, suffix = ""): string {
 export function ContentQualityPanel({
   values,
   validationIssues,
+  posts = [],
 }: ContentQualityPanelProps) {
+  const knownPostSlugs = useMemo(
+    () => posts.map((post) => post.slug),
+    [posts],
+  );
+
   const analysis = useMemo(
     () =>
       analyzeContentQuality(
@@ -24,10 +32,15 @@ export function ContentQualityPanel({
           description: values.description,
           body: values.body,
           heroImage: values.heroImage,
+          metaTitle: values.metaTitle,
+          metaDescription: values.metaDescription,
+          socialImage: values.socialImage,
+          coverImageAlt: values.coverImageAlt,
         },
         validationIssues,
+        { knownPostSlugs },
       ),
-    [values, validationIssues],
+    [values, validationIssues, knownPostSlugs],
   );
 
   const { metrics, warnings } = analysis;

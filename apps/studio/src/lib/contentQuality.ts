@@ -1,4 +1,8 @@
 import type { ValidationIssue } from "@sourcedraft/core";
+import {
+  META_DESCRIPTION_LENGTH_GUIDANCE,
+  META_TITLE_LENGTH_GUIDANCE,
+} from "@sourcedraft/core";
 import { analyzeDocumentOutline } from "./documentOutline.js";
 
 export type ContentQualityInput = {
@@ -6,7 +10,19 @@ export type ContentQualityInput = {
   description: string;
   body: string;
   heroImage: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  socialImage?: string;
+  coverImageAlt?: string;
 };
+
+export type ContentQualityContext = {
+  knownPostSlugs?: string[];
+};
+
+const LONG_ARTICLE_WORD_THRESHOLD = 400;
+const SHORT_BODY_WORD_THRESHOLD = 100;
+const EXTERNAL_LINK_WARN_THRESHOLD = 8;
 
 export type LinkCounts = {
   internal: number;
@@ -38,8 +54,8 @@ export type ContentQualityWarning = {
 };
 
 const WORDS_PER_MINUTE = 200;
-const TITLE_LENGTH_GUIDANCE = 60;
-const DESCRIPTION_LENGTH_GUIDANCE = 160;
+const TITLE_LENGTH_GUIDANCE = META_TITLE_LENGTH_GUIDANCE;
+const DESCRIPTION_LENGTH_GUIDANCE = META_DESCRIPTION_LENGTH_GUIDANCE;
 
 const MARKDOWN_LINK_PATTERN =
   /(?<!!)\[([^\]]*)\]\(([^)\s]+)(?:\s+"[^"]*")?\)/gu;
@@ -126,10 +142,53 @@ export function buildContentQualityMetrics(
   };
 }
 
+function normalizeInternalSlug(target: string): string | null {
+  const trimmed = target.trim();
+  if (trimmed.length === 0 || trimmed.startsWith("#")) {
+    return null;
+  }
+
+  const withoutQuery = trimmed.split("?")[0]?.split("#")[0] ?? trimmed;
+  const postMatch = withoutQuery.match(/\/post\/([^/]+)\/?$/u);
+  if (postMatch?.[1]) {
+    return postMatch[1];
+  }
+
+  const slugMatch = withoutQuery.match(/^\/([^/]+)\/?$/u);
+  if (slugMatch?.[1] && !slugMatch[1].includes(".")) {
+    return slugMatch[1];
+  }
+
+  return null;
+}
+
+export function findBrokenInternalLinks(
+  body: string,
+  knownSlugs: Set<string>,
+): string[] {
+  const broken: string[] = [];
+  const pattern = new RegExp(MARKDOWN_LINK_PATTERN.source, "gu");
+
+  for (const match of body.matchAll(pattern)) {
+    const url = match[2] ?? "";
+    if (isExternalUrl(url)) {
+      continue;
+    }
+
+    const slug = normalizeInternalSlug(url);
+    if (slug !== null && knownSlugs.size > 0 && !knownSlugs.has(slug)) {
+      broken.push(url);
+    }
+  }
+
+  return broken;
+}
+
 export function buildContentQualityWarnings(
   input: ContentQualityInput,
   metrics: ContentQualityMetrics,
   validationIssues: ValidationIssue[],
+  context: ContentQualityContext = {},
 ): ContentQualityWarning[] {
   const warnings: ContentQualityWarning[] = [];
   const issueFields = new Set(validationIssues.map((issue) => issue.field));
@@ -218,6 +277,89 @@ export function buildContentQualityWarnings(
     });
   }
 
+  const metaTitle = input.metaTitle?.trim() ?? "";
+  if (metaTitle.length > META_TITLE_LENGTH_GUIDANCE) {
+    warnings.push({
+      id: "meta-title-long",
+      kind: "info",
+      message: `Meta title is ${metaTitle.length} characters (guidance: ${META_TITLE_LENGTH_GUIDANCE}).`,
+    });
+  }
+
+  const metaDescription = input.metaDescription?.trim() ?? "";
+  if (metaDescription.length > META_DESCRIPTION_LENGTH_GUIDANCE) {
+    warnings.push({
+      id: "meta-description-long",
+      kind: "info",
+      message: `Meta description is ${metaDescription.length} characters (guidance: ${META_DESCRIPTION_LENGTH_GUIDANCE}).`,
+    });
+  }
+
+  const heroImage = input.heroImage.trim();
+  const coverAlt = input.coverImageAlt?.trim() ?? "";
+  if (heroImage.length > 0 && coverAlt.length === 0) {
+    warnings.push({
+      id: "hero-alt-missing",
+      kind: "warn",
+      message: "Cover image is set but hero alt text is empty.",
+    });
+  }
+
+  const socialImage = input.socialImage?.trim() ?? "";
+  if (heroImage.length === 0 && socialImage.length === 0) {
+    warnings.push({
+      id: "social-image-missing",
+      kind: "info",
+      message: "No hero or social image set for sharing previews.",
+    });
+  }
+
+  if (
+    metrics.wordCount >= LONG_ARTICLE_WORD_THRESHOLD &&
+    outline.headings.length > 0 &&
+    !outline.hasSubheading
+  ) {
+    warnings.push({
+      id: "long-article-no-h2",
+      kind: "info",
+      message: `Article has ${metrics.wordCount} words but no H2 sections.`,
+    });
+  }
+
+  if (
+    metrics.wordCount > 0 &&
+    metrics.wordCount < SHORT_BODY_WORD_THRESHOLD
+  ) {
+    warnings.push({
+      id: "body-short",
+      kind: "info",
+      message: `Body is only ${metrics.wordCount} words.`,
+    });
+  }
+
+  if (metrics.externalLinkCount > EXTERNAL_LINK_WARN_THRESHOLD) {
+    warnings.push({
+      id: "external-links-many",
+      kind: "info",
+      message: `Body has ${metrics.externalLinkCount} external links.`,
+    });
+  }
+
+  const knownSlugs = new Set(
+    (context.knownPostSlugs ?? []).map((slug) => slug.trim()).filter(Boolean),
+  );
+  const brokenLinks = findBrokenInternalLinks(input.body, knownSlugs);
+  if (brokenLinks.length > 0) {
+    warnings.push({
+      id: "internal-links-broken",
+      kind: "warn",
+      message:
+        brokenLinks.length === 1
+          ? `Internal link may not match a loaded post: ${brokenLinks[0]}`
+          : `${brokenLinks.length} internal links may not match loaded posts.`,
+    });
+  }
+
   if (input.body.trim().length === 0 && !issueFields.has("body")) {
     warnings.push({
       id: "body-empty",
@@ -232,12 +374,18 @@ export function buildContentQualityWarnings(
 export function analyzeContentQuality(
   input: ContentQualityInput,
   validationIssues: ValidationIssue[],
+  context: ContentQualityContext = {},
 ): {
   metrics: ContentQualityMetrics;
   warnings: ContentQualityWarning[];
 } {
   const metrics = buildContentQualityMetrics(input);
-  const warnings = buildContentQualityWarnings(input, metrics, validationIssues);
+  const warnings = buildContentQualityWarnings(
+    input,
+    metrics,
+    validationIssues,
+    context,
+  );
 
   return { metrics, warnings };
 }

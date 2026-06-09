@@ -1,5 +1,6 @@
 import type { ValidationIssue } from "@sourcedraft/core";
 import type { ArticleFormState } from "../lib/articleForm";
+import type { PostSummary } from "../lib/posts";
 import { ContentQualityPanel } from "./ContentQualityPanel";
 import { MediaSection } from "./MediaSection";
 import { SeoSharingPanel } from "./SeoSharingPanel";
@@ -13,6 +14,7 @@ type PostDetailsPanelProps = {
   valid: boolean;
   issues: ValidationIssue[];
   outputPath: string | null;
+  posts?: PostSummary[];
   onChange: (field: keyof ArticleFormState, value: string | boolean) => void;
   onSlugManualEdit: () => void;
   onSlugResync: () => void;
@@ -31,6 +33,7 @@ export function PostDetailsPanel({
   valid,
   issues,
   outputPath,
+  posts = [],
   onChange,
   onSlugManualEdit,
   onSlugResync,
@@ -216,7 +219,11 @@ export function PostDetailsPanel({
           validationIssues={issues}
         />
 
-        <ContentQualityPanel values={values} validationIssues={issues} />
+        <ContentQualityPanel
+          values={values}
+          validationIssues={issues}
+          posts={posts}
+        />
 
         <div
           className={

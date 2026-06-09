@@ -579,6 +579,9 @@ function App() {
               outputPath={outputPath}
               prBranchPreview={prBranchPreview}
               prModeSupported={prModeSupported}
+              validationIssues={validation.issues}
+              formValues={form}
+              knownPostSlugs={posts.map((post) => post.slug)}
               onPublishModeChange={setPublishMode}
               onPublish={handlePublish}
             />
@@ -593,6 +596,7 @@ function App() {
             valid={validation.valid}
             issues={validation.issues}
             outputPath={outputPath}
+            posts={posts}
             onChange={handleFieldChange}
             onSlugManualEdit={handleSlugManualEdit}
             onSlugResync={handleSlugResync}
