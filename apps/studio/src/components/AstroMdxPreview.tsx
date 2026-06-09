@@ -12,7 +12,7 @@ type AstroMdxPreviewProps = {
 };
 
 function previewLabel(adapter: string): string {
-  return adapter === "markdown" ? "Markdown output" : "Astro MDX output";
+  return adapter === "markdown" ? "Markdown preview" : "MDX preview";
 }
 
 export function AstroMdxPreview({
@@ -40,20 +40,22 @@ export function AstroMdxPreview({
       : null;
 
   return (
-    <section className="panel mdx-output">
+    <section className="panel mdx-output" aria-labelledby="preview-panel-title">
       <div className="panel__header">
-        <h2 className="panel__title">{previewLabel(adapter)}</h2>
+        <h2 className="panel__title" id="preview-panel-title">
+          {previewLabel(adapter)}
+        </h2>
         <p className="panel__meta">
           {valid
-            ? "Preview of the file that will be committed"
-            : "Fix validation issues to preview output"}
+            ? "Review the file that will be saved to GitHub"
+            : "Complete post details and body to preview"}
         </p>
       </div>
 
       {valid && resolvedOutputPath && fileOutput ? (
         <div className="mdx-output__content">
           <div className="mdx-output__path">
-            <span className="mdx-output__path-label">Output path</span>
+            <span className="mdx-output__path-label">Output file</span>
             <code>{resolvedOutputPath}</code>
           </div>
           <pre className="mdx-output__code">
@@ -61,14 +63,27 @@ export function AstroMdxPreview({
           </pre>
         </div>
       ) : (
-        <ul className="validation-panel__issues mdx-output__issues">
-          {issues.map((issue) => (
-            <li key={`${issue.field}-${issue.message}`}>
-              <span className="validation-panel__field">{issue.field}</span>
-              {issue.message}
-            </li>
-          ))}
-        </ul>
+        <div className="validation-panel">
+          {issues.length === 0 ? (
+            <p className="validation-panel__intro">
+              Add a title, description, dates, category, and body to continue.
+            </p>
+          ) : (
+            <>
+              <p className="validation-panel__intro" role="status">
+                Fix these items before publishing:
+              </p>
+              <ul className="validation-panel__issues mdx-output__issues">
+                {issues.map((issue) => (
+                  <li key={`${issue.field}-${issue.message}`}>
+                    <span className="validation-panel__field">{issue.field}</span>
+                    {issue.message}
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+        </div>
       )}
     </section>
   );

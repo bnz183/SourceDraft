@@ -175,11 +175,11 @@ export async function listPosts(
 ): Promise<{ status: number; body: PostsListResponse }> {
   const publisher = createPublisher(env);
   const contentDir = normalizeContentDir(env.contentDir);
-  const listed = await publisher.listFiles({ path: contentDir });
+  const listed = await publisher.listFiles({ path: contentDir, contentDir });
 
   if (!listed.ok) {
     return {
-      status: 502,
+      status: listed.status === 404 ? 404 : 502,
       body: { ok: false, error: listed.error },
     };
   }
@@ -246,8 +246,9 @@ export async function loadPost(
   const loaded = await publisher.readFile({ path: safe.path });
 
   if (!loaded.ok) {
+    const status = loaded.status === 404 ? 404 : 502;
     return {
-      status: loaded.status === 404 ? 404 : 502,
+      status,
       body: { ok: false, error: loaded.error },
     };
   }

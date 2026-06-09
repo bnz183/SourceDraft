@@ -50,6 +50,8 @@ The GitHub token never reaches the browser. It is read from `.env` on the server
 
 Details: [docs/github-publishing.md](docs/github-publishing.md) · [docs/media.md](docs/media.md)
 
+v0.1 uses the GitHub Contents API — suitable for typical blogs; very large content folders are a known MVP limitation.
+
 ## Quickstart
 
 Requirements: Node.js 22+, pnpm 11+

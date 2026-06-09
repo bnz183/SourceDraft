@@ -21,29 +21,30 @@ export function AdapterStatus({
     githubOwner.trim().length > 0 && githubRepo.trim().length > 0;
 
   const rows: StatusRow[] = [
-    { label: "Adapter", value: adapter, state: "ok" },
-    { label: "Output path", value: contentDir, state: "ok" },
+    { label: "Output format", value: adapter, state: "ok" },
+    { label: "Content folder", value: contentDir, state: "ok" },
     {
-      label: "GitHub target",
+      label: "GitHub repository",
       value: githubReady ? `${githubOwner}/${githubRepo}` : "Not configured",
       state: githubReady ? "idle" : "off",
     },
     {
       label: "GitHub token",
-      value: "Checked server-side on publish",
-      state: "idle",
+      value: "Used on the server when you publish",
+      state: githubReady ? "idle" : "off",
     },
-    { label: "Auth", value: "Local password session", state: "ok" },
   ];
 
   return (
-    <section className="panel adapter-status">
+    <section className="panel adapter-status" aria-labelledby="setup-panel-title">
       <div className="panel__header">
-        <h2 className="panel__title">Publishing setup</h2>
+        <h2 className="panel__title" id="setup-panel-title">
+          Publishing setup
+        </h2>
         <p className="panel__meta">
           {githubReady
-            ? "GitHub repo configured in .env"
-            : "Set GITHUB_OWNER and GITHUB_REPO in .env to publish"}
+            ? "Connected to your GitHub repository"
+            : "Finish GitHub setup in .env to publish"}
         </p>
       </div>
 
@@ -56,7 +57,7 @@ export function AdapterStatus({
                 className={`adapter-status__dot adapter-status__dot--${row.state}`}
                 aria-hidden="true"
               />
-              {row.value}
+              <span>{row.value}</span>
             </dd>
           </div>
         ))}

@@ -100,12 +100,13 @@ export async function publishArticle(
     path,
     content,
     message: `Publish: ${article.slug}`,
+    purpose: "post",
   });
 
   if (!result.ok) {
     const errorBody: PublishErrorResponse = {
       ok: false,
-      error: result.error,
+      error: result.error || "Publish to GitHub failed.",
     };
 
     if (result.status !== undefined) {

@@ -46,7 +46,11 @@ export async function fetchPosts(): Promise<FetchPostsResponse> {
 
     if (!response.ok || !data.ok) {
       return data.ok
-        ? { ok: false, error: "Could not load posts." }
+        ? {
+            ok: false,
+            error:
+              "Could not load posts. Check GitHub token, owner/repo, and contentDir.",
+          }
         : data;
     }
 
@@ -66,7 +70,10 @@ export async function fetchPost(path: string): Promise<FetchPostResponse> {
 
     if (!response.ok || !data.ok) {
       return data.ok
-        ? { ok: false, error: "Could not load post." }
+        ? {
+            ok: false,
+            error: "Could not open this post. It may have been moved or deleted.",
+          }
         : data;
     }
 

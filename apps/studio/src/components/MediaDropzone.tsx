@@ -1,4 +1,4 @@
-import { useRef, useState, type DragEvent } from "react";
+import { useRef, useState, type DragEvent, type KeyboardEvent } from "react";
 import { uploadMedia } from "../lib/media";
 
 const ACCEPTED_TYPES = new Set([
@@ -9,7 +9,7 @@ const ACCEPTED_TYPES = new Set([
 ]);
 
 type MediaDropzoneProps = {
-  mediaDir: string;
+  githubReady: boolean;
   onUseAsHero: (publicPath: string) => void;
   onInsertIntoBody: (publicPath: string) => void;
 };
@@ -21,7 +21,7 @@ type UploadState =
   | { status: "error"; message: string };
 
 export function MediaDropzone({
-  mediaDir,
+  githubReady,
   onUseAsHero,
   onInsertIntoBody,
 }: MediaDropzoneProps) {
@@ -29,15 +29,25 @@ export function MediaDropzone({
   const [dragActive, setDragActive] = useState(false);
   const [upload, setUpload] = useState<UploadState>({ status: "idle" });
 
+  const uploadDisabled = !githubReady || upload.status === "uploading";
+
   async function handleFile(file: File | null | undefined) {
-    if (!file) {
+    if (!file || uploadDisabled) {
       return;
     }
 
     if (!ACCEPTED_TYPES.has(file.type)) {
       setUpload({
         status: "error",
-        message: "Choose a PNG, JPEG, GIF, or WebP image.",
+        message: "Use a PNG, JPEG, GIF, or WebP image.",
+      });
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setUpload({
+        status: "error",
+        message: "Image must be 5 MB or smaller.",
       });
       return;
     }
@@ -59,7 +69,9 @@ export function MediaDropzone({
 
   function handleDragOver(event: DragEvent<HTMLDivElement>) {
     event.preventDefault();
-    setDragActive(true);
+    if (!uploadDisabled) {
+      setDragActive(true);
+    }
   }
 
   function handleDragLeave(event: DragEvent<HTMLDivElement>) {
@@ -71,6 +83,17 @@ export function MediaDropzone({
     event.preventDefault();
     setDragActive(false);
     void handleFile(event.dataTransfer.files.item(0));
+  }
+
+  function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    if (uploadDisabled) {
+      return;
+    }
+
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      inputRef.current?.click();
+    }
   }
 
   function resetUpload() {
@@ -88,29 +111,48 @@ export function MediaDropzone({
             ? "media-dropzone__target media-dropzone__target--active"
             : "media-dropzone__target"
         }
+        role="group"
+        aria-label="Image upload"
+        tabIndex={uploadDisabled ? -1 : 0}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
+        onKeyDown={handleKeyDown}
+        aria-disabled={uploadDisabled}
       >
-        <p className="media-dropzone__label">Drop an image here</p>
-        <p className="media-dropzone__hint">
-          PNG, JPEG, GIF, or WebP up to 5 MB. Uploads go to{" "}
-          <code>{mediaDir}</code> through the server — your GitHub token never
-          leaves the API.
+        <p className="media-dropzone__label">
+          Drag an image here, or choose a file
         </p>
+        <p className="media-dropzone__hint">
+          PNG, JPEG, GIF, or WebP · max 5 MB. Uploads are committed to your site
+          repo through the server.
+        </p>
+        {!githubReady && (
+          <p className="media-dropzone__hint media-dropzone__hint--warning" role="status">
+            Configure GitHub in Settings before uploading images.
+          </p>
+        )}
         <button
           type="button"
           className="button button--compact"
-          disabled={upload.status === "uploading"}
+          disabled={uploadDisabled}
+          aria-describedby={uploadDisabled ? "upload-disabled-reason" : undefined}
           onClick={() => inputRef.current?.click()}
         >
-          {upload.status === "uploading" ? "Uploading..." : "Choose image"}
+          {upload.status === "uploading" ? "Uploading…" : "Choose image"}
         </button>
+        {uploadDisabled && githubReady === false && (
+          <span id="upload-disabled-reason" className="visually-hidden">
+            GitHub owner and repository are not configured
+          </span>
+        )}
         <input
           ref={inputRef}
+          id="media-upload-input"
           className="media-dropzone__input"
           type="file"
           accept="image/png,image/jpeg,image/gif,image/webp"
+          disabled={uploadDisabled}
           onChange={(event) => {
             void handleFile(event.target.files?.item(0));
           }}
@@ -118,7 +160,10 @@ export function MediaDropzone({
       </div>
 
       {upload.status === "error" && (
-        <p className="media-dropzone__message media-dropzone__message--error">
+        <p
+          className="media-dropzone__message media-dropzone__message--error"
+          role="alert"
+        >
           {upload.message}
         </p>
       )}
@@ -126,17 +171,21 @@ export function MediaDropzone({
       {upload.status === "success" && (
         <div className="media-dropzone__result">
           <p className="media-dropzone__message media-dropzone__message--success">
-            Uploaded <code>{upload.publicPath}</code>
+            Image ready at{" "}
+            <code className="media-dropzone__path">{upload.publicPath}</code>
+          </p>
+          <p className="media-dropzone__hint">
+            Use this path in your cover image field or body Markdown.
           </p>
           <div className="media-dropzone__actions">
             <button
               type="button"
-              className="button button--compact"
+              className="button button--compact button--primary"
               onClick={() => {
                 onUseAsHero(upload.publicPath);
               }}
             >
-              Use as hero image
+              Use as cover image
             </button>
             <button
               type="button"

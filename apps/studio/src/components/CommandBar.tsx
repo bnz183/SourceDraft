@@ -7,8 +7,8 @@ type CommandBarProps = {
 };
 
 const NAV_ITEMS: { id: View; label: string }[] = [
-  { id: "overview", label: "Overview" },
-  { id: "new-article", label: "New Article" },
+  { id: "overview", label: "Posts" },
+  { id: "new-article", label: "Write" },
   { id: "settings", label: "Settings" },
 ];
 
@@ -23,7 +23,7 @@ export function CommandBar({
         <span className="command-bar__mark">SD</span>
         <div>
           <p className="command-bar__title">SourceDraft Studio</p>
-          <p className="command-bar__subtitle">Markdown / MDX writing workspace</p>
+          <p className="command-bar__subtitle">Write, preview, and publish to GitHub</p>
         </div>
       </div>
 

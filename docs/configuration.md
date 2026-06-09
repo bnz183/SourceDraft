@@ -82,6 +82,8 @@ SourceDraft searches for `sourcedraft.config.json` in the working directory, up 
 
 Missing file → built-in defaults matching the example above.
 
+Wrong `contentDir` or `mediaDir` values produce clear GitHub errors in Studio when listing posts, opening a post, publishing, or uploading media. See [github-publishing.md](github-publishing.md#common-failures).
+
 ## Environment variables
 
 ```env

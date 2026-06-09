@@ -40,7 +40,11 @@ export async function publishArticle(
 
   if (!response.ok || !data.ok) {
     return data.ok
-      ? { ok: false, error: "Publish failed." }
+      ? {
+          ok: false,
+          error:
+            "Publish to GitHub failed. Check token, owner/repo, and contentDir.",
+        }
       : data;
   }
 

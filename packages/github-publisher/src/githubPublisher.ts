@@ -1,3 +1,22 @@
+/**
+ * GitHub Contents API publisher for SourceDraft v0.1.
+ *
+ * This MVP uses the Contents API for publish, list, read, and upload flows.
+ * It works well for small and medium content folders. Very large directories
+ * may hit GitHub listing limits; a future version may add Git Trees API or
+ * indexed listing for large sites.
+ */
+import {
+  directoryListingLimitMessage,
+  errorContextFromConfig,
+  formatGitHubApiError,
+  formatLocalGitHubError,
+  isDirectoryListingTruncated,
+  validateGitHubFileBody,
+  type GitHubOperation,
+} from "./githubErrors.js";
+import { encodeRepoPath, normalizeRepoPath } from "./githubPaths.js";
+
 const GITHUB_API_VERSION = "2022-11-28";
 
 export type GitHubPublisherConfig = {
@@ -10,6 +29,7 @@ export type GitHubPublisherConfig = {
 export type PublishFileInput = {
   path: string;
   message: string;
+  purpose?: "post" | "media";
 } & (
   | { content: string; contentBase64?: never }
   | { contentBase64: string; content?: never }
@@ -33,6 +53,7 @@ export type PublishFileResult = PublishFileSuccess | PublishFileError;
 
 export type ListFilesInput = {
   path: string;
+  contentDir?: string;
 };
 
 export type ListedFile = {
@@ -99,18 +120,6 @@ type GitHubCommitBody = {
   };
 };
 
-function normalizeRepoPath(path: string): string {
-  return path.replace(/^\/+/u, "").trim();
-}
-
-function encodeRepoPath(path: string): string {
-  return path
-    .split("/")
-    .filter((segment) => segment.length > 0)
-    .map((segment) => encodeURIComponent(segment))
-    .join("/");
-}
-
 function contentsUrl(config: GitHubPublisherConfig, path: string): string {
   const encodedPath = encodeRepoPath(path);
   return `https://api.github.com/repos/${config.owner}/${config.repo}/contents/${encodedPath}`;
@@ -135,6 +144,35 @@ async function readGitHubError(response: Response): Promise<string> {
   }
 
   return response.statusText || "GitHub API request failed.";
+}
+
+function apiError(
+  response: Response,
+  rawMessage: string,
+  operation: GitHubOperation,
+  config: GitHubPublisherConfig,
+  context: { path?: string; contentDir?: string; mediaDir?: string } = {},
+): PublishFileError {
+  const errorContext = errorContextFromConfig(config, context);
+  return {
+    ok: false,
+    error: formatGitHubApiError(response.status, rawMessage, operation, errorContext),
+    status: response.status,
+  };
+}
+
+function localError(
+  message: string,
+  operation: GitHubOperation,
+  config: GitHubPublisherConfig,
+  context: { path?: string; contentDir?: string; mediaDir?: string } = {},
+  status?: number,
+): PublishFileError {
+  return {
+    ok: false,
+    error: formatLocalGitHubError(message, operation, errorContextFromConfig(config, context)),
+    ...(status !== undefined ? { status } : {}),
+  };
 }
 
 function encodeContent(content: string): string {
@@ -173,11 +211,13 @@ function resolvePublishContent(input: PublishFileInput): PublishFileError | stri
 async function getExistingFileSha(
   config: GitHubPublisherConfig,
   path: string,
+  purpose: "post" | "media",
 ): Promise<
   | { found: true; sha: string }
   | { found: false }
   | PublishFileError
 > {
+  const operation: GitHubOperation = purpose === "media" ? "uploadMedia" : "checkFile";
   const url = `${contentsUrl(config, path)}?ref=${encodeURIComponent(config.branch)}`;
   const response = await fetch(url, {
     method: "GET",
@@ -189,23 +229,33 @@ async function getExistingFileSha(
   }
 
   if (!response.ok) {
-    return {
-      ok: false,
-      error: await readGitHubError(response),
-      status: response.status,
-    };
+    const raw = await readGitHubError(response);
+    return apiError(response, raw, operation, config, { path });
   }
 
-  const body = (await response.json()) as GitHubContentBody;
-  if (typeof body.sha !== "string" || body.sha.length === 0) {
-    return {
-      ok: false,
-      error: "GitHub returned a file without a sha.",
-      status: response.status,
-    };
+  let body: GitHubContentBody | GitHubDirectoryEntry[];
+  try {
+    body = (await response.json()) as GitHubContentBody | GitHubDirectoryEntry[];
+  } catch {
+    return localError(
+      "GitHub returned an unreadable file response.",
+      operation,
+      config,
+      { path },
+      response.status,
+    );
   }
 
-  return { found: true, sha: body.sha };
+  if (Array.isArray(body)) {
+    return localError("Path is not a file.", operation, config, { path }, response.status);
+  }
+
+  const validationError = validateGitHubFileBody(body);
+  if (validationError !== null) {
+    return localError(validationError, operation, config, { path }, response.status);
+  }
+
+  return { found: true, sha: body.sha as string };
 }
 
 async function putFile(
@@ -213,8 +263,10 @@ async function putFile(
   path: string,
   contentBase64: string,
   message: string,
+  purpose: "post" | "media",
   existingSha?: string,
 ): Promise<PublishFileResult> {
+  const operation: GitHubOperation = purpose === "media" ? "uploadMedia" : "publish";
   const payload: Record<string, string> = {
     message,
     content: contentBase64,
@@ -235,31 +287,47 @@ async function putFile(
   });
 
   if (!response.ok) {
-    return {
-      ok: false,
-      error: await readGitHubError(response),
-      status: response.status,
-    };
+    const raw = await readGitHubError(response);
+    return apiError(response, raw, operation, config, {
+      path,
+      ...(purpose === "media" ? { mediaDir: path.split("/").slice(0, -1).join("/") } : {}),
+    });
   }
 
-  const body = (await response.json()) as GitHubCommitBody;
+  let body: GitHubCommitBody;
+  try {
+    body = (await response.json()) as GitHubCommitBody;
+  } catch {
+    return localError(
+      "GitHub returned an unreadable publish response.",
+      operation,
+      config,
+      { path },
+      response.status,
+    );
+  }
+
   const sha = body.content?.sha;
   const commitSha = body.commit?.sha;
 
   if (typeof sha !== "string" || sha.length === 0) {
-    return {
-      ok: false,
-      error: "GitHub did not return the published file sha.",
-      status: response.status,
-    };
+    return localError(
+      "GitHub did not return the published file sha.",
+      operation,
+      config,
+      { path },
+      response.status,
+    );
   }
 
   if (typeof commitSha !== "string" || commitSha.length === 0) {
-    return {
-      ok: false,
-      error: "GitHub did not return the commit sha.",
-      status: response.status,
-    };
+    return localError(
+      "GitHub did not return the commit sha.",
+      operation,
+      config,
+      { path },
+      response.status,
+    );
   }
 
   return {
@@ -274,6 +342,7 @@ async function putFile(
 async function collectFiles(
   config: GitHubPublisherConfig,
   path: string,
+  contentDir: string,
   files: ListedFile[],
 ): Promise<PublishFileError | null> {
   const url = `${contentsUrl(config, path)}?ref=${encodeURIComponent(config.branch)}`;
@@ -283,14 +352,25 @@ async function collectFiles(
   });
 
   if (!response.ok) {
-    return {
-      ok: false,
-      error: await readGitHubError(response),
-      status: response.status,
-    };
+    const raw = await readGitHubError(response);
+    return apiError(response, raw, "listPosts", config, {
+      path,
+      contentDir,
+    });
   }
 
-  const body = (await response.json()) as GitHubDirectoryEntry | GitHubDirectoryEntry[];
+  let body: GitHubDirectoryEntry | GitHubDirectoryEntry[];
+  try {
+    body = (await response.json()) as GitHubDirectoryEntry | GitHubDirectoryEntry[];
+  } catch {
+    return localError(
+      "GitHub returned an unreadable directory listing.",
+      "listPosts",
+      config,
+      { path, contentDir },
+      response.status,
+    );
+  }
 
   if (!Array.isArray(body)) {
     if (
@@ -306,9 +386,22 @@ async function collectFiles(
         sha: body.sha,
         size: body.size,
       });
+      return null;
     }
 
-    return null;
+    return localError(
+      `Could not list posts under "${contentDir}". contentDir should be a folder containing post files.`,
+      "listPosts",
+      config,
+      { path, contentDir },
+    );
+  }
+
+  if (isDirectoryListingTruncated(body.length)) {
+    return localError(directoryListingLimitMessage(), "listPosts", config, {
+      path,
+      contentDir,
+    });
   }
 
   for (const entry of body) {
@@ -332,7 +425,7 @@ async function collectFiles(
     }
 
     if (entry.type === "dir" && typeof entry.path === "string") {
-      const error = await collectFiles(config, entry.path, files);
+      const error = await collectFiles(config, entry.path, contentDir, files);
       if (error !== null) {
         return error;
       }
@@ -348,6 +441,8 @@ export function createGitHubPublisher(
   return {
     async publishFile(input: PublishFileInput): Promise<PublishFileResult> {
       const path = normalizeRepoPath(input.path);
+      const purpose = input.purpose ?? "post";
+
       if (path.length === 0) {
         return {
           ok: false,
@@ -367,7 +462,7 @@ export function createGitHubPublisher(
         return encodedContent;
       }
 
-      const existing = await getExistingFileSha(config, path);
+      const existing = await getExistingFileSha(config, path, purpose);
       if ("ok" in existing) {
         return existing;
       }
@@ -378,15 +473,18 @@ export function createGitHubPublisher(
           path,
           encodedContent,
           input.message,
+          purpose,
           existing.sha,
         );
       }
 
-      return putFile(config, path, encodedContent, input.message);
+      return putFile(config, path, encodedContent, input.message, purpose);
     },
 
     async listFiles(input: ListFilesInput): Promise<ListFilesResult> {
       const path = normalizeRepoPath(input.path);
+      const contentDir = input.contentDir ?? path;
+
       if (path.length === 0) {
         return {
           ok: false,
@@ -395,7 +493,7 @@ export function createGitHubPublisher(
       }
 
       const files: ListedFile[] = [];
-      const error = await collectFiles(config, path, files);
+      const error = await collectFiles(config, path, contentDir, files);
       if (error !== null) {
         return error;
       }
@@ -419,40 +517,33 @@ export function createGitHubPublisher(
       });
 
       if (!response.ok) {
-        return {
-          ok: false,
-          error: await readGitHubError(response),
-          status: response.status,
-        };
+        const raw = await readGitHubError(response);
+        return apiError(response, raw, "readPost", config, { path });
       }
 
-      const body = (await response.json()) as GitHubContentBody;
-      if (body.type !== "file") {
-        return {
-          ok: false,
-          error: "Path is not a file.",
-        };
+      let body: GitHubContentBody;
+      try {
+        body = (await response.json()) as GitHubContentBody;
+      } catch {
+        return localError(
+          "GitHub returned an unreadable file response.",
+          "readPost",
+          config,
+          { path },
+          response.status,
+        );
       }
 
-      if (typeof body.content !== "string" || body.encoding !== "base64") {
-        return {
-          ok: false,
-          error: "GitHub did not return base64 file content.",
-        };
-      }
-
-      if (typeof body.sha !== "string" || body.sha.length === 0) {
-        return {
-          ok: false,
-          error: "GitHub returned a file without a sha.",
-        };
+      const validationError = validateGitHubFileBody(body);
+      if (validationError !== null) {
+        return localError(validationError, "readPost", config, { path }, response.status);
       }
 
       return {
         ok: true,
         path,
-        content: Buffer.from(body.content, "base64").toString("utf8"),
-        sha: body.sha,
+        content: Buffer.from(body.content as string, "base64").toString("utf8"),
+        sha: body.sha as string,
       };
     },
   };
