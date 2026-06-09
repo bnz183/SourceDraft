@@ -15,6 +15,45 @@ function parseScalar(value: string): string {
   return trimmed;
 }
 
+function isFrontmatterKey(value: string): boolean {
+  if (value.length === 0) {
+    return false;
+  }
+
+  for (const char of value) {
+    const code = char.charCodeAt(0);
+    const isUpper = code >= 65 && code <= 90;
+    const isLower = code >= 97 && code <= 122;
+    if (!isUpper && !isLower) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function parseKeyValueLine(line: string): { key: string; value: string } | null {
+  const colonIndex = line.indexOf(":");
+  if (colonIndex <= 0) {
+    return null;
+  }
+
+  const key = line.slice(0, colonIndex).trim();
+  if (!isFrontmatterKey(key)) {
+    return null;
+  }
+
+  let valueStart = colonIndex + 1;
+  while (valueStart < line.length && line[valueStart] === " ") {
+    valueStart += 1;
+  }
+
+  return {
+    key,
+    value: line.slice(valueStart),
+  };
+}
+
 function parseYamlValue(value: string): unknown {
   const trimmed = value.trim();
   if (trimmed.length === 0) {
@@ -69,13 +108,9 @@ export function parseFrontmatter(yaml: string): Record<string, unknown> {
       continue;
     }
 
-    const match = line.match(/^([A-Za-z]+):\s*(.*)$/u);
-    if (match) {
-      const key = match[1];
-      const value = match[2] ?? "";
-      if (key !== undefined) {
-        result[key] = parseYamlValue(value);
-      }
+    const keyValue = parseKeyValueLine(line);
+    if (keyValue !== null) {
+      result[keyValue.key] = parseYamlValue(keyValue.value);
       index += 1;
       continue;
     }
