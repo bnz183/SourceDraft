@@ -8,7 +8,13 @@ import {
   type Article,
   type ArticleInput,
 } from "@sourcedraft/core";
-import type { CmsArticlePayload } from "@sourcedraft/publishers";
+import {
+  isPrPublishMode,
+  parsePublishMode,
+  publishModeSummary,
+  type CmsArticlePayload,
+  type PublishMode,
+} from "@sourcedraft/publishers";
 import type { PublishEnvConfig } from "./config.js";
 import {
   applyDeployHookStrictMode,
@@ -23,6 +29,7 @@ export type PublishRequestBody = ArticleInput & {
   sourcePath?: unknown;
   /** Remote CMS post id (WordPress post id, Ghost uuid) for updates */
   remoteId?: unknown;
+  publishMode?: unknown;
 };
 
 export type PublishSuccessResponse = {
@@ -32,7 +39,13 @@ export type PublishSuccessResponse = {
   sha: string;
   commitSha: string;
   remoteId?: string;
+  publishMode?: PublishMode;
+  prUrl?: string;
+  prNumber?: number;
+  prBranch?: string;
+  baseBranch?: string;
   deployHook?: DeployHookResult;
+  deployHookNote?: string;
 };
 
 export type PublishErrorResponse = {
@@ -80,6 +93,25 @@ function toCmsPayload(article: Article): CmsArticlePayload {
     ...(article.coverImageAlt !== undefined ? { coverImageAlt: article.coverImageAlt } : {}),
     ...(article.noindex === true ? { noindex: true } : {}),
   };
+}
+
+function resolvePublishMode(
+  body: PublishRequestBody,
+  env: PublishEnvConfig,
+): { ok: true; mode: PublishMode } | { ok: false; error: string } {
+  if (body.publishMode !== undefined) {
+    const parsed = parsePublishMode(body.publishMode);
+    if (parsed === null) {
+      return {
+        ok: false,
+        error: `Unsupported publish mode. Supported modes: ${publishModeSummary()}.`,
+      };
+    }
+
+    return { ok: true, mode: parsed };
+  }
+
+  return { ok: true, mode: env.publishMode };
 }
 
 function parseRemoteId(value: unknown): string | undefined {
@@ -130,6 +162,28 @@ export async function publishArticle(
     path = defaultPostPath(article, env);
   }
 
+  const publishModeResult = resolvePublishMode(body, env);
+  if (!publishModeResult.ok) {
+    return {
+      status: 400,
+      body: {
+        ok: false,
+        error: publishModeResult.error,
+      },
+    };
+  }
+
+  const publishMode = publishModeResult.mode;
+  if (isPrPublishMode(publishMode) && env.publisher !== "github") {
+    return {
+      status: 400,
+      body: {
+        ok: false,
+        error: `Pull request publish mode is only supported for the GitHub publisher. Current publisher: ${env.publisher}.`,
+      },
+    };
+  }
+
   const content = renderArticle(article, env);
   const remoteId = parseRemoteId(body.remoteId);
   const publisher = createPublisherFromEnv(env);
@@ -139,6 +193,9 @@ export async function publishArticle(
     content,
     message: `Publish: ${article.slug}`,
     article: toCmsPayload(article),
+    slug: article.slug,
+    publishMode,
+    prBranchPrefix: env.prBranchPrefix,
     ...(remoteId !== undefined ? { remoteId } : {}),
   });
 
@@ -155,6 +212,26 @@ export async function publishArticle(
     return {
       status: 502,
       body: errorBody,
+    };
+  }
+
+  if (isPrPublishMode(publishMode)) {
+    return {
+      status: 200,
+      body: {
+        ok: true,
+        path: result.path,
+        created: result.created,
+        sha: result.sha,
+        commitSha: result.commitSha,
+        publishMode,
+        ...(result.prUrl !== undefined ? { prUrl: result.prUrl } : {}),
+        ...(result.prNumber !== undefined ? { prNumber: result.prNumber } : {}),
+        ...(result.prBranch !== undefined ? { prBranch: result.prBranch } : {}),
+        ...(result.baseBranch !== undefined ? { baseBranch: result.baseBranch } : {}),
+        deployHookNote:
+          "PR created; deploy hook not triggered until merge.",
+      },
     };
   }
 
@@ -185,6 +262,7 @@ export async function publishArticle(
       created: result.created,
       sha: result.sha,
       commitSha: result.commitSha,
+      publishMode: result.publishMode ?? "direct",
       ...(result.remoteId !== undefined ? { remoteId: result.remoteId } : {}),
       ...(deployHook.triggered ? { deployHook } : {}),
     },

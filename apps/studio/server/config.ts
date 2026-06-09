@@ -13,8 +13,10 @@ import {
 import {
   isPublisherId,
   listPublisherIds,
+  parsePublishMode,
   supportedPublisherSummary,
   type PublisherId,
+  type PublishMode,
 } from "@sourcedraft/publishers";
 
 export type SupportedAdapter = AdapterId;
@@ -30,6 +32,9 @@ export type PublishEnvConfig = {
   publicMediaPath: string;
   adapter: SupportedAdapter;
   publisher: SupportedPublisher;
+  publishMode: PublishMode;
+  prBranchPrefix: string;
+  prDraft: boolean;
   adapterOptions?: Record<string, unknown>;
   publisherOptions?: Record<string, unknown>;
   categories: string[];
@@ -53,6 +58,44 @@ export type PublishEnvResult =
 
 export function loadProjectConfig(): SourceDraftConfig {
   return loadSourceDraftConfig();
+}
+
+function parseBooleanEnv(value: string | undefined, defaultValue: boolean): boolean {
+  if (value === undefined) {
+    return defaultValue;
+  }
+
+  const normalized = value.trim().toLowerCase();
+  if (normalized === "true" || normalized === "1" || normalized === "yes") {
+    return true;
+  }
+
+  if (normalized === "false" || normalized === "0" || normalized === "no") {
+    return false;
+  }
+
+  return defaultValue;
+}
+
+function resolvePublishModeFromEnv(): PublishMode {
+  const raw = process.env.SOURCEDRAFT_PUBLISH_MODE?.trim().toLowerCase();
+  const parsed = parsePublishMode(raw);
+  let mode: PublishMode = parsed ?? "direct";
+
+  if (mode === "pull-request" && parseBooleanEnv(process.env.SOURCEDRAFT_PR_DRAFT, false)) {
+    mode = "draft-pull-request";
+  }
+
+  return mode;
+}
+
+function resolvePrBranchPrefix(): string {
+  const raw = process.env.SOURCEDRAFT_PR_BRANCH_PREFIX?.trim();
+  if (!raw) {
+    return "sourcedraft/";
+  }
+
+  return raw.endsWith("/") ? raw : `${raw}/`;
 }
 
 function resolveAdapter(rawAdapter: string): SupportedAdapter | null {
@@ -355,6 +398,9 @@ export function loadPublishEnv(): PublishEnvResult {
         ? { ghostDefaultStatus: credentials.ghostDefaultStatus }
         : {}),
       categories: project.categories,
+      publishMode: resolvePublishModeFromEnv(),
+      prBranchPrefix: resolvePrBranchPrefix(),
+      prDraft: parseBooleanEnv(process.env.SOURCEDRAFT_PR_DRAFT, false),
     },
   };
 }
@@ -428,6 +474,9 @@ export function loadPublicConfig(): PublicStudioConfig {
     publicMediaPath: resolvePublicMediaPath(mediaDir, project),
     adapter,
     publisher,
+    publishMode: resolvePublishModeFromEnv(),
+    prBranchPrefix: resolvePrBranchPrefix(),
+    prDraft: parseBooleanEnv(process.env.SOURCEDRAFT_PR_DRAFT, false),
     ...(project.adapterOptions !== undefined
       ? { adapterOptions: project.adapterOptions }
       : {}),

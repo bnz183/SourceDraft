@@ -109,6 +109,10 @@ app.get("/api/config", readLimiter, requireAuth, (req, res) => {
     publicMediaPath: runtime.publicMediaPath,
     defaultBranch: runtime.branch,
     categories: runtime.categories,
+    publishMode: runtime.publishMode,
+    prBranchPrefix: runtime.prBranchPrefix,
+    prDraft: runtime.prDraft,
+    publisher: runtime.publisher,
     ...(runtime.adapterOptions !== undefined
       ? { adapterOptions: runtime.adapterOptions }
       : {}),

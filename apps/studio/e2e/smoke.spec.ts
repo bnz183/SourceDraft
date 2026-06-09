@@ -77,4 +77,23 @@ test.describe("Studio smoke", () => {
     await page.getByRole("button", { name: "Simulate publish" }).click();
     await expect(page.getByText("Publish simulated")).toBeVisible({ timeout: 10_000 });
   });
+
+  test("publish mode selector renders in demo mode", async ({ page }) => {
+    await enterDemoMode(page);
+    await page.getByRole("button", { name: "New post" }).click();
+    await postTitleInput(page).fill("Publish mode smoke test");
+    await postDescriptionInput(page).fill(
+      "Summary for publish mode smoke test.",
+    );
+    await page.locator(".writing-canvas__body").fill("# Publish mode\n\nBody content.");
+
+    const modeSelect = page.locator("#publish-mode-select");
+    await expect(modeSelect).toBeVisible();
+    await modeSelect.selectOption("pull-request");
+    await expect(page.getByText("PR branch")).toBeVisible();
+    await page.getByRole("button", { name: "Simulate PR publish" }).click();
+    await expect(page.getByText("Pull request simulated")).toBeVisible({
+      timeout: 10_000,
+    });
+  });
 });

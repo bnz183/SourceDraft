@@ -39,6 +39,36 @@ export function repoLabel(context: GitHubErrorContext): string {
   return "the configured repository";
 }
 
+const BRANCH_PROTECTION_HINT =
+  " Direct publish to a protected branch failed. Try pull-request or draft-pull-request publish mode (SOURCEDRAFT_PUBLISH_MODE).";
+
+export function isBranchProtectionError(status: number, rawMessage: string): boolean {
+  if (status !== 403 && status !== 422) {
+    return false;
+  }
+
+  const lowerMessage = rawMessage.toLowerCase();
+  return (
+    lowerMessage.includes("protected") ||
+    lowerMessage.includes("ruleset") ||
+    lowerMessage.includes("required status") ||
+    lowerMessage.includes("unsigned") ||
+    lowerMessage.includes("commit must be signed") ||
+    lowerMessage.includes("must be made through a pull request")
+  );
+}
+
+export function branchProtectionRecommendation(
+  status: number,
+  rawMessage: string,
+): string | null {
+  if (!isBranchProtectionError(status, rawMessage)) {
+    return null;
+  }
+
+  return BRANCH_PROTECTION_HINT;
+}
+
 export function formatGitHubApiError(
   status: number,
   rawMessage: string,
@@ -47,6 +77,8 @@ export function formatGitHubApiError(
 ): string {
   const message = rawMessage.trim();
   const target = repoLabel(context);
+  const protectionHint =
+    operation === "publish" ? branchProtectionRecommendation(status, message) : null;
 
   if (status === 401) {
     return "GitHub rejected the token (401). Check GITHUB_TOKEN in .env — it may be missing, expired, or revoked.";
@@ -58,7 +90,8 @@ export function formatGitHubApiError(
       return "GitHub API rate limit reached. Wait a few minutes and try again.";
     }
 
-    return `GitHub denied access to ${target} (403). The token needs read and write permission for repository contents on this repo and branch.`;
+    const base = `GitHub denied access to ${target} (403). The token needs read and write permission for repository contents on this repo and branch.`;
+    return protectionHint ? `${base}${protectionHint}` : base;
   }
 
   if (status === 404) {
@@ -94,7 +127,8 @@ export function formatGitHubApiError(
   }
 
   if (status === 422) {
-    return `GitHub rejected the request (422). ${message || "Check the file path and branch."}`;
+    const base = `GitHub rejected the request (422). ${message || "Check the file path and branch."}`;
+    return protectionHint ? `${base}${protectionHint}` : base;
   }
 
   if (message.length > 0) {

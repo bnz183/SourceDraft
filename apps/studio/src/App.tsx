@@ -1,5 +1,6 @@
 import { getAdapterPostPath, isAdapterId } from "@sourcedraft/adapters";
 import { normalizeArticle, validateArticle } from "@sourcedraft/core";
+import type { PublishMode } from "@sourcedraft/publishers";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AppBar } from "./components/AppBar";
 import { AstroMdxPreview } from "./components/AstroMdxPreview";
@@ -26,6 +27,7 @@ import {
   type ArticleFormState,
 } from "./lib/articleForm";
 import { fetchPost, fetchPosts, type PostSummary } from "./lib/posts";
+import { previewPrBranch } from "./lib/prBranch";
 import { publishArticle as publishArticleToGitHub } from "./lib/publish";
 import {
   FALLBACK_STUDIO_CONFIG,
@@ -69,6 +71,10 @@ function App() {
   const [publishing, setPublishing] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
   const [publishSuccess, setPublishSuccess] = useState<string | null>(null);
+  const [publishSuccessUrl, setPublishSuccessUrl] = useState<string | null>(
+    null,
+  );
+  const [publishMode, setPublishMode] = useState<PublishMode>("direct");
   const [latestUploadedImagePath, setLatestUploadedImagePath] = useState<
     string | null
   >(null);
@@ -121,6 +127,7 @@ function App() {
       }
 
       setStudioConfig(config);
+      setPublishMode(config.publishMode);
       setDemoMode(config.demoMode === true);
       setForm((current) => {
         if (current.title.length > 0 || current.body.length > 0) {
@@ -162,6 +169,20 @@ function App() {
       return null;
     }
   }, [articleInput, validation.valid]);
+
+  const prBranchPreview = useMemo(() => {
+    if (!validation.valid || !normalizedArticle) {
+      return null;
+    }
+
+    return previewPrBranch(normalizedArticle.slug, studioConfig.prBranchPrefix);
+  }, [
+    validation.valid,
+    normalizedArticle,
+    studioConfig.prBranchPrefix,
+  ]);
+
+  const prModeSupported = studioConfig.publisher === "github";
 
   const outputPath = useMemo(() => {
     if (!validation.valid || !normalizedArticle) {
@@ -382,9 +403,13 @@ function App() {
     setPublishing(true);
     setPublishError(null);
     setPublishSuccess(null);
+    setPublishSuccessUrl(null);
 
     try {
-      const result = await publishArticleToGitHub(articleInput, editingPath);
+      const result = await publishArticleToGitHub(articleInput, {
+        sourcePath: editingPath,
+        publishMode,
+      });
 
       if (!result.ok) {
         const issueSummary =
@@ -396,27 +421,46 @@ function App() {
       }
 
       const action = result.created ? "Created" : "Updated";
-      const deployNote =
-        result.deployHook?.triggered === true
-          ? ` ${result.deployHook.ok ? "Deploy hook succeeded." : result.deployHook.message}`
-          : "";
+      const mode = result.publishMode ?? publishMode;
+
+      if (mode === "direct") {
+        const deployNote =
+          result.deployHook?.triggered === true
+            ? ` ${result.deployHook.ok ? "Deploy hook succeeded." : result.deployHook.message}`
+            : "";
+
+        setPublishSuccess(
+          `${action} ${result.path} (commit ${result.commitSha.slice(0, 7)}).${deployNote}`,
+        );
+        setEditingPath(result.path);
+        commitBaseline(
+          {
+            form,
+            editingPath: result.path,
+            slugAuto,
+          },
+          {
+            remoteSync: true,
+            clearLocalDraft: true,
+          },
+        );
+        await refreshPosts();
+        return;
+      }
+
+      const prLabel =
+        typeof result.prNumber === "number"
+          ? `PR #${result.prNumber}`
+          : "Pull request";
+      const prBranchNote =
+        result.prBranch !== undefined ? ` on ${result.prBranch}` : "";
 
       setPublishSuccess(
-        `${action} ${result.path} (commit ${result.commitSha.slice(0, 7)}).${deployNote}`,
+        `${action} ${result.path}${prBranchNote} (${prLabel}, commit ${result.commitSha.slice(0, 7)}).${result.deployHookNote ? ` ${result.deployHookNote}` : ""}`,
       );
-      setEditingPath(result.path);
-      commitBaseline(
-        {
-          form,
-          editingPath: result.path,
-          slugAuto,
-        },
-        {
-          remoteSync: true,
-          clearLocalDraft: true,
-        },
-      );
-      await refreshPosts();
+      if (typeof result.prUrl === "string" && result.prUrl.length > 0) {
+        setPublishSuccessUrl(result.prUrl);
+      }
     } catch {
       setPublishError(
         "Could not reach the publish API. Start the dev server and try again.",
@@ -526,8 +570,16 @@ function App() {
               publishing={publishing}
               publishError={publishError}
               publishSuccess={publishSuccess}
+              publishSuccessUrl={publishSuccessUrl}
               githubReady={githubReady}
               demoMode={demoMode}
+              publishMode={publishMode}
+              defaultPublishMode={studioConfig.publishMode}
+              baseBranch={studioConfig.defaultBranch}
+              outputPath={outputPath}
+              prBranchPreview={prBranchPreview}
+              prModeSupported={prModeSupported}
+              onPublishModeChange={setPublishMode}
               onPublish={handlePublish}
             />
           </main>
