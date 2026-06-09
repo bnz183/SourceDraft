@@ -1,9 +1,11 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  branchProtectionRecommendation,
   directoryListingLimitMessage,
   formatGitHubApiError,
   formatLocalGitHubError,
+  isBranchProtectionError,
   isDirectoryListingTruncated,
   validateGitHubFileBody,
 } from "./githubErrors.js";
@@ -21,6 +23,25 @@ describe("formatGitHubApiError", () => {
     });
     assert.match(error, /acme\/blog/);
     assert.match(error, /403/);
+  });
+
+  it("recommends pull-request mode for protected branch publish failures", () => {
+    assert.equal(
+      isBranchProtectionError(403, "Branch main is protected"),
+      true,
+    );
+
+    const error = formatGitHubApiError(
+      422,
+      "Required status check expected",
+      "publish",
+      { owner: "acme", repo: "blog" },
+    );
+    assert.match(error, /SOURCEDRAFT_PUBLISH_MODE/);
+    assert.equal(
+      branchProtectionRecommendation(422, "unsigned commits are not allowed"),
+      " Direct publish to a protected branch failed. Try pull-request or draft-pull-request publish mode (SOURCEDRAFT_PUBLISH_MODE).",
+    );
   });
 
   it("maps rate limit 403 messages without regex", () => {

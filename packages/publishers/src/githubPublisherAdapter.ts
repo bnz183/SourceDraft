@@ -1,10 +1,16 @@
-import { createGitHubPublisher } from "@sourcedraft/github-publisher";
+import {
+  createGitHubPublisher,
+  publishFileViaPullRequest,
+  slugFromRepoPath,
+} from "@sourcedraft/github-publisher";
+import { isPrPublishMode } from "./publishMode.js";
 import type {
   Publisher,
   PublisherFactory,
   PublisherRuntimeConfig,
   PublishArticleInput,
   PublishArticleResult,
+  PublishMode,
   ReadPostInput,
   ReadPostResult,
   ListPostsInput,
@@ -39,6 +45,55 @@ function createGitHubPublisherInstance(config: PublisherRuntimeConfig): Publishe
     kind: "git",
     capabilities: GITHUB_CAPABILITIES,
     async publishArticle(input: PublishArticleInput): Promise<PublishArticleResult> {
+      const publishMode: PublishMode = input.publishMode ?? "direct";
+
+      if (isPrPublishMode(publishMode)) {
+        const slug =
+          typeof input.slug === "string" && input.slug.trim().length > 0
+            ? input.slug.trim()
+            : slugFromRepoPath(input.path);
+
+        const prResult = await publishFileViaPullRequest(
+          {
+            token: config.token,
+            owner: config.owner,
+            repo: config.repo,
+            baseBranch: config.branch,
+            ...(input.prBranchPrefix !== undefined
+              ? { branchPrefix: input.prBranchPrefix }
+              : {}),
+          },
+          {
+            path: input.path,
+            content: input.content,
+            message: input.message,
+            slug,
+            draft: publishMode === "draft-pull-request",
+          },
+        );
+
+        if (!prResult.ok) {
+          return {
+            ok: false,
+            error: prResult.error,
+            ...(prResult.status !== undefined ? { status: prResult.status } : {}),
+          };
+        }
+
+        return {
+          ok: true,
+          path: prResult.path,
+          created: prResult.created,
+          sha: prResult.sha,
+          commitSha: prResult.commitSha,
+          publishMode,
+          prUrl: prResult.prUrl,
+          prNumber: prResult.prNumber,
+          prBranch: prResult.prBranch,
+          baseBranch: prResult.baseBranch,
+        };
+      }
+
       const result = await github.publishFile({
         path: input.path,
         content: input.content,
@@ -60,6 +115,7 @@ function createGitHubPublisherInstance(config: PublisherRuntimeConfig): Publishe
         created: result.created,
         sha: result.sha,
         commitSha: result.commitSha,
+        publishMode: "direct",
       };
     },
     async uploadMedia(input: UploadMediaInput): Promise<UploadMediaResult> {

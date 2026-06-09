@@ -1,3 +1,14 @@
+import type { PublishMode } from "./publishMode.js";
+
+export type { PublishMode } from "./publishMode.js";
+export {
+  isPrPublishMode,
+  isPublishMode,
+  parsePublishMode,
+  publishModeSummary,
+  PUBLISH_MODES,
+} from "./publishMode.js";
+
 export const PUBLISHER_IDS = [
   "github",
   "gitlab",
@@ -77,6 +88,12 @@ export type PublishArticleInput = {
   article?: CmsArticlePayload;
   /** Remote post ID for CMS updates (WordPress post id, Ghost uuid) */
   remoteId?: string;
+  /** GitHub publish mode; ignored by non-GitHub publishers */
+  publishMode?: PublishMode;
+  /** Article slug for deterministic PR branch naming */
+  slug?: string;
+  /** PR branch prefix override (default sourcedraft/) */
+  prBranchPrefix?: string;
 };
 
 export type PublishArticleSuccess = {
@@ -87,6 +104,11 @@ export type PublishArticleSuccess = {
   commitSha: string;
   /** Remote CMS post identifier when applicable */
   remoteId?: string;
+  publishMode?: PublishMode;
+  prUrl?: string;
+  prNumber?: number;
+  prBranch?: string;
+  baseBranch?: string;
 };
 
 export type PublishArticleError = {

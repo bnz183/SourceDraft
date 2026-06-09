@@ -1,3 +1,5 @@
+import type { PublishMode } from "@sourcedraft/publishers";
+
 export type StudioConfig = {
   adapter: string;
   contentDir: string;
@@ -8,6 +10,10 @@ export type StudioConfig = {
   adapterOptions?: Record<string, unknown>;
   githubOwner: string;
   githubRepo: string;
+  publisher: string;
+  publishMode: PublishMode;
+  prBranchPrefix: string;
+  prDraft: boolean;
   demoMode?: boolean;
 };
 
@@ -20,6 +26,10 @@ export const FALLBACK_STUDIO_CONFIG: StudioConfig = {
   categories: ["Guides", "Notes", "Reviews", "Tutorials", "Reference"],
   githubOwner: "",
   githubRepo: "",
+  publisher: "github",
+  publishMode: "direct",
+  prBranchPrefix: "sourcedraft/",
+  prDraft: false,
 };
 
 export async function fetchStudioConfig(): Promise<StudioConfig> {
@@ -46,6 +56,11 @@ export async function fetchStudioConfig(): Promise<StudioConfig> {
         : {}),
       githubOwner: data.githubOwner || "",
       githubRepo: data.githubRepo || "",
+      publisher: data.publisher || FALLBACK_STUDIO_CONFIG.publisher,
+      publishMode: data.publishMode || FALLBACK_STUDIO_CONFIG.publishMode,
+      prBranchPrefix:
+        data.prBranchPrefix || FALLBACK_STUDIO_CONFIG.prBranchPrefix,
+      prDraft: data.prDraft === true,
       demoMode: data.demoMode === true,
     };
   } catch {
