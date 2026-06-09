@@ -48,7 +48,13 @@ export function MediaLibrary({
   }, [githubReady]);
 
   useEffect(() => {
-    void loadLibrary();
+    const timer = window.setTimeout(() => {
+      void loadLibrary();
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
   }, [loadLibrary, refreshKey]);
 
   async function handleCopy(publicPath: string) {

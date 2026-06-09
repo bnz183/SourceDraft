@@ -361,6 +361,52 @@ export function loadPublishEnv(): PublishEnvResult {
 
 export type PublicStudioConfig = Omit<PublishEnvConfig, "token">;
 
+function publicPublisherPaths(
+  publisher: SupportedPublisher,
+  defaultBranch: string,
+): Pick<PublicStudioConfig, "owner" | "repo" | "branch"> {
+  if (publisher === "gitlab") {
+    return {
+      owner:
+        process.env.GITLAB_PROJECT_PATH?.trim() ||
+        process.env.GITLAB_PROJECT_ID?.trim() ||
+        "",
+      repo: "",
+      branch: process.env.GITLAB_BRANCH?.trim() || defaultBranch,
+    };
+  }
+
+  if (publisher === "bitbucket") {
+    return {
+      owner: process.env.BITBUCKET_WORKSPACE?.trim() || "",
+      repo: process.env.BITBUCKET_REPO_SLUG?.trim() || "",
+      branch: process.env.BITBUCKET_BRANCH?.trim() || defaultBranch,
+    };
+  }
+
+  if (publisher === "wordpress") {
+    return {
+      owner: process.env.WORDPRESS_API_URL?.trim() || "",
+      repo: "",
+      branch: defaultBranch,
+    };
+  }
+
+  if (publisher === "ghost") {
+    return {
+      owner: process.env.GHOST_ADMIN_URL?.trim() || "",
+      repo: "",
+      branch: defaultBranch,
+    };
+  }
+
+  return {
+    owner: process.env.GITHUB_OWNER?.trim() || "",
+    repo: process.env.GITHUB_REPO?.trim() || "",
+    branch: process.env.GITHUB_BRANCH?.trim() || defaultBranch,
+  };
+}
+
 export function loadPublicConfig(): PublicStudioConfig {
   const project = loadProjectConfig();
   const rawAdapter = process.env.CMS_ADAPTER?.trim() || project.adapter;
@@ -368,32 +414,10 @@ export function loadPublicConfig(): PublicStudioConfig {
   const adapter = resolveAdapter(rawAdapter) ?? "astro-mdx";
   const publisher = resolvePublisher(rawPublisher) ?? "github";
   const mediaDir = process.env.CMS_MEDIA_DIR?.trim() || project.mediaDir;
-
-  let owner = "";
-  let repo = "";
-  let branch = project.defaultBranch;
-
-  if (publisher === "gitlab") {
-    owner =
-      process.env.GITLAB_PROJECT_PATH?.trim() ||
-      process.env.GITLAB_PROJECT_ID?.trim() ||
-      "";
-    branch = process.env.GITLAB_BRANCH?.trim() || project.defaultBranch;
-  } else if (publisher === "bitbucket") {
-    owner = process.env.BITBUCKET_WORKSPACE?.trim() || "";
-    repo = process.env.BITBUCKET_REPO_SLUG?.trim() || "";
-    branch = process.env.BITBUCKET_BRANCH?.trim() || project.defaultBranch;
-  } else if (publisher === "wordpress") {
-    owner = process.env.WORDPRESS_API_URL?.trim() || "";
-    branch = project.defaultBranch;
-  } else if (publisher === "ghost") {
-    owner = process.env.GHOST_ADMIN_URL?.trim() || "";
-    branch = project.defaultBranch;
-  } else {
-    owner = process.env.GITHUB_OWNER?.trim() || "";
-    repo = process.env.GITHUB_REPO?.trim() || "";
-    branch = process.env.GITHUB_BRANCH?.trim() || project.defaultBranch;
-  }
+  const { owner, repo, branch } = publicPublisherPaths(
+    publisher,
+    project.defaultBranch,
+  );
 
   return {
     owner,

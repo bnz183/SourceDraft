@@ -113,7 +113,13 @@ function App() {
       return;
     }
 
-    fetchStudioConfig().then((config) => {
+    let cancelled = false;
+
+    void fetchStudioConfig().then((config) => {
+      if (cancelled) {
+        return;
+      }
+
       setStudioConfig(config);
       setDemoMode(config.demoMode === true);
       setForm((current) => {
@@ -128,7 +134,14 @@ function App() {
       });
     });
 
-    void refreshPosts();
+    const postsTimer = window.setTimeout(() => {
+      void refreshPosts();
+    }, 0);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(postsTimer);
+    };
   }, [authenticated, refreshPosts]);
 
   const githubReady = useMemo(

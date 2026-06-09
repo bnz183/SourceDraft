@@ -49,7 +49,7 @@ export function useDocumentAutosave({
   publishing,
   enabled,
 }: UseDocumentAutosaveOptions): UseDocumentAutosaveResult {
-  const baselineRef = useRef<DocumentSnapshot>(snapshot);
+  const [baseline, setBaseline] = useState<DocumentSnapshot>(snapshot);
   const [localSavedAt, setLocalSavedAt] = useState<string | null>(null);
   const [syncedWithRemote, setSyncedWithRemote] = useState(false);
   const [restorePrompt, setRestorePrompt] = useState<AutosaveRecord | null>(
@@ -60,8 +60,8 @@ export function useDocumentAutosave({
   const initialCheckDoneRef = useRef(false);
 
   const isDirty = useMemo(
-    () => !snapshotsEqual(snapshot, baselineRef.current),
-    [snapshot],
+    () => !snapshotsEqual(snapshot, baseline),
+    [snapshot, baseline],
   );
 
   const checkRestorePrompt = useCallback((current: DocumentSnapshot) => {
@@ -91,11 +91,11 @@ export function useDocumentAutosave({
 
   const commitBaseline = useCallback(
     (baseline: DocumentSnapshot, options: CommitBaselineOptions) => {
-      baselineRef.current = {
+      setBaseline({
         form: { ...baseline.form },
         editingPath: baseline.editingPath,
         slugAuto: baseline.slugAuto,
-      };
+      });
       setSyncedWithRemote(options.remoteSync);
       setLocalSavedAt(null);
       setRestorePrompt(null);
