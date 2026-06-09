@@ -7,5 +7,8 @@
   "defaultBranch": "main",
   "categories": ["Guides", "Notes", "Reviews", "Tutorials", "Reference"],
   "adapterOptions": {},
-  "publisherOptions": {}
+  "publisherOptions": {},
+  "plugins": [],
+  "requiredPlugins": [],
+  "discoverPlugins": false
 }

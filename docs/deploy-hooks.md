@@ -50,16 +50,18 @@ By default, a deploy hook failure does **not** fail the publish — your content
 
 Set `DEPLOY_HOOK_STRICT=true` when you want publish to return an error if the hook fails. Use this only when you need atomic “publish + deploy” semantics.
 
-## Provider notes
+## Compatibility matrix
 
-| Provider | Typical hook source |
-|----------|---------------------|
-| `vercel` | Project → Settings → Git → Deploy Hooks |
-| `netlify` | Site → Build & deploy → Build hooks |
-| `cloudflare-pages` | Pages project → Settings → Builds → Deploy hooks |
-| `generic` | Any CI webhook that accepts `POST` + JSON |
+| Provider | `DEPLOY_HOOK_PROVIDER` | Status | Typical hook source | Auth |
+|----------|------------------------|--------|---------------------|------|
+| Generic | `generic` | Shipped | Any CI webhook accepting `POST` + JSON | URL secret |
+| Vercel | `vercel` | Shipped | Project → Settings → Git → Deploy Hooks | URL secret |
+| Netlify | `netlify` | Shipped | Site → Build & deploy → Build hooks | URL secret |
+| Cloudflare Pages | `cloudflare-pages` | Shipped | Pages project → Settings → Builds → Deploy hooks | URL secret |
 
 SourceDraft does not store provider API tokens for deploy hooks — the hook URL itself is the credential.
+
+Recipe: [quickstart-recipes.md#deploy-hook-after-publish](quickstart-recipes.md#deploy-hook-after-publish)
 
 ## Security
 

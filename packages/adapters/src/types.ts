@@ -11,7 +11,8 @@ export const ADAPTER_IDS = [
   "nuxt-content-markdown",
 ] as const;
 
-export type AdapterId = (typeof ADAPTER_IDS)[number];
+/** Built-in adapter ids; plugins may register additional string ids at runtime. */
+export type AdapterId = string;
 
 export type AdapterPathConfig = {
   contentDir: string;

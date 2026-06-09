@@ -30,3 +30,13 @@ blog/2024-06-01-getting-started-with-sourcedraft.mdx
 See [`blog/2024-06-01-getting-started-with-sourcedraft.mdx`](blog/2024-06-01-getting-started-with-sourcedraft.mdx).
 
 Wire your Docusaurus `blog` plugin to the same folder. SourceDraft only writes files — it does not run Docusaurus.
+
+## How to publish
+
+1. Copy `adapter`, `contentDir`, and `adapterOptions` into SourceDraft’s `sourcedraft.config.json`.
+2. Set `.env` for your git publisher (`GITHUB_*`, `GITLAB_*`, or `BITBUCKET_*`).
+3. In Studio: **New post** → fill fields → confirm preview path under `blog/` → **Publish**.
+4. Add the new file to Docusaurus if your setup requires manual registration (plugin usually picks up `blog/*.mdx` automatically).
+5. Run your normal Docusaurus build or CI.
+
+Recipe: [docs/quickstart-recipes.md](../../docs/quickstart-recipes.md)

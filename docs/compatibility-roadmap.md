@@ -9,7 +9,7 @@ Extension foundation for SourceDraft adapters and publishers.
 | `adapterRegistry` | `@sourcedraft/adapters` | Article → file content, paths, frontmatter parsing |
 | `publisherRegistry` | `@sourcedraft/publishers` | Publish articles, upload media, list/read posts |
 
-Built-in connectors register on package load via `registerBuiltInAdapters()` and `registerBuiltInPublishers()`.
+Built-in connectors register on package load via `registerBuiltInAdapters()` and `registerBuiltInPublishers()`. Custom adapters, publishers, and media providers can register via server-side plugins — see [plugins.md](plugins.md).
 
 ### Adapter interface
 

@@ -1,0 +1,31 @@
+{
+  "name": "@sourcedraft/plugins",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Server-side plugin loader for SourceDraft adapters, publishers, and media providers.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "check": "tsc --noEmit",
+    "test": "node --import tsx --test 'src/**/*.test.ts'"
+  },
+  "dependencies": {
+    "@sourcedraft/adapters": "workspace:*",
+    "@sourcedraft/media-providers": "workspace:*",
+    "@sourcedraft/publishers": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.30",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
+  }
+}

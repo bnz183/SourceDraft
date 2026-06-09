@@ -15,16 +15,18 @@ Unknown adapter ids fail validation in `loadPublishEnv()` with a list of support
 
 ## Compatibility matrix
 
-| Adapter key | Extension | Default `contentDir` | Best use case | Supported SEO fields |
-|-------------|-----------|-------------------|---------------|----------------------|
-| `astro-mdx` | `.mdx` | `src/content/blog` | Astro content collections | `metaTitle`, `metaDescription`, `canonicalUrl`, `socialImage` (when set on article) |
-| `markdown` | `.md` | `src/content/blog` | Generic Markdown repos | same |
-| `nextjs-mdx` | `.mdx` | `content/posts` | Next.js MDX blogs | same + `author` → `author`, `heroImage` → `coverImage` |
-| `hugo-markdown` | `.md` | `content/posts` | Hugo static sites | same |
-| `eleventy-jekyll-markdown` | `.md` | `src/posts` / `_posts` | Eleventy or Jekyll | same |
-| `docusaurus-mdx` | `.mdx` | `blog` | Docusaurus blog plugin | same + `author` → `authors[]`, `heroImage` → `image` |
-| `mkdocs-markdown` | `.md` | `docs` | MkDocs documentation sites | same (no `draft` in output) |
-| `nuxt-content-markdown` | `.md` | `content/blog` | Nuxt Content v2 collections | same |
+| Adapter key | Status | Extension | Default `contentDir` | Studio preview | SEO fields | Example |
+|-------------|--------|-----------|----------------------|----------------|------------|---------|
+| `astro-mdx` | Shipped | `.mdx` | `src/content/blog` | Yes | Yes | [astro-blog](../examples/astro-blog/) |
+| `markdown` | Shipped | `.md` | `src/content/blog` | Yes | Yes | — |
+| `nextjs-mdx` | Shipped | `.mdx` | `content/posts` | Yes | Yes | [nextjs-mdx-blog](../examples/nextjs-mdx-blog/) |
+| `hugo-markdown` | Shipped | `.md` | `content/posts` | Yes | Yes | [hugo-blog](../examples/hugo-blog/) |
+| `eleventy-jekyll-markdown` | Shipped | `.md` | `src/posts` / `_posts` | Yes | Yes | [eleventy-jekyll-blog](../examples/eleventy-jekyll-blog/) |
+| `docusaurus-mdx` | Shipped | `.mdx` | `blog` | Yes | Yes | [docusaurus-blog](../examples/docusaurus-blog/) |
+| `mkdocs-markdown` | Shipped | `.md` | `docs` | Yes (+ nav hint) | Yes (no `draft` in file) | [mkdocs-blog](../examples/mkdocs-blog/) |
+| `nuxt-content-markdown` | Shipped | `.md` | `content/blog` | Yes | Yes | [nuxt-content-blog](../examples/nuxt-content-blog/) |
+
+Custom adapters can register via [plugins.md](plugins.md). SEO fields: `metaTitle`, `metaDescription`, `canonicalUrl`, `socialImage`, `coverImageAlt`, `noindex`, computed `readingTime` — see [seo-fields.md](seo-fields.md).
 
 Optional SEO fields (`metaTitle`, `metaDescription`, `canonicalUrl`, `socialImage`, `coverImageAlt`, `noindex`, `author`, computed `readingTime`) are emitted when present. Edit them in Studio under **SEO / Sharing**. See [seo-fields.md](seo-fields.md).
 
@@ -105,9 +107,8 @@ Does not edit `mkdocs.yml`. Studio preview shows a **nav hint** with the path to
 | MkDocs | [examples/mkdocs-blog](../examples/mkdocs-blog/) |
 | Nuxt Content | [examples/nuxt-content-blog](../examples/nuxt-content-blog/) |
 
-## Future (not in repo yet)
+## Remote CMS publishers (WordPress, Ghost)
 
-- WordPress REST API
-- Ghost API
+Adapters still control **preview** and optional file-shaped output in Studio. When `publisher` is `wordpress` or `ghost`, the publish API sends article fields to the remote CMS — not necessarily a git commit. Use `markdown` or your site's file adapter for preview consistency.
 
-These are planned directions, not shipped packages.
+Details: [publishers.md](publishers.md) · [wordpress.md](wordpress.md) · [ghost.md](ghost.md)

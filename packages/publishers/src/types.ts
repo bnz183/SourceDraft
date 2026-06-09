@@ -6,7 +6,8 @@ export const PUBLISHER_IDS = [
   "ghost",
 ] as const;
 
-export type PublisherId = (typeof PUBLISHER_IDS)[number];
+/** Built-in publisher ids; plugins may register additional string ids at runtime. */
+export type PublisherId = string;
 
 /** Git publishers commit files to a repository; remote CMS publishers call HTTP APIs. */
 export type PublisherKind = "git" | "remote-cms";

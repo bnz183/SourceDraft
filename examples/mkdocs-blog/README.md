@@ -29,3 +29,12 @@ nav:
   - Blog:
       - Getting started: docs/getting-started-with-sourcedraft.md
 ```
+
+## How to publish
+
+1. Copy config into SourceDraft’s `sourcedraft.config.json` (`adapter`: `mkdocs-markdown`, `contentDir`: `docs`).
+2. Configure git publisher credentials in `.env`.
+3. Publish from Studio; check the **nav hint** in preview and add the path to `mkdocs.yml`.
+4. Run `mkdocs build` or your usual docs pipeline.
+
+Recipe: [docs/quickstart-recipes.md](../../docs/quickstart-recipes.md)

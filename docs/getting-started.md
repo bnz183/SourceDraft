@@ -1,6 +1,8 @@
 # Getting started
 
-You need a GitHub repository for your **site** (for example an Astro blog) that reads posts from a folder such as `src/content/blog`.
+You need a target for published content — usually a Git repository for your **site** (for example an Astro blog reading `src/content/blog`), or a WordPress/Ghost site for API publishing.
+
+**Fast path:** copy a recipe from [quickstart-recipes.md](quickstart-recipes.md) (Astro+GitHub, Hugo+GitLab, WordPress, Cloudinary, deploy hooks, …).
 
 ## 1. Install SourceDraft
 
@@ -29,7 +31,9 @@ cp .env.example .env
 
 Edit paths, adapter, and categories to match your site. These values are safe to commit.
 
-Use `astro-mdx` for `.mdx` output or `markdown` for `.md` output. See [adapters.md](adapters.md).
+Pick an adapter for your stack (`astro-mdx`, `nextjs-mdx`, `hugo-markdown`, …). See the [adapters compatibility matrix](adapters.md#compatibility-matrix).
+
+Set `publisher` to `github`, `gitlab`, `bitbucket`, `wordpress`, or `ghost`. See [publishers.md](publishers.md).
 
 Validate anytime:
 
@@ -53,8 +57,8 @@ GITHUB_BRANCH=main
 
 | File | Holds |
 |------|--------|
-| `sourcedraft.config.json` | `contentDir`, `mediaDir`, `publicMediaPath`, categories, adapter |
-| `.env` | Password, GitHub token, repo owner/name |
+| `sourcedraft.config.json` | `contentDir`, `mediaDir`, `publicMediaPath`, categories, `adapter`, `publisher` |
+| `.env` | Password, publisher credentials, optional `CMS_MEDIA_PROVIDER`, deploy hook |
 
 See [configuration.md](configuration.md) for the full split.
 
@@ -96,11 +100,11 @@ The publish API also exposes `GET /api/health/setup` (authenticated) with the sa
 1. **Posts** sidebar — open an existing post, or click **New post**
 2. Fill title and description in the center canvas; set slug, dates, and category in **Post details**; upload a cover image if needed ([media.md](media.md))
 3. Check the Markdown or MDX preview and output path
-4. **Publish to GitHub**
+4. **Publish** — button label reflects your publisher (for example **Publish to GitHub**)
 
-SourceDraft validates, builds the file with your adapter, and commits to `contentDir/<slug>.mdx` or `.md`.
+SourceDraft validates, renders with your adapter, and sends to the configured publisher (git commit or remote CMS API).
 
-How that commit works: [github-publishing.md](github-publishing.md)
+Git publishers: [git-publishers.md](git-publishers.md) · GitHub: [github-publishing.md](github-publishing.md) · WordPress: [wordpress.md](wordpress.md) · Ghost: [ghost.md](ghost.md)
 
 ## Smoke tests (Playwright)
 

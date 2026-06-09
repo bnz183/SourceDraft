@@ -23,6 +23,7 @@ import { listMedia } from "./listMedia.js";
 import { listPosts, loadPost } from "./posts.js";
 import { publishArticle, type PublishRequestBody } from "./publish.js";
 import { requireSameSiteRequest } from "./requestProtection.js";
+import { initializePlugins } from "./plugins.js";
 import { getSetupHealth } from "./setupHealth.js";
 
 const envPaths = [
@@ -37,6 +38,8 @@ for (const envPath of envPaths) {
     loadDotenv({ path: envPath });
   }
 }
+
+await initializePlugins();
 
 const port = Number(process.env.STUDIO_API_PORT ?? 8787);
 const app = express();
