@@ -6,7 +6,8 @@ All credentials are read from `.env` in the publish API only. Studio stores a se
 
 | Secret | Used for |
 |--------|----------|
-| `SOURCEDRAFT_ADMIN_PASSWORD` | Studio login |
+| `SOURCEDRAFT_ADMIN_PASSWORD_HASH` | Studio login (preferred scrypt hash) |
+| `SOURCEDRAFT_ADMIN_PASSWORD` | Studio login legacy plaintext fallback for local dev |
 | `GITHUB_*` | GitHub Contents API (publish, list, media) |
 | `GITLAB_*` | GitLab Repository Files API |
 | `BITBUCKET_*` | Bitbucket commit-upload API |
@@ -45,7 +46,9 @@ Sessions reset when the API process restarts. This is not durable account auth.
 
 Protected routes include login, logout, publish, and media upload. Middleware checks `Sec-Fetch-Site` or `Origin`/`Referer` and rejects obvious cross-site POSTs. Optional `STUDIO_ALLOWED_ORIGINS` for reverse-proxy deployments.
 
-This is basic MVP hardening — not a substitute for CSRF tokens, rate limiting, or production auth on a public deployment.
+Rate limiting is enabled on auth, publish, media, and read endpoints. Limits are relaxed automatically outside `NODE_ENV=production` so local development stays usable. Set `STUDIO_RATE_LIMIT_RELAXED=true` in production only when you intentionally need higher local-style limits behind a trusted reverse proxy.
+
+This is basic MVP hardening — not a substitute for CSRF tokens or production-grade account auth on a public deployment.
 
 ## Server-only publisher access
 
@@ -96,6 +99,20 @@ Details: [plugins.md](plugins.md)
 ## Studio auth (MVP)
 
 Single shared password, in-memory sessions.
+
+Prefer `SOURCEDRAFT_ADMIN_PASSWORD_HASH` over plaintext `SOURCEDRAFT_ADMIN_PASSWORD`. The hash format is:
+
+```text
+scrypt$N$r$p$saltBase64$hashBase64
+```
+
+Generate a hash:
+
+```bash
+pnpm exec tsx scripts/hash-admin-password.ts "your-password"
+```
+
+When both hash and plaintext are set, the hash is used. Plaintext remains a legacy local-dev fallback only.
 
 **Intended for local/private use.** Do not expose Studio publicly without HTTPS, stronger auth, and deployment hardening.
 

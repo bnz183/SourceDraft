@@ -1,4 +1,5 @@
 import type { Article } from "@sourcedraft/core";
+import { trimTrailingSlashes } from "@sourcedraft/core";
 import {
   resolveDocusaurusMdxOptions,
   type FilenameConvention,
@@ -40,7 +41,7 @@ export function getDocusaurusMdxPath(
   article: Article,
   config: DocusaurusMdxPathConfig,
 ): string {
-  const contentDir = config.contentDir.replace(/\/+$/u, "");
+  const contentDir = trimTrailingSlashes(config.contentDir);
   const rawExtension = config.extension ?? "mdx";
   const extension = rawExtension.startsWith(".")
     ? rawExtension.slice(1)

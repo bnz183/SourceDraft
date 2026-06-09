@@ -55,6 +55,40 @@ test("mergeEnvMaps respects overwrite decisions", () => {
   assert.equal(merged.get("GITHUB_OWNER"), "acme");
 });
 
+test("serializeEnvFile escapes unsafe values and rejects invalid keys", () => {
+  const map = new Map([
+    ["GITHUB_TOKEN", "secret value"],
+    ["QUOTED", 'say "hello"'],
+    ["BACKSLASH", "path\\to\\file"],
+    ["NEWLINE", "line1\nline2"],
+    ["CARRIAGE", "line1\rline2"],
+    ["TAB", "col1\tcol2"],
+    ["EMPTY", ""],
+    ["HASH", "value#comment"],
+    ["INJECTION", "safe\nGITHUB_TOKEN=hijacked"],
+  ]);
+
+  const serialized = serializeEnvFile(map);
+  assert.match(serialized, /GITHUB_TOKEN="secret value"/);
+  assert.match(serialized, /QUOTED=/);
+  assert.match(serialized, /\\n/);
+  assert.match(serialized, /EMPTY=""/);
+  assert.doesNotMatch(serialized, /^GITHUB_TOKEN=hijacked/m);
+
+  const loaded = parseEnvFile(serialized);
+  assert.equal(loaded.get("GITHUB_TOKEN"), "secret value");
+  assert.equal(loaded.get("QUOTED"), 'say "hello"');
+  assert.equal(loaded.get("BACKSLASH"), "path\\to\\file");
+  assert.equal(loaded.get("NEWLINE"), "line1\nline2");
+  assert.equal(loaded.get("CARRIAGE"), "line1\rline2");
+  assert.equal(loaded.get("TAB"), "col1\tcol2");
+  assert.equal(loaded.get("EMPTY"), "");
+  assert.equal(loaded.get("HASH"), "value#comment");
+  assert.equal(loaded.get("INJECTION"), "safe\nGITHUB_TOKEN=hijacked");
+
+  assert.throws(() => serializeEnvFile(new Map([["bad-key", "value"]])), /Invalid env key/);
+});
+
 test("serializeEnvFile round-trips through loadEnvMap", () => {
   const dir = mkdtempSync(join(tmpdir(), "sourcedraft-setup-"));
   const envPath = join(dir, ".env");

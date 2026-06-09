@@ -1,4 +1,5 @@
 import type { Article } from "@sourcedraft/core";
+import { trimTrailingSlashes } from "@sourcedraft/core";
 
 export type HugoMarkdownPathConfig = {
   contentDir: string;
@@ -9,7 +10,7 @@ export function getHugoMarkdownPath(
   article: Article,
   config: HugoMarkdownPathConfig,
 ): string {
-  const contentDir = config.contentDir.replace(/\/+$/u, "");
+  const contentDir = trimTrailingSlashes(config.contentDir);
   const rawExtension = config.extension ?? "md";
   const extension = rawExtension.startsWith(".")
     ? rawExtension.slice(1)

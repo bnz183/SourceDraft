@@ -53,6 +53,7 @@ export function createGhostAdminJwt(
       aud: "/admin/",
     }),
   );
+  // CodeQL: HMAC-SHA256 signs Ghost Admin API JWTs (RFC 7519), not password storage.
   const signature = createHmac("sha256", parsed.secret)
     .update(`${header}.${payload}`)
     .digest("base64url");

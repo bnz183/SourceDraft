@@ -1,3 +1,5 @@
+import { trimTrailingSlashes } from "@sourcedraft/core";
+
 export type S3MediaConfig = {
   endpoint: string;
   region: string;
@@ -59,13 +61,13 @@ export function validateS3MediaConfig(input: {
   return {
     ok: true,
     config: {
-      endpoint: endpoint.replace(/\/+$/, ""),
+      endpoint: trimTrailingSlashes(endpoint),
       region,
       bucket,
       accessKeyId,
       secretAccessKey,
       ...(input.publicBaseUrl?.trim()
-        ? { publicBaseUrl: input.publicBaseUrl.trim().replace(/\/+$/, "") }
+        ? { publicBaseUrl: trimTrailingSlashes(input.publicBaseUrl.trim()) }
         : {}),
       ...(input.forcePathStyle === true ? { forcePathStyle: true } : {}),
     },
