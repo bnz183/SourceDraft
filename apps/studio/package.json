@@ -14,7 +14,9 @@
     "start:server": "node dist-server/index.js",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "node --import tsx --test src/**/*.test.ts server/**/*.test.ts"
+    "test": "node --import tsx --test src/**/*.test.ts server/**/*.test.ts",
+    "test:e2e": "playwright test e2e/smoke.spec.ts",
+    "screenshots:generate": "playwright test e2e/screenshots.spec.ts"
   },
   "dependencies": {
     "@fontsource/ibm-plex-mono": "^5.2.7",
@@ -33,6 +35,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.55.0",
     "@types/busboy": "^1.5.4",
     "@types/express": "^5.0.3",
     "@types/node": "^24.12.3",

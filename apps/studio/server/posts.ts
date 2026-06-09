@@ -32,7 +32,7 @@ function createPublisher(env: PublishEnvConfig) {
   });
 }
 
-function slugFromPath(path: string): string {
+export function slugFromPath(path: string): string {
   const filename = path.split("/").pop() ?? "";
   return filename.replace(/\.(mdx|md)$/iu, "");
 }
@@ -125,7 +125,7 @@ function parseFrontmatter(yaml: string): Record<string, unknown> {
   return result;
 }
 
-function splitFrontmatter(
+export function splitFrontmatter(
   content: string,
 ): { frontmatter: Record<string, unknown>; body: string } | null {
   if (!content.startsWith("---\n")) {
@@ -146,7 +146,7 @@ function splitFrontmatter(
   };
 }
 
-function frontmatterToArticleInput(
+export function frontmatterToArticleInput(
   path: string,
   frontmatter: Record<string, unknown>,
   body: string,

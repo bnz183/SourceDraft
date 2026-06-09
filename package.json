@@ -9,7 +9,9 @@
     "build": "pnpm -r build",
     "check": "pnpm -r check",
     "lint": "pnpm -r lint",
-    "test": "pnpm --filter @sourcedraft/core --filter @sourcedraft/adapter-astro-mdx --filter @sourcedraft/adapter-markdown --filter @sourcedraft/github-publisher --filter studio test"
+    "test": "pnpm --filter @sourcedraft/core --filter @sourcedraft/adapter-astro-mdx --filter @sourcedraft/adapter-markdown --filter @sourcedraft/github-publisher --filter studio test",
+    "test:e2e": "pnpm --filter studio test:e2e",
+    "screenshots:generate": "pnpm --filter studio screenshots:generate"
   },
   "devDependencies": {
     "tsx": "^4.20.3"

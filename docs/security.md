@@ -7,6 +7,17 @@
 
 Studio stores a session cookie after login. It does not store the GitHub token or admin password in the browser.
 
+## Demo mode
+
+When `SOURCEDRAFT_DEMO_MODE=true` or GitHub is not fully configured:
+
+- Studio serves sample posts from server memory — not your repository.
+- `POST /api/publish` and `POST /api/media/upload` simulate success and **never call the GitHub API**.
+- Forced demo mode (`SOURCEDRAFT_DEMO_MODE=true`) blocks GitHub writes even if `GITHUB_TOKEN` is set.
+- Demo sessions use the same HttpOnly cookie as password login; no secrets are stored in the browser.
+
+Use demo mode for local exploration and smoke tests only. **MVP password auth is still intended for local/private use.**
+
 ## Session cookies (MVP)
 
 After login, the server sets an in-memory session cookie:
@@ -51,6 +62,7 @@ All GitHub API calls run in `apps/studio/server`:
 | `POST /api/publish` | Create or update post files |
 | `GET /api/posts` | List and load posts from `contentDir` |
 | `POST /api/media/upload` | Commit image files to `mediaDir` |
+| `GET /api/health/setup` | Safe setup diagnostics (authenticated; no secrets) |
 
 The client sends article JSON, post path queries, or multipart uploads. The server attaches credentials from `.env`.
 

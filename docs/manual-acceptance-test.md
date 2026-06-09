@@ -7,12 +7,30 @@ Run this checklist before promoting SourceDraft v0.1. Use a **test** GitHub repo
 - [ ] `pnpm install`
 - [ ] `pnpm build` — exit 0
 - [ ] `pnpm test` — exit 0
+- [ ] `pnpm test:e2e` — exit 0 (Playwright smoke tests, demo mode)
 
 ```bash
-pnpm install --lockfile-only
+pnpm install --frozen-lockfile
 pnpm build
 pnpm test
+pnpm exec playwright install chromium   # first time only
+CI=true pnpm test:e2e
 ```
+
+Optional: regenerate README screenshots before release if UI changed:
+
+```bash
+pnpm screenshots:generate
+```
+
+## Demo mode checklist
+
+- [ ] With GitHub unset or `SOURCEDRAFT_DEMO_MODE=true`, **Explore demo mode** appears on sign-in
+- [ ] Demo banner reads **Demo mode — no GitHub commits are made**
+- [ ] Sample posts load in the **Posts** sidebar
+- [ ] Opening and editing a sample post works
+- [ ] **Simulate publish** succeeds without a GitHub commit
+- [ ] Settings → **Setup health** shows check statuses (no token values)
 
 ## Setup
 
@@ -29,6 +47,7 @@ pnpm test
 
 - [ ] After login, the **Posts** sidebar and center editor workspace load (not a blank page)
 - [ ] Open **Settings** in the top bar and confirm adapter, `contentDir`, `mediaDir`, and `publicMediaPath` match your config
+- [ ] **Setup health** lists admin password, GitHub, paths, adapter, and demo mode status
 - [ ] Click **Back to editor** to return to the writing workspace
 
 ## Create and preview

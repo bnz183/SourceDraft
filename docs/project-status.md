@@ -13,7 +13,10 @@ Early open-source MVP — usable for single-editor writing and GitHub publishing
 - Image upload from Studio (PNG, JPEG, GIF, WebP; 5 MB max) with configurable `publicMediaPath`
 - `sourcedraft.config.json` + `.env` configuration
 - Server-side password auth for Studio and API
-- CI: build and unit tests on push/PR
+- **Demo mode** with sample posts and simulated publish/upload (no GitHub writes)
+- **Setup health** checks in Settings and `GET /api/health/setup`
+- CI: build, unit tests, and Playwright smoke tests (demo mode) on push/PR
+- Release screenshots in `docs/assets/` (regenerate with `pnpm screenshots:generate`)
 
 ## What does not work yet
 
@@ -27,6 +30,19 @@ Early open-source MVP — usable for single-editor writing and GitHub publishing
 | Adapters | `astro-mdx` and `markdown` only |
 | Media | GitHub repo uploads only; no Cloudinary/S3/R2 |
 | Teams | No roles, review workflow, or multi-editor accounts |
+| Demo mode | Fixture-backed seed content; session edits are temporary; not a hosted demo SaaS |
+
+## Demo mode (fixtures)
+
+Demo mode loads stable seed posts and media metadata from `apps/studio/server/demo/fixtures/`. On every API restart, the same fixtures are loaded again. Edits and simulated publishes during a session stay in memory only and are discarded when the process restarts. No GitHub commits are made.
+
+Details: [demo-mode.md](demo-mode.md)
+
+## Known limitations (demo mode)
+
+- Session edits and simulated uploads are in-memory only — restarting the API reloads fixtures.
+- `SOURCEDRAFT_DEMO_MODE=true` disables all GitHub writes even if a token is configured.
+- Demo mode is for exploration, smoke tests, and screenshots — not production publishing.
 
 ## Known MVP limitations (GitHub)
 

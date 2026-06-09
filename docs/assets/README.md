@@ -7,9 +7,16 @@ Static images for SourceDraft documentation (primarily README screenshots).
 Use lowercase kebab-case PNG files:
 
 - `studio-overview.png`
-- `editor-preview.png`
-- `media-upload.png`
+- `editor.png`
+- `toolbar.png`
+- `autosave.png`
+- `media-library.png`
+- `content-quality.png`
+- `preview.png`
 - `publish-success.png`
+- `setup-health.png`
+
+Regenerate with `pnpm screenshots:generate` from the repository root (demo mode, no GitHub credentials).
 
 Add new screenshots only when they reflect the current Studio UI.
 
@@ -22,7 +29,7 @@ Before committing an image, confirm it does **not** show:
 - Private repository names you do not want public (use a test repo or blur)
 - Personal email addresses, internal URLs, or unrelated proprietary content
 
-Studio Settings fields are read-only, but screenshots can still expose owner/repo names and folder paths. Use a dedicated test GitHub repository when possible.
+Automated screenshots use demo mode fixtures only. Manual GitHub-mode captures should use a dedicated test repository.
 
 ## Usage
 
@@ -32,4 +39,4 @@ Reference images from the root README or docs with relative paths, for example:
 ![Studio overview](docs/assets/studio-overview.png)
 ```
 
-See [screenshots.md](../screenshots.md) for capture instructions.
+See [screenshots.md](../screenshots.md) for capture and regeneration instructions.

@@ -1,5 +1,6 @@
 import { randomBytes, timingSafeEqual } from "node:crypto";
 import type { NextFunction, Request, Response } from "express";
+import { isDemoModeAvailable, isDemoModeForced, isGitHubConfigured } from "./demoMode.js";
 
 const SESSION_COOKIE = "sourcedraft_session";
 /** 24 hours — in-memory MVP sessions, not durable account auth. */
@@ -7,6 +8,7 @@ const SESSION_TTL_MS = 24 * 60 * 60 * 1000;
 
 type SessionRecord = {
   expiresAt: number;
+  demo?: boolean;
 };
 
 const sessions = new Map<string, SessionRecord>();
@@ -116,10 +118,13 @@ export function verifyPassword(password: string): boolean {
   return timingSafeEqual(provided, target);
 }
 
-export function createSession(): string {
+export function createSession(options?: { demo?: boolean }): string {
   purgeExpiredSessions();
   const token = randomBytes(32).toString("hex");
-  sessions.set(token, { expiresAt: Date.now() + SESSION_TTL_MS });
+  sessions.set(token, {
+    expiresAt: Date.now() + SESSION_TTL_MS,
+    demo: options?.demo === true,
+  });
   return token;
 }
 
@@ -152,8 +157,41 @@ export function getSessionToken(req: Request): string | null {
   return readCookie(req, SESSION_COOKIE);
 }
 
+export function isDemoSession(token: string | null): boolean {
+  if (!token) {
+    return false;
+  }
+
+  purgeExpiredSessions();
+  const session = sessions.get(token);
+  return session?.demo === true;
+}
+
+export function isRequestDemoSession(req: Request): boolean {
+  if (isDemoModeForced() || !isGitHubConfigured()) {
+    return true;
+  }
+
+  return isDemoSession(getSessionToken(req));
+}
+
+export function isAuthenticatedDemoActive(req: Request): boolean {
+  const token = getSessionToken(req);
+  if (!isSessionValid(token)) {
+    return false;
+  }
+
+  return isRequestDemoSession(req);
+}
+
 export function requireAuth(req: Request, res: Response, next: NextFunction): void {
-  if (!isAuthConfigured()) {
+  const token = getSessionToken(req);
+  if (isSessionValid(token)) {
+    next();
+    return;
+  }
+
+  if (!isAuthConfigured() && !isDemoModeAvailable()) {
     res.status(500).json({
       ok: false,
       error: "SOURCEDRAFT_ADMIN_PASSWORD is not configured.",
@@ -161,13 +199,7 @@ export function requireAuth(req: Request, res: Response, next: NextFunction): vo
     return;
   }
 
-  const token = getSessionToken(req);
-  if (!isSessionValid(token)) {
-    res.status(401).json({ ok: false, error: "Authentication required." });
-    return;
-  }
-
-  next();
+  res.status(401).json({ ok: false, error: "Authentication required." });
 }
 
 export function login(
@@ -184,6 +216,22 @@ export function login(
   }
 
   const token = createSession();
+  setSessionCookie(req, res, token);
+  return { ok: true };
+}
+
+export function enterDemo(
+  req: Request,
+  res: Response,
+): { ok: boolean; error?: string } {
+  if (!isDemoModeAvailable()) {
+    return {
+      ok: false,
+      error: "Demo mode is not available when GitHub is fully configured.",
+    };
+  }
+
+  const token = createSession({ demo: true });
   setSessionCookie(req, res, token);
   return { ok: true };
 }

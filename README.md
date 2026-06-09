@@ -8,9 +8,13 @@ SourceDraft began as an internal tool for [QuBrite.com](https://qubrite.com) and
 
 ## Screenshots
 
-Screenshots are not included in the repository yet. Expected images and capture instructions: [docs/screenshots.md](docs/screenshots.md).
+![Studio overview](docs/assets/studio-overview.png)
 
-When added, they will live in `docs/assets/` (overview, editor preview, media upload, publish success).
+| | |
+|---|---|
+| ![Editor](docs/assets/editor.png) | ![Publish simulated in demo mode](docs/assets/publish-success.png) |
+
+More views (toolbar, autosave, media library, content quality, preview, setup health): [docs/screenshots.md](docs/screenshots.md). Regenerate with `pnpm screenshots:generate`.
 
 ## What is SourceDraft?
 
@@ -36,6 +40,8 @@ Your static site — Astro today, others later — still builds and deploys exac
 - Upload images to GitHub (`mediaDir`) from Studio
 - Configure paths, adapter, and categories in `sourcedraft.config.json`
 - Protect Studio with a server-side admin password
+- **Demo mode** — explore Studio with sample posts without GitHub credentials
+- **Setup health** — Settings panel checks for missing config (no secrets exposed)
 
 ## What it does not do yet
 
@@ -90,6 +96,8 @@ pnpm dev
 
 Sign in, click **New post**, preview the output, publish. The file lands at `contentDir/<slug>.mdx` or `.md` depending on your adapter (default: `src/content/blog/`).
 
+**Try without GitHub:** set `SOURCEDRAFT_DEMO_MODE=true` in `.env`, or leave GitHub vars empty and click **Explore demo mode** on the sign-in screen. Demo content reloads from repository fixtures on each API start. See [docs/demo-mode.md](docs/demo-mode.md).
+
 Full walkthrough: [docs/getting-started.md](docs/getting-started.md)
 
 ## Beginner path
@@ -137,6 +145,7 @@ Issues and pull requests are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) fo
 ## Documentation
 
 - [Getting started](docs/getting-started.md)
+- [Demo mode](docs/demo-mode.md)
 - [Non-technical overview](docs/non-technical-overview.md) — for writers
 - [GitHub publishing](docs/github-publishing.md)
 - [Media uploads](docs/media.md)
@@ -146,6 +155,7 @@ Issues and pull requests are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) fo
 - [Adapters](docs/adapters.md)
 - [Project status](docs/project-status.md)
 - [Manual acceptance test](docs/manual-acceptance-test.md)
+- [Smoke tests (Playwright)](docs/getting-started.md#smoke-tests-playwright)
 - [Release checklist](RELEASE_CHECKLIST.md)
 - [Security](docs/security.md)
 - [Screenshots guide](docs/screenshots.md)

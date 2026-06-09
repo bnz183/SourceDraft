@@ -4,6 +4,7 @@ import { normalizeArticle, validateArticle } from "@sourcedraft/core";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AppBar } from "./components/AppBar";
 import { AstroMdxPreview } from "./components/AstroMdxPreview";
+import { DemoBanner } from "./components/DemoBanner";
 import { LoginScreen } from "./components/LoginScreen";
 import { PostDetailsPanel } from "./components/PostDetailsPanel";
 import { PostSidebar } from "./components/PostSidebar";
@@ -13,6 +14,7 @@ import { SettingsPanel } from "./components/SettingsPanel";
 import { WritingCanvas } from "./components/WritingCanvas";
 import { useDocumentAutosave } from "./hooks/useDocumentAutosave";
 import {
+  enterDemo,
   fetchAuthStatus,
   login as loginToStudio,
   logout as logoutFromStudio,
@@ -49,6 +51,9 @@ function App() {
   const [authChecked, setAuthChecked] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
   const [authConfigured, setAuthConfigured] = useState(false);
+  const [demoMode, setDemoMode] = useState(false);
+  const [demoModeForced, setDemoModeForced] = useState(false);
+  const [demoModeAvailable, setDemoModeAvailable] = useState(false);
   const [view, setView] = useState<View>("editor");
   const [studioConfig, setStudioConfig] = useState<StudioConfig>(
     FALLBACK_STUDIO_CONFIG,
@@ -97,6 +102,9 @@ function App() {
     fetchAuthStatus().then((status) => {
       setAuthConfigured(status.configured);
       setAuthenticated(status.authenticated);
+      setDemoMode(status.demoMode === true);
+      setDemoModeForced(status.demoModeForced === true);
+      setDemoModeAvailable(status.demoModeAvailable === true);
       setAuthChecked(true);
     });
   }, []);
@@ -108,6 +116,7 @@ function App() {
 
     fetchStudioConfig().then((config) => {
       setStudioConfig(config);
+      setDemoMode(config.demoMode === true);
       setForm((current) => {
         if (current.title.length > 0 || current.body.length > 0) {
           return current;
@@ -318,7 +327,23 @@ function App() {
   async function handleLogin(password: string) {
     const result = await loginToStudio(password);
     if (result.ok) {
+      const status = await fetchAuthStatus();
       setAuthenticated(true);
+      setDemoMode(status.demoMode === true);
+      setDemoModeForced(status.demoModeForced === true);
+      setDemoModeAvailable(status.demoModeAvailable === true);
+    }
+    return result;
+  }
+
+  async function handleEnterDemo() {
+    const result = await enterDemo();
+    if (result.ok) {
+      const status = await fetchAuthStatus();
+      setAuthenticated(true);
+      setDemoMode(true);
+      setDemoModeForced(status.demoModeForced === true);
+      setDemoModeAvailable(status.demoModeAvailable === true);
     }
     return result;
   }
@@ -392,12 +417,19 @@ function App() {
 
   if (!authenticated) {
     return (
-      <LoginScreen configured={authConfigured} onLogin={handleLogin} />
+      <LoginScreen
+        configured={authConfigured}
+        demoAvailable={demoModeAvailable}
+        demoForced={demoModeForced}
+        onLogin={handleLogin}
+        onEnterDemo={handleEnterDemo}
+      />
     );
   }
 
   return (
     <div className="studio">
+      {demoMode && <DemoBanner forced={demoModeForced} />}
       <AppBar
         adapter={studioConfig.adapter}
         documentStatus={view === "editor" ? documentStatus : null}
@@ -473,6 +505,7 @@ function App() {
               publishError={publishError}
               publishSuccess={publishSuccess}
               githubReady={githubReady}
+              demoMode={demoMode}
               onPublish={handlePublish}
             />
           </main>
