@@ -16,12 +16,13 @@
   "scripts": {
     "build": "tsc",
     "check": "tsc --noEmit",
-    "test": "node --import tsx --test src/**/*.test.ts"
+    "test": "node --import tsx --test 'src/**/*.test.ts' 'src/**/**/*.test.ts'"
   },
   "dependencies": {
     "@sourcedraft/github-publisher": "workspace:*"
   },
   "devDependencies": {
+    "@types/node": "^22.15.30",
     "tsx": "^4.20.3",
     "typescript": "^5.8.3"
   }

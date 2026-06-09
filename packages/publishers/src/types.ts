@@ -1,4 +1,4 @@
-export const PUBLISHER_IDS = ["github"] as const;
+export const PUBLISHER_IDS = ["github", "gitlab", "bitbucket"] as const;
 
 export type PublisherId = (typeof PUBLISHER_IDS)[number];
 
@@ -10,6 +10,12 @@ export type PublisherRuntimeConfig = {
   contentDir: string;
   mediaDir: string;
   publisherOptions?: Record<string, unknown>;
+  /** GitLab project id or namespace/project path */
+  gitlabProjectRef?: string;
+  /** GitLab API base URL (default https://gitlab.com) */
+  gitlabBaseUrl?: string;
+  /** Bitbucket app-password username when Basic auth is required */
+  bitbucketUsername?: string;
 };
 
 export type PublisherCapabilities = {

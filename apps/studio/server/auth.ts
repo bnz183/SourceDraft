@@ -1,6 +1,10 @@
 import { randomBytes, timingSafeEqual } from "node:crypto";
 import type { NextFunction, Request, Response } from "express";
-import { isDemoModeAvailable, isDemoModeForced, isGitHubConfigured } from "./demoMode.js";
+import {
+  isDemoModeAvailable,
+  isDemoModeForced,
+  isPublisherConfigured,
+} from "./demoMode.js";
 
 const SESSION_COOKIE = "sourcedraft_session";
 /** 24 hours — in-memory MVP sessions, not durable account auth. */
@@ -168,7 +172,7 @@ export function isDemoSession(token: string | null): boolean {
 }
 
 export function isRequestDemoSession(req: Request): boolean {
-  if (isDemoModeForced() || !isGitHubConfigured()) {
+  if (isDemoModeForced() || !isPublisherConfigured()) {
     return true;
   }
 

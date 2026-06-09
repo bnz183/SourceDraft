@@ -298,6 +298,9 @@ importers:
         specifier: workspace:*
         version: link:../github-publisher
     devDependencies:
+      '@types/node':
+        specifier: ^22.15.30
+        version: 22.19.19
       tsx:
         specifier: ^4.20.3
         version: 4.22.4

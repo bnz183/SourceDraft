@@ -36,8 +36,8 @@ Your static site — Astro today, others later — still builds and deploys exac
 - List and edit existing posts from your GitHub `contentDir`
 - Validate fields against a universal article schema
 - Preview Markdown or Astro MDX output and target file path before publishing
-- Publish to GitHub (create or update a file on a branch)
-- Upload images to GitHub (`mediaDir`) from Studio
+- Publish to GitHub, GitLab, or Bitbucket (create or update a file on a branch)
+- Upload images to the configured remote (`mediaDir`) from Studio
 - Configure paths, adapter, and categories in `sourcedraft.config.json`
 - Protect Studio with a server-side admin password
 - **Demo mode** — explore Studio with sample posts without GitHub credentials
@@ -52,19 +52,19 @@ Your static site — Astro today, others later — still builds and deploys exac
 
 See [docs/project-status.md](docs/project-status.md).
 
-## How GitHub publishing works
+## How publishing works
 
-1. You finish a valid article in Studio and click **Publish to GitHub**.
+1. You finish a valid article in Studio and click **Publish**.
 2. The **publish API** (server only) validates the article again.
 3. The configured **adapter** builds the file (YAML frontmatter + body) as `.mdx` or `.md`.
-4. The **GitHub publisher** checks whether the file exists in your repo, then creates or updates it via the GitHub API.
+4. The configured **publisher** (`github`, `gitlab`, or `bitbucket`) commits the file to your repository.
 5. Your existing CI or build step picks up the new file from `contentDir`.
 
-The GitHub token never reaches the browser. It is read from `.env` on the server when you publish or upload media.
+API tokens never reach the browser. They are read from `.env` on the server when you publish or upload media.
 
-Details: [docs/github-publishing.md](docs/github-publishing.md) · [docs/media.md](docs/media.md)
+Details: [docs/git-publishers.md](docs/git-publishers.md) · [docs/github-publishing.md](docs/github-publishing.md) · [docs/media.md](docs/media.md)
 
-v0.1 uses the GitHub Contents API — suitable for typical blogs; very large content folders are a known MVP limitation.
+**Compatibility:** GitHub (Contents API), GitLab (Repository Files API), and Bitbucket Cloud (commit-upload). GitHub and GitLab support listing/editing existing posts; Bitbucket supports publish and media upload only today.
 
 ## Quickstart
 
@@ -147,6 +147,7 @@ Issues and pull requests are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) fo
 - [Getting started](docs/getting-started.md)
 - [Demo mode](docs/demo-mode.md)
 - [Non-technical overview](docs/non-technical-overview.md) — for writers
+- [Git publishing (GitHub, GitLab, Bitbucket)](docs/git-publishers.md)
 - [GitHub publishing](docs/github-publishing.md)
 - [Media uploads](docs/media.md)
 - [Configuration](docs/configuration.md)
