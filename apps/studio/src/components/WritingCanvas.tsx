@@ -1,8 +1,8 @@
-import { useId, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
+import type { Editor } from "@tiptap/react";
 import type { PostSummary } from "../lib/posts";
 import { DocumentOutline } from "./DocumentOutline";
-import { handleMarkdownShortcut } from "../lib/markdownShortcuts";
-import { MarkdownToolbar } from "./MarkdownToolbar";
+import { SourceDraftEditor } from "../editor/SourceDraftEditor";
 
 type WritingCanvasProps = {
   title: string;
@@ -31,8 +31,48 @@ export function WritingCanvas({
   onDescriptionChange,
   onBodyChange,
 }: WritingCanvasProps) {
-  const bodyFieldId = useId();
-  const bodyRef = useRef<HTMLTextAreaElement>(null);
+  const editorRef = useRef<Editor | null>(null);
+  const sourceTextareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const [editorMode, setEditorMode] = useState<"rich" | "source">("rich");
+
+  const handleEditorReady = useCallback((editor: Editor | null) => {
+    editorRef.current = editor;
+  }, []);
+
+  const scrollToOffset = useCallback(
+    (offset: number) => {
+      if (editorMode === "source") {
+        const textarea = sourceTextareaRef.current;
+        if (!textarea) {
+          return;
+        }
+
+        textarea.focus();
+        textarea.setSelectionRange(offset, offset);
+        const textBefore = textarea.value.slice(0, offset);
+        const lineCount = textBefore.length === 0 ? 1 : textBefore.split("\n").length;
+        const styles = window.getComputedStyle(textarea);
+        const lineHeight = Number.parseFloat(styles.lineHeight) || 28;
+        textarea.scrollTop = Math.max(0, (lineCount - 1) * lineHeight - textarea.clientHeight / 3);
+        return;
+      }
+
+      const editor = editorRef.current;
+      if (!editor) {
+        return;
+      }
+
+      const text = body.slice(0, offset);
+      const lineCount = text.length === 0 ? 1 : text.split("\n").length;
+      const editorElement = editor.view.dom;
+      editor.chain().focus().run();
+      editorElement.scrollTop = Math.max(
+        0,
+        (lineCount - 1) * 28 - editorElement.clientHeight / 3,
+      );
+    },
+    [body, editorMode],
+  );
 
   return (
     <div className="writing-canvas">
@@ -90,45 +130,21 @@ export function WritingCanvas({
       </label>
 
       <div className="writing-canvas__page">
-        <MarkdownToolbar
+        <SourceDraftEditor
           body={body}
-          bodyFieldId={bodyFieldId}
           latestImagePath={latestImagePath}
           imageAlt={title.trim() || "Image"}
           posts={posts}
           editingPath={editingPath}
-          textareaRef={bodyRef}
+          fieldError={fieldErrors.body}
           onBodyChange={onBodyChange}
+          onEditorReady={handleEditorReady}
+          onEditorModeChange={setEditorMode}
+          sourceTextareaRef={sourceTextareaRef}
         />
-
-        <label className="writing-canvas__body-field">
-          <span className="visually-hidden">Article body</span>
-          <textarea
-            id={bodyFieldId}
-            ref={bodyRef}
-            className={
-              fieldErrors.body
-                ? "writing-canvas__body writing-canvas__body--error"
-                : "writing-canvas__body"
-            }
-            value={body}
-            onChange={(event) => onBodyChange(event.target.value)}
-            onKeyDown={(event) => {
-              handleMarkdownShortcut(event, body, onBodyChange);
-            }}
-            spellCheck={true}
-            placeholder="Start writing your article…"
-            aria-invalid={fieldErrors.body ? true : undefined}
-          />
-        </label>
-        {fieldErrors.body && (
-          <p className="writing-canvas__body-error field__error" role="alert">
-            {fieldErrors.body}
-          </p>
-        )}
       </div>
 
-      <DocumentOutline body={body} textareaRef={bodyRef} />
+      <DocumentOutline body={body} onScrollToOffset={scrollToOffset} />
     </div>
   );
 }

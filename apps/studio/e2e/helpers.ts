@@ -26,6 +26,18 @@ export function postDescriptionInput(page: Page) {
   return page.getByTestId("post-description-input");
 }
 
+export function postBodyEditor(page: Page) {
+  return page.locator('[data-testid="post-body-editor"]');
+}
+
+export async function fillPostBody(page: Page, value: string): Promise<void> {
+  const editor = postBodyEditor(page);
+  await editor.click();
+  await page.keyboard.press("Control+A");
+  await page.keyboard.press("Backspace");
+  await page.keyboard.type(value);
+}
+
 export async function enterDemoMode(page: Page): Promise<void> {
   attachPageErrorLogging(page);
   await waitForStudioRoot(page);
