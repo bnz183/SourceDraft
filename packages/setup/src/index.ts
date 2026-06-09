@@ -50,3 +50,30 @@ export {
 } from "./validateConfig.js";
 
 export { runWizard, type WizardOptions, type WizardResult } from "./wizard.js";
+
+export {
+  parseFrontmatter,
+  splitFrontmatter,
+} from "./frontmatter.js";
+
+export { hasComplexMdx } from "./mdxComplexity.js";
+
+export {
+  buildSuggestedConfigSnippet,
+  detectSetup,
+  isSafeToApplySuggestion,
+  type SetupDetectionResult,
+  type SetupDetectionSuggestion,
+} from "./detectSetup.js";
+
+export {
+  auditPostFile,
+  buildContentAuditReport,
+  isPostFilePath,
+  type AuditPostInput,
+  type ContentAuditIssue,
+  type ContentAuditPost,
+  type ContentAuditReport,
+  type ContentAuditSummary,
+  type DuplicateSlugGroup,
+} from "./contentAudit.js";

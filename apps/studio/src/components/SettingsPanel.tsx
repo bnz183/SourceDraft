@@ -1,5 +1,7 @@
 import type { StudioConfig } from "../lib/studioConfig";
 import { AdapterStatus } from "./AdapterStatus";
+import { ContentAuditPanel } from "./ContentAuditPanel";
+import { SetupDetectionPanel } from "./SetupDetectionPanel";
 import { SetupHealthPanel } from "./SetupHealthPanel";
 
 type SettingsPanelProps = {
@@ -9,6 +11,8 @@ type SettingsPanelProps = {
 export function SettingsPanel({ config }: SettingsPanelProps) {
   return (
     <div className="settings-view">
+      <SetupDetectionPanel />
+      <ContentAuditPanel />
       <SetupHealthPanel />
 
       <section className="panel settings-panel">

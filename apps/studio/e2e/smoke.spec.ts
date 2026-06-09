@@ -61,9 +61,22 @@ test.describe("Studio smoke", () => {
   test("settings setup health renders", async ({ page }) => {
     await enterDemoMode(page);
     await page.getByRole("button", { name: "Settings" }).click();
+    await expect(page.getByRole("heading", { name: "Setup detection" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Content audit" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Setup health" })).toBeVisible();
     await expect(page.getByText("Admin password")).toBeVisible();
     await expect(page.getByText("GitHub token (server-side)")).toBeVisible();
+  });
+
+  test("publish checklist renders in demo mode", async ({ page }) => {
+    await enterDemoMode(page);
+    await page.getByRole("button", { name: "New post" }).click();
+    await postTitleInput(page).fill("Checklist smoke test");
+    await postDescriptionInput(page).fill("Summary for checklist smoke test.");
+    await fillPostBody(page, "# Checklist\n\nBody content.");
+    await expect(page.getByRole("heading", { name: "Publish checklist" })).toBeVisible();
+    await expect(page.getByText("Validation")).toBeVisible();
+    await expect(page.getByText("Output path")).toBeVisible();
   });
 
   test("publish success can be simulated in demo mode", async ({ page }) => {
