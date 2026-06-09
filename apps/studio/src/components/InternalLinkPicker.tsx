@@ -19,6 +19,7 @@ type InternalLinkPickerProps = {
   textareaRef: RefObject<HTMLTextAreaElement | null>;
   onBodyChange: (body: string) => void;
   onClose: () => void;
+  onSelectPost?: (post: PostSummary) => void;
 };
 
 export function InternalLinkPicker({
@@ -29,6 +30,7 @@ export function InternalLinkPicker({
   textareaRef,
   onBodyChange,
   onClose,
+  onSelectPost,
 }: InternalLinkPickerProps) {
   const [query, setQuery] = useState("");
 
@@ -38,6 +40,11 @@ export function InternalLinkPicker({
   );
 
   function insertTarget(post: PostSummary) {
+    if (onSelectPost) {
+      onSelectPost(post);
+      return;
+    }
+
     const textarea = textareaRef.current;
     if (!textarea) {
       return;

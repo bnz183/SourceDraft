@@ -3,6 +3,8 @@ import {
   attachPageErrorLogging,
   ensureScreenshotDir,
   enterDemoMode,
+  fillPostBody,
+  postBodyEditor,
   postDescriptionInput,
   postTitleInput,
   screenshotPath,
@@ -29,7 +31,7 @@ test.describe("release screenshots", () => {
     });
 
     await page.getByRole("button", { name: "Getting started with SourceDraft" }).click();
-    await expect(page.locator(".writing-canvas__body")).toBeVisible();
+    await expect(postBodyEditor(page)).toBeVisible();
 
     await page.screenshot({
       path: screenshotPath("editor.png"),
@@ -65,7 +67,8 @@ test.describe("release screenshots", () => {
     await postDescriptionInput(page).fill(
       "Summary used for automated publish-success screenshot.",
     );
-    await page.locator(".writing-canvas__body").fill(
+    await fillPostBody(
+      page,
       "# Screenshot publish example\n\nBody for release screenshot capture.",
     );
     await page.getByRole("button", { name: "Simulate publish" }).click();

@@ -599,7 +599,8 @@ code {
   font-family: var(--font-mono);
 }
 
-.writing-canvas__body {
+.writing-canvas__body,
+.sourcedraft-editor .ProseMirror {
   width: 100%;
   min-height: 420px;
   resize: vertical;
@@ -610,6 +611,128 @@ code {
   font-family: var(--font-writing);
   font-size: var(--text-lg);
   line-height: var(--leading-writing);
+}
+
+.sourcedraft-editor-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.sourcedraft-editor__surface {
+  position: relative;
+}
+
+.sourcedraft-editor .ProseMirror {
+  outline: none;
+  resize: vertical;
+}
+
+.sourcedraft-editor .ProseMirror p.is-editor-empty:first-child::before {
+  color: #b0b0b8;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+.sourcedraft-editor .ProseMirror h1,
+.sourcedraft-editor .ProseMirror h2,
+.sourcedraft-editor .ProseMirror h3 {
+  font-family: var(--font-ui);
+  line-height: 1.2;
+  margin: 1.2em 0 0.5em;
+}
+
+.sourcedraft-editor .ProseMirror blockquote {
+  border-left: 3px solid var(--border-strong);
+  margin: 0.8em 0;
+  padding-left: 1em;
+  color: var(--text-muted);
+}
+
+.sourcedraft-editor .ProseMirror pre {
+  background: var(--bg-raised);
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  overflow-x: auto;
+  padding: 12px 14px;
+}
+
+.sourcedraft-editor .ProseMirror img {
+  max-width: 100%;
+}
+
+.mdx-raw-block {
+  background: #f6f7fb;
+  border: 1px dashed var(--border-strong);
+  border-radius: 6px;
+  margin: 0.8em 0;
+  padding: 10px 12px;
+}
+
+.mdx-raw-block__code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.writing-canvas__body--source {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+}
+
+.editor-toolbar__spacer {
+  flex: 1;
+}
+
+.editor-toolbar__button--active {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.slash-command-menu-wrap {
+  position: fixed;
+  z-index: 30;
+}
+
+.slash-command-menu {
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  min-width: 220px;
+  overflow: hidden;
+}
+
+.slash-command-menu__item {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.slash-command-menu__item--active,
+.slash-command-menu__item:hover {
+  background: #f7faff;
+}
+
+.slash-command-menu__label {
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.slash-command-menu__hint {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
 }
 
 .writing-canvas__body::placeholder {

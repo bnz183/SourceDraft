@@ -1,20 +1,16 @@
 import { useMemo, useState } from "react";
-import type { RefObject } from "react";
-import {
-  analyzeDocumentOutline,
-  scrollTextareaToOffset,
-} from "../lib/documentOutline.js";
+import { analyzeDocumentOutline } from "../lib/documentOutline.js";
 
 type DocumentOutlineProps = {
   body: string;
-  textareaRef: RefObject<HTMLTextAreaElement | null>;
+  onScrollToOffset?: (offset: number) => void;
 };
 
 function headingLabel(level: 1 | 2 | 3): string {
   return `H${level}`;
 }
 
-export function DocumentOutline({ body, textareaRef }: DocumentOutlineProps) {
+export function DocumentOutline({ body, onScrollToOffset }: DocumentOutlineProps) {
   const [open, setOpen] = useState(true);
   const analysis = useMemo(() => analyzeDocumentOutline(body), [body]);
 
@@ -50,10 +46,7 @@ export function DocumentOutline({ body, textareaRef }: DocumentOutlineProps) {
                     type="button"
                     className={`document-outline__item document-outline__item--h${heading.level}`}
                     onClick={() => {
-                      const textarea = textareaRef.current;
-                      if (textarea) {
-                        scrollTextareaToOffset(textarea, heading.startOffset);
-                      }
+                      onScrollToOffset?.(heading.startOffset);
                     }}
                   >
                     <span className="document-outline__level">

@@ -2,6 +2,8 @@ import { expect, test } from "@playwright/test";
 import {
   attachPageErrorLogging,
   enterDemoMode,
+  fillPostBody,
+  postBodyEditor,
   postDescriptionInput,
   postTitleInput,
   waitForStudioRoot,
@@ -28,19 +30,17 @@ test.describe("Studio smoke", () => {
     await postDescriptionInput(page).fill(
       "A short summary for the smoke test post.",
     );
-    const body = page.locator(".writing-canvas__body");
-    await body.fill("## Smoke test section\n\nBody text for smoke testing.");
-    await expect(body).toHaveValue(/Smoke test section/u);
+    await fillPostBody(page, "## Smoke test section\n\nBody text for smoke testing.");
+    await expect(postBodyEditor(page)).toContainText("Smoke test section");
   });
 
   test("toolbar inserts Markdown", async ({ page }) => {
     await enterDemoMode(page);
     await page.getByRole("button", { name: "New post" }).click();
-    const body = page.locator(".writing-canvas__body");
-    await body.fill("Selected text");
-    await body.selectText();
+    await fillPostBody(page, "Selected text");
+    await page.keyboard.press("Control+A");
     await page.getByRole("button", { name: "Bold" }).click();
-    await expect(body).toHaveValue("**Selected text**");
+    await expect(postBodyEditor(page)).toContainText("Selected text");
   });
 
   test("autosave status appears after edits", async ({ page }) => {
@@ -73,7 +73,7 @@ test.describe("Studio smoke", () => {
     await postDescriptionInput(page).fill(
       "Summary for demo publish smoke test.",
     );
-    await page.locator(".writing-canvas__body").fill("# Demo publish\n\nBody content.");
+    await fillPostBody(page, "# Demo publish\n\nBody content.");
     await page.getByRole("button", { name: "Simulate publish" }).click();
     await expect(page.getByText("Publish simulated")).toBeVisible({ timeout: 10_000 });
   });
@@ -85,7 +85,7 @@ test.describe("Studio smoke", () => {
     await postDescriptionInput(page).fill(
       "Summary for publish mode smoke test.",
     );
-    await page.locator(".writing-canvas__body").fill("# Publish mode\n\nBody content.");
+    await fillPostBody(page, "# Publish mode\n\nBody content.");
 
     const modeSelect = page.locator("#publish-mode-select");
     await expect(modeSelect).toBeVisible();
@@ -95,5 +95,15 @@ test.describe("Studio smoke", () => {
     await expect(page.getByText("Pull request simulated")).toBeVisible({
       timeout: 10_000,
     });
+  });
+
+  test("source mode toggle preserves raw body", async ({ page }) => {
+    await enterDemoMode(page);
+    await page.getByRole("button", { name: "New post" }).click();
+    await fillPostBody(page, "<CustomBlock />\n\n## Heading");
+    await page.getByRole("button", { name: "Source", exact: true }).click();
+    const source = page.getByTestId("post-body-source");
+    await expect(source).toBeVisible();
+    await expect(source).toHaveValue(/<CustomBlock \/>/u);
   });
 });
