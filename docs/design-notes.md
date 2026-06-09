@@ -22,8 +22,8 @@ The writing canvas and preview are capped around 72ch width. Body text uses ~18p
 
 CSS variables live in `apps/studio/src/index.css` (`--font-ui`, `--font-writing`, `--font-mono`, and the `--text-*` scale).
 
-## Markdown toolbar (v0.2)
+## Body editor
 
-Studio keeps a plain `<textarea>` for the article body and adds a formatting toolbar that inserts Markdown around the current selection via `apps/studio/src/lib/markdownEditor.ts`.
+Studio uses a **Tiptap** rich editor with toolbar and slash commands. The persisted format remains a Markdown/MDX **string** for preview and publish. **Source mode** exposes a raw textarea for exact MDX editing.
 
-**CodeMirror was not added in v0.2.** Toolbar actions only need selection ranges, text insertion, and focus restoration — all available on a textarea without a new dependency. CodeMirror 6 remains the preferred upgrade when we need syntax highlighting, bracket matching, multi-cursor editing, or built-in search/replace in source mode. Until then, the textarea keeps the bundle smaller and preserves MDX body text as a simple string end-to-end for preview and publish.
+Details: [editor.md](editor.md). The legacy `MarkdownToolbar` component is unused; do not document it as the primary editor.

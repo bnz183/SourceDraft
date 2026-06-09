@@ -8,9 +8,9 @@ Early open-source MVP — usable for solo writing and publishing to Git or remot
 
 | Area | Status |
 |------|--------|
-| **Studio** | Article editor, post list (git publishers), media library (git-backed), preview, SEO panel, setup/compatibility health |
+| **Studio** | Tiptap editor + slash commands + source mode, post list (git publishers), media library (git-backed), preview, SEO panel, content QA, publish checklist, setup detection, content audit, setup/compatibility health |
 | **Adapters** | `astro-mdx`, `markdown`, `nextjs-mdx`, `hugo-markdown`, `eleventy-jekyll-markdown`, `docusaurus-mdx`, `mkdocs-markdown`, `nuxt-content-markdown` |
-| **Publishers** | `github`, `gitlab`, `bitbucket`, `wordpress`, `ghost` |
+| **Publishers** | `github`, `gitlab`, `bitbucket`, `wordpress`, `ghost` (GitHub PR publish modes: direct, pull-request, draft-pull-request) |
 | **Media** | `github-media` (images + PDF), `cloudinary` (images) |
 | **Deploy hooks** | `generic`, `vercel`, `netlify`, `cloudflare-pages` |
 | **Config** | `sourcedraft.config.json` + `.env`, `pnpm setup`, `pnpm validate:config` |

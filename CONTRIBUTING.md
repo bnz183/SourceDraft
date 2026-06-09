@@ -27,7 +27,25 @@ Edit `.env` with local values for development. **Do not commit `.env` or `.env.l
 1. Fork the repository (or create a branch if you have write access).
 2. Branch from `main` with a short descriptive name, for example `fix/post-list-error` or `docs/contributing`.
 3. Keep changes focused — avoid unrelated refactors.
-4. Open a pull request against `main` with a clear summary and test notes.
+4. Open a **pull request** against `main` with a clear summary and test notes.
+5. **Do not push directly to `main`.** Repository rules require PRs and passing checks (including CodeQL).
+
+### Commit messages
+
+Use clear, imperative subjects that explain *why* when helpful:
+
+- `feat: add hugo frontmatter adapter option`
+- `fix: surface GitHub 403 on protected branch`
+- `docs: document PR publish modes`
+- `chore: update release checklist`
+
+Squash merges are typical for feature PRs.
+
+### Tests required
+
+- Run `pnpm build` and `pnpm test` before opening a PR.
+- Run `pnpm test:e2e` when Studio UI, auth, or publish flows change.
+- Add or update unit tests for logic changes in `packages/*` or `apps/studio/server` when practical.
 
 Before a release, see [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md) and [docs/manual-acceptance-test.md](docs/manual-acceptance-test.md).
 
@@ -39,6 +57,7 @@ From the repository root:
 pnpm install    # install workspace dependencies
 pnpm build      # build all packages and Studio (including server TypeScript)
 pnpm test       # run unit tests
+pnpm test:e2e   # Playwright smoke tests (demo mode)
 pnpm dev        # start Studio UI + publish API locally
 ```
 

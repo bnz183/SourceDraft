@@ -1,6 +1,8 @@
 # SourceDraft
 
-SourceDraft is a free, open-source editor for Markdown and MDX blogs. You write in the browser, upload images, check SEO metadata, preview the generated file, and publish to a Git repository or remote CMS (WordPress, Ghost).
+SourceDraft is a free, open-source **Git-based CMS** for Markdown and MDX publishing. You write in the browser with a Tiptap editor and slash commands, upload images, run content QA checks, preview the generated file, and publish to a Git repository or remote CMS (WordPress, Ghost).
+
+Licensed under [AGPL-3.0-or-later](LICENSE).
 
 **Project status:** SourceDraft is an early local/private MVP for Git-backed Markdown and MDX publishing. It is usable for solo writing and GitHub commits, but it is not a hosted CMS, multi-user product, or finished SaaS. See [docs/project-status.md](docs/project-status.md) and [CHANGELOG.md](CHANGELOG.md).
 
@@ -32,13 +34,18 @@ Your static site still builds and deploys exactly as before. SourceDraft creates
 
 ## What it does today
 
-- Edit articles in Studio (title, slug, dates, category, tags, body, draft flag)
+- Edit articles in Studio with a **Tiptap rich editor**, **slash commands**, and **source mode** for raw Markdown/MDX
 - List and edit existing posts from your GitHub `contentDir`
 - Validate fields against a universal article schema
-- Preview Markdown or Astro MDX output and target file path before publishing
+- **Content QA** — non-blocking warnings for SEO, alt text, headings, links, and body length
+- **Publish checklist** — validation status, output path, publish mode, and warnings before publish
+- Preview Markdown or MDX adapter output and target file path before publishing
 - Publish to Git hosts (GitHub, GitLab, Bitbucket) or remote CMS APIs (WordPress, Ghost)
+- **GitHub PR publishing** — direct commit, pull request, or draft pull request for protected branches
 - Upload images to git `mediaDir`, Cloudinary, or (experimental) S3-compatible storage
 - Optional deploy hooks after publish (Vercel, Netlify, Cloudflare Pages, generic)
+- **Setup detection** — scan local project files and suggest adapter, content, and media paths
+- **Content audit** — read-only scan of existing posts (frontmatter, duplicate slugs, complex MDX)
 - Configure paths, adapter, and categories in `sourcedraft.config.json`
 - Protect Studio with a server-side admin password
 - **Demo mode** — explore Studio with sample posts without GitHub credentials
@@ -170,6 +177,10 @@ Issues and pull requests are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) fo
 - [Ghost publishing](docs/ghost.md)
 - [Deploy hooks](docs/deploy-hooks.md)
 - [GitHub publishing](docs/github-publishing.md)
+- [GitHub PR publishing](docs/github-pr-publishing.md)
+- [Editor and source mode](docs/editor.md)
+- [Setup detection](docs/setup-detection.md)
+- [Content QA](docs/content-qa.md)
 - [Media uploads](docs/media.md)
 - [Configuration](docs/configuration.md)
 - [Astro integration example](docs/astro-blog-example.md)
