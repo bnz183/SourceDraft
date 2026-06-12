@@ -46,7 +46,7 @@ Defaults: `adapter: "astro-mdx"`, `publisher: "github"`.
 
 **Adapters:** `astro-mdx`, `markdown`, `nextjs-mdx`, `hugo-markdown`, `eleventy-jekyll-markdown`, `docusaurus-mdx`, `mkdocs-markdown`, `nuxt-content-markdown`
 
-**Publishers:** `github` (wraps `@sourcedraft/github-publisher`)
+**Publishers:** `github` (wraps `@sourcedraft/github-publisher`), `gitlab`, `bitbucket`, `wordpress`, `ghost` — see [publishers.md](publishers.md) for the capability matrix
 
 ## Studio integration points
 
@@ -60,10 +60,10 @@ Defaults: `adapter: "astro-mdx"`, `publisher: "github"`.
 
 ## Future (not implemented)
 
-- WordPress REST API publisher
-- Ghost API publisher
-- Plugin/marketplace loading
 - Git Trees API for large repos
+- Post list/read in Studio for Bitbucket, WordPress, and Ghost
+- Full S3/R2 media upload (`s3-compatible` validates config only today)
+- Dedicated `listMedia` capability (media library reuses `listPosts`)
 
 ## Risks
 

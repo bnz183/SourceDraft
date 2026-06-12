@@ -51,7 +51,7 @@ Early open-source MVP — usable for solo writing and publishing to Git or remot
 | **WordPress/Ghost admin** | Optional **publishers** — SourceDraft is not a full WP/Ghost replacement | Native CMS UI and media library |
 | **Static dashboard** | Validates universal schema, previews exact file path, multi-adapter | Often framework-specific or hosted |
 
-SourceDraft fits when you want one editor for Markdown/MDX files **or** API publish to WP/Ghost, with secrets on the server only.
+SourceDraft fits when you want one editor for Markdown/MDX files **or** API publish to WP/Ghost, with secrets on the server only. Full honest comparison: [comparison.md](comparison.md)
 
 ## Demo mode
 
