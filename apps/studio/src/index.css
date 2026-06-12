@@ -1831,7 +1831,107 @@ select.field__input:focus-visible {
 }
 
 .login-screen__panel {
-  width: min(100%, 420px);
+  width: min(100%, 560px);
+}
+
+.login-screen__section-title {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.welcome-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.welcome-card--login {
+  padding-top: 0;
+}
+
+.welcome-card__intro {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.welcome-card__title {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.welcome-card__lead {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.welcome-card__choices {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.welcome-card__choice {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+}
+
+.welcome-card__choice-title {
+  margin: 0;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.welcome-card__choice-body {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.welcome-card__choice-action {
+  align-self: flex-start;
+  margin-top: 4px;
+}
+
+.settings-view__advanced {
+  margin-top: 8px;
+}
+
+.settings-view__advanced-summary {
+  cursor: pointer;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text);
+  padding: 8px 0;
+}
+
+.setup-health__advanced {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.setup-health__advanced-toggle {
+  align-self: flex-start;
 }
 
 .login-screen__form {

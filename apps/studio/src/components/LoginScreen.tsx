@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { WriterWelcomeCard } from "./WriterWelcomeCard.js";
 
 type LoginScreenProps = {
   configured: boolean;
@@ -55,46 +56,52 @@ export function LoginScreen({
       <section className="panel login-screen__panel">
         <div className="panel__header">
           <h1 className="panel__title">SourceDraft Studio</h1>
-          <p className="panel__meta">Sign in to write and publish</p>
+          <p className="panel__meta">A clean writing dashboard for your blog</p>
         </div>
+
+        <WriterWelcomeCard
+          variant="login"
+          demoAvailable={demoAvailable}
+          enteringDemo={enteringDemo}
+          onTryDemo={() => {
+            void handleEnterDemo();
+          }}
+        />
 
         {demoForced && (
           <div className="notice notice--warning login-screen__demo-notice" role="status">
-            <p className="notice__title">Demo mode enabled</p>
+            <p className="notice__title">Demo mode is on</p>
             <p className="notice__body">
-              This instance runs in demo mode. GitHub commits are disabled.
+              This Studio runs in demo mode. Nothing is sent to a real blog.
             </p>
           </div>
         )}
 
         <form className="login-screen__form" onSubmit={handleSubmit}>
-          <p className="login-screen__intro">
-            This workspace uses one shared password, checked on the server. It is
-            meant for local or private use.
-          </p>
+          <h2 className="login-screen__section-title">Sign in</h2>
 
           {!configured && !demoAvailable && (
             <div className="notice notice--warning" role="status">
-              <p className="notice__title">Password not configured</p>
+              <p className="notice__title">Studio password not set yet</p>
               <p className="notice__body">
-                Add <code>SOURCEDRAFT_ADMIN_PASSWORD</code> to <code>.env</code>{" "}
-                and restart the API server.
+                Ask whoever installed SourceDraft to add a sign-in password on the
+                server, or follow the developer setup steps in the README.
               </p>
             </div>
           )}
 
           {!configured && demoAvailable && (
             <div className="notice notice--warning" role="status">
-              <p className="notice__title">GitHub not configured</p>
+              <p className="notice__title">Your blog is not connected yet</p>
               <p className="notice__body">
-                You can explore demo mode without GitHub credentials, or configure
-                a password and GitHub settings for real publishing.
+                Try demo mode to explore safely, or ask your technical helper to
+                finish setup so you can publish for real.
               </p>
             </div>
           )}
 
           <label className="field field--full">
-            <span className="field__label">Password</span>
+            <span className="field__label">Studio password</span>
             <input
               className="field__input field__input--mono"
               type="password"
@@ -116,27 +123,9 @@ export function LoginScreen({
             className="button button--primary login-screen__submit"
             disabled={!configured || submitting || enteringDemo || password.length === 0}
           >
-            {submitting ? "Signing in…" : "Sign in"}
+            {submitting ? "Signing in…" : "Sign in to Studio"}
           </button>
         </form>
-
-        {demoAvailable && (
-          <div className="login-screen__demo">
-            <p className="login-screen__demo-copy">
-              Explore Studio with sample posts. No GitHub token required.
-            </p>
-            <button
-              type="button"
-              className="button login-screen__demo-button"
-              disabled={submitting || enteringDemo}
-              onClick={() => {
-                void handleEnterDemo();
-              }}
-            >
-              {enteringDemo ? "Opening demo…" : "Explore demo mode"}
-            </button>
-          </div>
-        )}
       </section>
     </div>
   );

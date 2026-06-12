@@ -243,7 +243,7 @@ describe("document status", () => {
         ...record,
         editingPath: null,
       }),
-      "New post",
+      "New article",
     );
   });
 });

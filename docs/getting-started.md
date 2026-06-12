@@ -83,24 +83,24 @@ Sign in with `SOURCEDRAFT_ADMIN_PASSWORD`.
 Use demo mode to explore Studio before connecting a repository:
 
 1. **Environment flag:** set `SOURCEDRAFT_DEMO_MODE=true` in `.env` and restart the API, or
-2. **Opt-in:** leave `GITHUB_TOKEN`, `GITHUB_OWNER`, and `GITHUB_REPO` unset and click **Explore demo mode** on the sign-in screen.
+2. **Opt-in:** leave `GITHUB_TOKEN`, `GITHUB_OWNER`, and `GITHUB_REPO` unset and click **Try demo mode** on the sign-in screen.
 
-Demo mode provides sample posts from repository fixtures, local editing, simulated media upload paths, and simulated publish success. A banner reads: **Demo mode — no GitHub commits are made**. Session edits are temporary; restarting the API reloads the same seed content. See [demo-mode.md](demo-mode.md).
+Demo mode lets you explore SourceDraft without connecting a real blog. It provides sample articles from repository fixtures, local editing, simulated media upload paths, and simulated publish success. No real posts are published; sample content resets when the API restarts. See [demo-mode.md](demo-mode.md).
 
 Demo mode never sends your GitHub token to the browser and never commits to GitHub, even if credentials are present while `SOURCEDRAFT_DEMO_MODE=true`.
 
-## Setup health
+## Publishing readiness
 
-Open **Settings** in Studio. The **Setup health** section shows booleans for admin password, GitHub owner/repo, server-side token presence (never the value), content/media paths, adapter, and demo mode status. It suggests a next action when setup is incomplete.
+Open **Settings** in Studio. The **Publishing readiness** section explains in plain language whether SourceDraft can send articles to your blog — Studio password, blog connection, article folder, blog type, and demo mode status. Credentials are checked on the server and never shown in the browser. It suggests a next action when setup is incomplete. Advanced technical details are under **Show advanced details**.
 
 The publish API also exposes `GET /api/health/setup` (authenticated) with the same safe diagnostics.
 
 ## 5. Write and publish
 
-1. **Posts** sidebar — open an existing post, or click **New post**
+1. **Articles** sidebar — open an existing article, or click **New article**
 2. Fill title and description in the center canvas; set slug, dates, and category in **Post details**; upload a cover image if needed ([media.md](media.md))
-3. Check the Markdown or MDX preview and output path
-4. **Publish** — button label reflects your publisher (for example **Publish to GitHub**)
+3. Check the preview to see the generated article file before sending
+4. **Send to your blog** — or simulate sending in demo mode
 
 SourceDraft validates, renders with your adapter, and sends to the configured publisher (git commit or remote CMS API).
 
