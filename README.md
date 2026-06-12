@@ -198,4 +198,4 @@ Issues and pull requests are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) fo
 
 ## License
 
-[AGPL-3.0-or-later](LICENSE)
+SourceDraft is licensed under AGPL-3.0-or-later. See [LICENSE](LICENSE) and [docs/license.md](docs/license.md).
