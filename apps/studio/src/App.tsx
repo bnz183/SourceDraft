@@ -12,6 +12,7 @@ import { PublishGate } from "./components/PublishGate";
 import { RestoreDraftBanner } from "./components/RestoreDraftBanner";
 import { SettingsPanel } from "./components/SettingsPanel";
 import { WritingCanvas } from "./components/WritingCanvas";
+import type { LatestMediaUpload } from "./editor/SourceDraftEditor";
 import { useDocumentAutosave } from "./hooks/useDocumentAutosave";
 import {
   enterDemo,
@@ -78,6 +79,9 @@ function App() {
   const [latestUploadedImagePath, setLatestUploadedImagePath] = useState<
     string | null
   >(null);
+  const [latestUpload, setLatestUpload] = useState<LatestMediaUpload | null>(
+    null,
+  );
 
   const articleInput = useMemo(() => formStateToArticleInput(form), [form]);
   const validation = useMemo(
@@ -135,7 +139,7 @@ function App() {
         }
 
         return {
-          ...createInitialFormState(config.categories[0] ?? "Guides"),
+          ...createInitialFormState(config.categories[0] ?? "AI-Assisted Publishing"),
           slug: current.slug,
         };
       });
@@ -157,6 +161,8 @@ function App() {
       studioConfig.githubRepo.trim().length > 0,
     [studioConfig.githubOwner, studioConfig.githubRepo],
   );
+
+  const mediaUploadAvailable = githubReady || demoMode;
 
   const normalizedArticle = useMemo(() => {
     if (!validation.valid) {
@@ -305,6 +311,13 @@ function App() {
     setForm((current) => ({ ...current, slug: slugFromTitle(current.title) }));
   }
 
+  function handleUploadSuccess(upload: LatestMediaUpload) {
+    setLatestUpload(upload);
+    if (upload.kind === "image") {
+      setLatestUploadedImagePath(upload.publicPath);
+    }
+  }
+
   function handleUseHeroImage(publicPath: string) {
     setForm((current) => ({ ...current, heroImage: publicPath }));
   }
@@ -341,7 +354,7 @@ function App() {
 
     const loadedForm = articleInputToFormState(
       result.article,
-      studioConfig.categories[0] ?? "Guides",
+      studioConfig.categories[0] ?? "AI-Assisted Publishing",
     );
     setForm(loadedForm);
     setSlugAuto(false);
@@ -546,6 +559,8 @@ function App() {
               editingPath={editingPath}
               draft={form.draft}
               latestImagePath={latestUploadedImagePath}
+              latestUpload={latestUpload}
+              mediaUploadAvailable={mediaUploadAvailable}
               posts={posts}
               fieldErrors={fieldErrors}
               onTitleChange={(value) => handleFieldChange("title", value)}
@@ -603,7 +618,7 @@ function App() {
             onUseHeroImage={handleUseHeroImage}
             onInsertImage={handleInsertImage}
             onInsertPdfLink={handleInsertPdfLink}
-            onUploadSuccess={setLatestUploadedImagePath}
+            onUploadSuccess={handleUploadSuccess}
           />
         </div>
       )}

@@ -74,7 +74,9 @@ pnpm dev
 
 Starts the editor and publish API (default API port `8787`). Use this command, not `dev:web` alone, or publish and uploads will fail.
 
-Sign in with `SOURCEDRAFT_ADMIN_PASSWORD`.
+Sign in with `SOURCEDRAFT_ADMIN_PASSWORD` — the Studio password from your server `.env` file, not a cloud account.
+
+The sign-in screen offers five paths: **Try demo mode**, write in an already-configured Studio, connect an existing blog (setup detection after sign-in), advanced developer setup, and agent-ready workflow positioning (future AI/automation — not shipped today).
 
 **MVP password auth is intended for local/private use.** Do not expose Studio on the public internet without extra hardening.
 

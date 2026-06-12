@@ -1,17 +1,33 @@
-import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
-import { derivePublicMediaPath } from "@sourcedraft/config";
+import { DEFAULT_SOURCEDRAFT_CATEGORIES, derivePublicMediaPath } from "@sourcedraft/config";
+import { detectContentRoot } from "./contentRootDetection.js";
+import {
+  inferFrontmatterSchema,
+  type InferredFrontmatterSchema,
+} from "./inferFrontmatterSchema.js";
+import {
+  buildOnboardingFailureMessage,
+  buildOnboardingMessage,
+} from "./onboardingCopy.js";
+import { pathExists, SCAN_IGNORE_DIRS } from "./scanUtils.js";
+
+export type { InferredFrontmatterSchema, FrontmatterFieldHint } from "./inferFrontmatterSchema.js";
 
 export type SetupDetectionSuggestion = {
   framework: string;
   adapter: string;
   contentDir: string;
+  contentRoot: string;
+  contentRootCandidates: string[];
+  postFileCount: number;
   mediaDir: string;
   publicMediaPath: string;
   defaultBranch: string;
   confidence: number;
   explanation: string;
   warnings: string[];
+  frontmatter: InferredFrontmatterSchema | null;
 };
 
 export type SetupDetectionResult = {
@@ -20,6 +36,8 @@ export type SetupDetectionResult = {
   primary: SetupDetectionSuggestion | null;
   alternatives: SetupDetectionSuggestion[];
   warnings: string[];
+  onboardingMessage: string | null;
+  failureMessage: string | null;
 };
 
 type FrameworkRule = {
@@ -38,10 +56,6 @@ function readText(path: string): string | null {
   }
 }
 
-function pathExists(path: string): boolean {
-  return existsSync(path);
-}
-
 function dirHasFilesWithExtension(dir: string, extensions: string[]): boolean {
   if (!pathExists(dir)) {
     return false;
@@ -55,7 +69,7 @@ function dirHasFilesWithExtension(dir: string, extensions: string[]): boolean {
         if (extensions.some((ext) => entry.name.endsWith(ext))) {
           return true;
         }
-      } else if (entry.isDirectory()) {
+      } else if (entry.isDirectory() && !SCAN_IGNORE_DIRS.has(entry.name)) {
         if (dirHasFilesWithExtension(fullPath, extensions)) {
           return true;
         }
@@ -380,21 +394,42 @@ function buildSuggestion(
   scored: { points: number; signals: string[]; warnings: string[] },
 ): SetupDetectionSuggestion {
   const confidence = Math.min(100, Math.max(0, scored.points));
-  const publicMediaPath = derivePublicMediaPath(rule.mediaDir);
+  const contentRoot = detectContentRoot(root, rule.adapter, rule.contentDir);
+  const mediaDir = rule.mediaDir;
+  const publicMediaPath = derivePublicMediaPath(mediaDir);
+  const frontmatter = inferFrontmatterSchema(root, contentRoot.contentDir);
+  const warnings = [...scored.warnings];
+
+  if (contentRoot.postCount === 0) {
+    warnings.push(
+      `No post files were found under ${contentRoot.contentDir}. Confirm the content folder after setup.`,
+    );
+  }
+
+  const explanationParts = [...scored.signals];
+  if (contentRoot.postCount > 0) {
+    explanationParts.push(
+      `${contentRoot.postCount} post file(s) in ${contentRoot.contentDir}`,
+    );
+  }
 
   return {
     framework: rule.framework,
     adapter: rule.adapter,
-    contentDir: rule.contentDir,
-    mediaDir: rule.mediaDir,
+    contentDir: contentRoot.contentDir,
+    contentRoot: contentRoot.contentDir,
+    contentRootCandidates: contentRoot.alternatives,
+    postFileCount: contentRoot.postCount,
+    mediaDir,
     publicMediaPath,
     defaultBranch: detectDefaultBranch(root),
     confidence,
     explanation:
-      scored.signals.length > 0
-        ? scored.signals.join("; ")
+      explanationParts.length > 0
+        ? explanationParts.join("; ")
         : "No strong framework markers found.",
-    warnings: scored.warnings,
+    warnings,
+    frontmatter,
   };
 }
 
@@ -403,12 +438,15 @@ export function detectSetup(root: string): SetupDetectionResult {
   const warnings: string[] = [];
 
   if (!pathExists(resolvedRoot)) {
+    const failureMessage = `Scan root does not exist: ${resolvedRoot}. Point SourceDraft at your site folder or set SOURCEDRAFT_REPO_ROOT.`;
     return {
       scannedRoot: resolvedRoot,
       detected: false,
       primary: null,
       alternatives: [],
-      warnings: [`Scan root does not exist: ${resolvedRoot}`],
+      warnings: [failureMessage],
+      onboardingMessage: null,
+      failureMessage,
     };
   }
 
@@ -423,12 +461,23 @@ export function detectSetup(root: string): SetupDetectionResult {
     warnings.push(
       "No supported static-site framework markers were found. Run pnpm setup or configure sourcedraft.config.json manually.",
     );
+    const failureMessage = buildOnboardingFailureMessage({
+      scannedRoot: resolvedRoot,
+      detected: false,
+      primary: null,
+      alternatives: [],
+      warnings,
+      onboardingMessage: null,
+      failureMessage: null,
+    });
     return {
       scannedRoot: resolvedRoot,
       detected: false,
       primary: null,
       alternatives: [],
       warnings,
+      onboardingMessage: null,
+      failureMessage,
     };
   }
 
@@ -449,18 +498,47 @@ export function detectSetup(root: string): SetupDetectionResult {
     }
   }
 
-  return {
+  const result: SetupDetectionResult = {
     scannedRoot: resolvedRoot,
     detected: primary !== undefined,
     primary: primary ?? null,
     alternatives,
     warnings,
+    onboardingMessage: primary ? buildOnboardingMessage(
+      {
+        scannedRoot: resolvedRoot,
+        detected: true,
+        primary,
+        alternatives,
+        warnings,
+        onboardingMessage: null,
+        failureMessage: null,
+      },
+      primary,
+    ) : null,
+    failureMessage: primary ? null : buildOnboardingFailureMessage({
+      scannedRoot: resolvedRoot,
+      detected: false,
+      primary: null,
+      alternatives,
+      warnings,
+      onboardingMessage: null,
+      failureMessage: null,
+    }),
   };
+
+  return result;
 }
 
 export function buildSuggestedConfigSnippet(
   suggestion: SetupDetectionSuggestion,
 ): string {
+  const categories =
+    suggestion.frontmatter?.suggestedCategories &&
+    suggestion.frontmatter.suggestedCategories.length > 0
+      ? suggestion.frontmatter.suggestedCategories
+      : [...DEFAULT_SOURCEDRAFT_CATEGORIES];
+
   return JSON.stringify(
     {
       adapter: suggestion.adapter,
@@ -468,7 +546,7 @@ export function buildSuggestedConfigSnippet(
       mediaDir: suggestion.mediaDir,
       publicMediaPath: suggestion.publicMediaPath,
       defaultBranch: suggestion.defaultBranch,
-      categories: ["Guides", "Notes", "Reviews", "Tutorials", "Reference"],
+      categories,
       adapterOptions: {},
       publisherOptions: {},
     },

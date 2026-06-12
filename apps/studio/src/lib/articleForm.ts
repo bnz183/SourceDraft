@@ -1,5 +1,8 @@
 import type { ArticleInput } from "@sourcedraft/core";
 import { createSlug } from "@sourcedraft/core";
+import { DEFAULT_STUDIO_CATEGORIES } from "./defaultCategories.js";
+
+const DEFAULT_FORM_CATEGORY = DEFAULT_STUDIO_CATEGORIES[0] ?? "Guides";
 
 export type ArticleFormState = {
   title: string;
@@ -22,7 +25,7 @@ export type ArticleFormState = {
 };
 
 export function createInitialFormState(
-  defaultCategory = "Guides",
+  defaultCategory: string = DEFAULT_FORM_CATEGORY,
 ): ArticleFormState {
   return {
     title: "",
@@ -137,7 +140,7 @@ function dateField(value: unknown): string {
 
 export function articleInputToFormState(
   input: ArticleInput,
-  defaultCategory = "Guides",
+  defaultCategory: string = DEFAULT_FORM_CATEGORY,
 ): ArticleFormState {
   const pubDate = dateField(input.pubDate);
 

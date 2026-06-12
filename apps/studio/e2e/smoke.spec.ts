@@ -14,13 +14,19 @@ test.describe("Studio smoke", () => {
     attachPageErrorLogging(page);
     await waitForStudioRoot(page);
     await expect(page.getByRole("heading", { name: "SourceDraft Studio" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "How would you like to start?" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Try demo mode" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Write in an already-configured Studio" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Connect an existing blog" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Advanced developer setup" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Agent-ready workflow" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Explore demo mode" })).toBeVisible();
   });
 
   test("overview/post list renders in demo mode", async ({ page }) => {
     await enterDemoMode(page);
     await expect(page.getByRole("heading", { name: "Posts" })).toBeVisible();
-    await expect(page.getByText("Getting started with SourceDraft")).toBeVisible();
+    await expect(page.getByText("AI-assisted publishing with SourceDraft")).toBeVisible();
   });
 
   test("new post form and editor accept text", async ({ page }) => {
@@ -41,6 +47,17 @@ test.describe("Studio smoke", () => {
     await page.keyboard.press("Control+A");
     await page.getByRole("button", { name: "Bold" }).click();
     await expect(postBodyEditor(page)).toContainText("Selected text");
+  });
+
+  test("editor toolbar exposes core formatting controls", async ({ page }) => {
+    await enterDemoMode(page);
+    await page.getByRole("button", { name: "New post" }).click();
+    await expect(page.getByRole("toolbar", { name: "Editor formatting" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Undo" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Italic" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Insert image" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Insert attachment" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Table" })).toBeDisabled();
   });
 
   test("autosave status appears after edits", async ({ page }) => {
@@ -114,7 +131,7 @@ test.describe("Studio smoke", () => {
     await enterDemoMode(page);
     await page.getByRole("button", { name: "New post" }).click();
     await fillPostBody(page, "<CustomBlock />\n\n## Heading");
-    await page.getByRole("button", { name: "Source", exact: true }).click();
+    await page.getByRole("button", { name: "Source mode" }).click();
     const source = page.getByTestId("post-body-source");
     await expect(source).toBeVisible();
     await expect(source).toHaveValue(/<CustomBlock \/>/u);

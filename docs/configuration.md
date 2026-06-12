@@ -59,7 +59,13 @@ Example:
   "publicMediaPath": "/images",
   "defaultBranch": "main",
   "publisher": "github",
-  "categories": ["Guides", "Notes", "Reviews", "Tutorials", "Reference"]
+  "categories": [
+    "AI-Assisted Publishing",
+    "Workflow Automation",
+    "Content Pipelines",
+    "CMS Integrations",
+    "Developer Tooling"
+  ]
 }
 ```
 

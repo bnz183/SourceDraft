@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { LatestMediaUpload } from "../editor/SourceDraftEditor";
 import { MediaDropzone } from "./MediaDropzone";
 import { MediaLibrary } from "./MediaLibrary";
 
@@ -7,7 +8,7 @@ type MediaSectionProps = {
   onUseAsHero: (publicPath: string) => void;
   onInsertImage: (publicPath: string) => void;
   onInsertPdfLink: (publicPath: string, filename: string) => void;
-  onUploadSuccess?: (publicPath: string) => void;
+  onUploadSuccess?: (upload: LatestMediaUpload) => void;
 };
 
 export function MediaSection({

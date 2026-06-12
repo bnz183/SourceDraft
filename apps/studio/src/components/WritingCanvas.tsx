@@ -2,7 +2,7 @@ import { useCallback, useRef, useState } from "react";
 import type { Editor } from "@tiptap/react";
 import type { PostSummary } from "../lib/posts";
 import { DocumentOutline } from "./DocumentOutline";
-import { SourceDraftEditor } from "../editor/SourceDraftEditor";
+import { SourceDraftEditor, type LatestMediaUpload } from "../editor/SourceDraftEditor";
 
 type WritingCanvasProps = {
   title: string;
@@ -11,6 +11,8 @@ type WritingCanvasProps = {
   editingPath: string | null;
   draft: boolean;
   latestImagePath: string | null;
+  latestUpload: LatestMediaUpload | null;
+  mediaUploadAvailable: boolean;
   posts: PostSummary[];
   fieldErrors: Record<string, string>;
   onTitleChange: (value: string) => void;
@@ -25,6 +27,8 @@ export function WritingCanvas({
   editingPath,
   draft,
   latestImagePath,
+  latestUpload,
+  mediaUploadAvailable,
   posts,
   fieldErrors,
   onTitleChange,
@@ -133,7 +137,9 @@ export function WritingCanvas({
         <SourceDraftEditor
           body={body}
           latestImagePath={latestImagePath}
+          latestUpload={latestUpload}
           imageAlt={title.trim() || "Image"}
+          mediaUploadAvailable={mediaUploadAvailable}
           posts={posts}
           editingPath={editingPath}
           fieldError={fieldErrors.body}

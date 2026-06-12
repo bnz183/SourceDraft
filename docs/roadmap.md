@@ -60,8 +60,15 @@ Deliberately out of scope in the current phase:
 - Hosted or multi-tenant Studio
 - Plugin marketplace
 - AI writing tools
+- Agent API, BYOK AI providers, MCP support, and automation endpoints
 - Site hosting or running your static-site build
 - Large UI redesigns
+
+## Future: agent-ready publishing workflows
+
+SourceDraft's structured article schema, validation, preview, and publish checklist make it a natural base for AI-assisted workflows where external agents prepare drafts and humans review before publishing.
+
+Agent API, BYOK AI providers, MCP support, and automation endpoints are **future work**, not current shipped features.
 
 ## Influence the roadmap
 

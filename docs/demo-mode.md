@@ -4,8 +4,9 @@ Demo mode lets you explore SourceDraft Studio without GitHub credentials. It is 
 
 ## How to enable
 
-1. **Environment flag:** set `SOURCEDRAFT_DEMO_MODE=true` in `.env` and restart the API, or
-2. **Opt-in:** leave `GITHUB_TOKEN`, `GITHUB_OWNER`, and `GITHUB_REPO` unset and click **Explore demo mode** on the sign-in screen.
+1. **Sign-in screen:** click **Explore demo mode** on the **Try demo mode** card — sample posts only, nothing is published, or
+2. **Environment flag:** set `SOURCEDRAFT_DEMO_MODE=true` in `.env` and restart the API, or
+3. **Opt-in:** leave `GITHUB_TOKEN`, `GITHUB_OWNER`, and `GITHUB_REPO` unset and use **Explore demo mode**.
 
 Start Studio with:
 

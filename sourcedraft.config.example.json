@@ -5,7 +5,13 @@
   "mediaDir": "public/images",
   "publicMediaPath": "/images",
   "defaultBranch": "main",
-  "categories": ["Guides", "Notes", "Reviews", "Tutorials", "Reference"],
+  "categories": [
+    "AI-Assisted Publishing",
+    "Workflow Automation",
+    "Content Pipelines",
+    "CMS Integrations",
+    "Developer Tooling"
+  ],
   "adapterOptions": {},
   "publisherOptions": {},
   "plugins": [],

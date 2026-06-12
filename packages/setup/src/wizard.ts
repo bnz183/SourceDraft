@@ -3,7 +3,10 @@ import { resolve } from "node:path";
 import { createInterface, type Interface } from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
 import { listAdapterIds } from "@sourcedraft/adapters";
-import { derivePublicMediaPath } from "@sourcedraft/config";
+import {
+  DEFAULT_SOURCEDRAFT_CATEGORIES_CSV,
+  derivePublicMediaPath,
+} from "@sourcedraft/config";
 import { listMediaProviderIds } from "@sourcedraft/media-providers";
 import { listPublisherIds } from "@sourcedraft/publishers";
 import {
@@ -19,6 +22,8 @@ import {
   publisherEnvRequirements,
 } from "./envRequirements.js";
 import { formatEnvValueForDisplay } from "./maskSecrets.js";
+import { detectSetup } from "./detectSetup.js";
+import { buildOnboardingFailureMessage, buildOnboardingMessage } from "./onboardingCopy.js";
 import { validateConfigAsync } from "./validateConfig.js";
 
 export type WizardOptions = {
@@ -156,13 +161,31 @@ export async function runWizard(options: WizardOptions = {}): Promise<WizardResu
     );
     console.log("Secrets are masked in summaries. Typed input is visible on screen.\n");
 
+    const detection = detectSetup(cwd);
+    if (detection.primary) {
+      console.log(buildOnboardingMessage(detection, detection.primary));
+      if (detection.warnings.length > 0) {
+        for (const warning of detection.warnings) {
+          console.log(`  • ${warning}`);
+        }
+      }
+      console.log("");
+    } else if (detection.failureMessage) {
+      console.log(buildOnboardingFailureMessage(detection));
+      console.log("");
+    }
+
     const adapterIds = listAdapterIds();
     const adapterLabels = adapterIds.map((id) => `${id}`);
+    const detectedAdapterIndex =
+      detection.primary !== null
+        ? Math.max(0, adapterIds.indexOf(detection.primary.adapter))
+        : 0;
     const adapter = await askChoice(
       rl,
       "Which site generator / output format (adapter)?",
       adapterLabels,
-      0,
+      detectedAdapterIndex,
     );
 
     const publisherIds = listPublisherIds();
@@ -190,23 +213,34 @@ export async function runWizard(options: WizardOptions = {}): Promise<WizardResu
     const mediaProvider = mediaPick.split(" — ")[0] ?? mediaIds[0] ?? "github-media";
 
     const hints = ADAPTER_HINTS[adapter] ?? ADAPTER_HINTS["astro-mdx"];
+    const detectedSuggestion =
+      detection.primary?.adapter === adapter ? detection.primary : null;
     const contentDir = await askText(
       rl,
       "Content directory (folder for articles in your repo)",
-      hints?.contentDir ?? "src/content/blog",
+      detectedSuggestion?.contentDir ?? hints?.contentDir ?? "src/content/blog",
     );
     const mediaDir = await askText(
       rl,
       "Media directory (folder for images in your repo)",
-      hints?.mediaDir ?? "public/images",
+      detectedSuggestion?.mediaDir ?? hints?.mediaDir ?? "public/images",
     );
     const publicMediaPath = derivePublicMediaPath(mediaDir);
-    const defaultBranch = await askText(rl, "Default git branch", "main");
+    const defaultBranch = await askText(
+      rl,
+      "Default git branch",
+      detectedSuggestion?.defaultBranch ?? "main",
+    );
 
+    const defaultCategories =
+      detectedSuggestion?.frontmatter?.suggestedCategories &&
+      detectedSuggestion.frontmatter.suggestedCategories.length > 0
+        ? detectedSuggestion.frontmatter.suggestedCategories.join(", ")
+        : DEFAULT_SOURCEDRAFT_CATEGORIES_CSV;
     const categoriesRaw = await askText(
       rl,
       "Default categories (comma-separated)",
-      "Guides, Notes, Reviews, Tutorials, Reference",
+      defaultCategories,
     );
     const categories = categoriesRaw
       .split(",")

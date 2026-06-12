@@ -46,7 +46,7 @@ describe("demo fixtures", () => {
     assert.equal(draft?.summary.draft, true);
     assert.equal(guide?.summary.draft, false);
     assert.match(images?.content ?? "", /!\[[^\]]*\]\([^)]+\)/u);
-    assert.match(links?.content ?? "", /\[Getting started with SourceDraft\]/u);
+    assert.match(links?.content ?? "", /\[AI-assisted publishing with SourceDraft\]/u);
     assert.match(links?.content ?? "", /^## /mu);
   });
 

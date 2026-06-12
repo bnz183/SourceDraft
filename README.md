@@ -34,7 +34,7 @@ Your static site still builds and deploys exactly as before. SourceDraft creates
 
 ## What it does today
 
-- Edit articles in Studio with a **Tiptap rich editor**, **slash commands**, and **source mode** for raw Markdown/MDX
+- Edit articles in Studio with a **Tiptap rich editor** (toolbar: headings, bold/italic/underline/strike, lists, links, images, attachments, undo/redo), **slash commands**, and **source mode** for raw Markdown/MDX
 - List and edit existing posts from your GitHub `contentDir`
 - Validate fields against a universal article schema
 - **Content QA** — non-blocking warnings for SEO, alt text, headings, links, and body length
