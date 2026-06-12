@@ -6,9 +6,11 @@ import {
   isPublisherConfigured,
 } from "./demoMode.js";
 import {
+  verifyPassword as verifyStoredPassword,
   verifyPlaintextPassword,
-  verifyScryptPassword,
 } from "./adminPassword.js";
+
+export const AUTH_FAILURE_MESSAGE = "Authentication failed.";
 
 const SESSION_COOKIE = "sourcedraft_session";
 /** 24 hours — in-memory MVP sessions, not durable account auth. */
@@ -115,10 +117,14 @@ export function isAuthConfigured(): boolean {
   return getAdminPasswordHash() !== null || getLegacyAdminPassword() !== null;
 }
 
-export function verifyPassword(password: string): boolean {
+export async function verifyPassword(password: string): Promise<boolean> {
+  if (password.length === 0) {
+    return false;
+  }
+
   const hash = getAdminPasswordHash();
   if (hash !== null) {
-    return verifyScryptPassword(password, hash);
+    return verifyStoredPassword(password, hash);
   }
 
   const legacyPassword = getLegacyAdminPassword();
@@ -214,17 +220,17 @@ export function requireAuth(req: Request, res: Response, next: NextFunction): vo
   res.status(401).json({ ok: false, error: "Authentication required." });
 }
 
-export function login(
+export async function login(
   req: Request,
   password: string,
   res: Response,
-): { ok: boolean; error?: string } {
+): Promise<{ ok: boolean; error?: string; status?: number }> {
   if (!isAuthConfigured()) {
-    return { ok: false, error: "Studio auth is not configured." };
+    return { ok: false, error: AUTH_FAILURE_MESSAGE, status: 401 };
   }
 
-  if (!verifyPassword(password)) {
-    return { ok: false, error: "Invalid password." };
+  if (!(await verifyPassword(password))) {
+    return { ok: false, error: AUTH_FAILURE_MESSAGE, status: 401 };
   }
 
   const token = createSession();

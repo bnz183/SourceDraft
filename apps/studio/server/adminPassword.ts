@@ -1,4 +1,12 @@
 import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
+import argon2 from "argon2";
+
+const ARGON2_OPTIONS = {
+  type: argon2.argon2id,
+  memoryCost: 19456,
+  timeCost: 2,
+  parallelism: 1,
+} as const;
 
 const DEFAULT_SCRYPT_N = 16384;
 const DEFAULT_SCRYPT_R = 8;
@@ -12,6 +20,41 @@ export type ScryptHashParams = {
   salt: Buffer;
   hash: Buffer;
 };
+
+export function isArgon2PasswordHash(value: string): boolean {
+  return value.trim().startsWith("$argon2");
+}
+
+export function isScryptPasswordHash(value: string): boolean {
+  return parseScryptPasswordHash(value) !== null;
+}
+
+export async function hashPassword(password: string): Promise<string> {
+  if (password.length === 0) {
+    throw new Error("Password must not be empty.");
+  }
+
+  return argon2.hash(password, ARGON2_OPTIONS);
+}
+
+export async function verifyPassword(
+  password: string,
+  encodedHash: string,
+): Promise<boolean> {
+  if (password.length === 0) {
+    return false;
+  }
+
+  if (isArgon2PasswordHash(encodedHash)) {
+    try {
+      return await argon2.verify(encodedHash, password);
+    } catch {
+      return false;
+    }
+  }
+
+  return verifyScryptPassword(password, encodedHash);
+}
 
 export function parseScryptPasswordHash(
   value: string,
@@ -54,7 +97,8 @@ export function formatScryptPasswordHash(
   ].join("$");
 }
 
-export function hashAdminPassword(
+/** Legacy scrypt hasher kept for tests and manual migration tooling only. */
+export function hashScryptPassword(
   password: string,
   options?: { N?: number; r?: number; p?: number; keylen?: number },
 ): string {
@@ -66,6 +110,10 @@ export function hashAdminPassword(
   const hash = scryptSync(password, salt, keylen, { N, r, p });
 
   return formatScryptPasswordHash({ N, r, p, salt, hash });
+}
+
+export async function hashAdminPassword(password: string): Promise<string> {
+  return hashPassword(password);
 }
 
 export function verifyScryptPassword(

@@ -69,12 +69,12 @@ app.get("/api/auth/status", readLimiter, (req, res) => {
   });
 });
 
-app.post("/api/auth/login", strictAuthLimiter, requireSameSiteRequest, (req, res) => {
+app.post("/api/auth/login", strictAuthLimiter, requireSameSiteRequest, async (req, res) => {
   const password = typeof req.body?.password === "string" ? req.body.password : "";
-  const result = login(req, password, res);
+  const result = await login(req, password, res);
 
   if (!result.ok) {
-    res.status(result.error === "Invalid password." ? 401 : 500).json({
+    res.status(result.status ?? 401).json({
       ok: false,
       error: result.error,
     });

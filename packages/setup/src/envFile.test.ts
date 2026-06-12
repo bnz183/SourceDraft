@@ -65,7 +65,9 @@ test("serializeEnvFile escapes unsafe values and rejects invalid keys", () => {
     ["TAB", "col1\tcol2"],
     ["EMPTY", ""],
     ["HASH", "value#comment"],
+    ["EQUALS", "key=value"],
     ["INJECTION", "safe\nGITHUB_TOKEN=hijacked"],
+    ["QUOTE_INJECT", 'abc"\nEVIL=true'],
   ]);
 
   const serialized = serializeEnvFile(map);
@@ -84,9 +86,12 @@ test("serializeEnvFile escapes unsafe values and rejects invalid keys", () => {
   assert.equal(loaded.get("TAB"), "col1\tcol2");
   assert.equal(loaded.get("EMPTY"), "");
   assert.equal(loaded.get("HASH"), "value#comment");
+  assert.equal(loaded.get("EQUALS"), "key=value");
   assert.equal(loaded.get("INJECTION"), "safe\nGITHUB_TOKEN=hijacked");
+  assert.equal(loaded.get("QUOTE_INJECT"), 'abc"\nEVIL=true');
 
   assert.throws(() => serializeEnvFile(new Map([["bad-key", "value"]])), /Invalid env key/);
+  assert.throws(() => serializeEnvFile(new Map([["123", "value"]])), /Invalid env key/);
 });
 
 test("serializeEnvFile round-trips through loadEnvMap", () => {
