@@ -4,7 +4,7 @@ import { formatEnvValueForDisplay } from "./maskSecrets.js";
 
 export type EnvMap = Map<string, string>;
 
-const ENV_KEY_PATTERN = /^[A-Z_][A-Z0-9_]*$/u;
+const ENV_KEY_PATTERN = /^[A-Z_][A-Z0-9_]*$/iu;
 
 export function isValidEnvKey(key: string): boolean {
   return ENV_KEY_PATTERN.test(key);
@@ -26,6 +26,7 @@ function needsQuoting(value: string): boolean {
     if (
       value[index] === " " ||
       value[index] === "#" ||
+      value[index] === "=" ||
       value[index] === '"' ||
       value[index] === "\\" ||
       value[index] === "\n" ||

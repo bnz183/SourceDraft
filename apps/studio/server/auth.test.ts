@@ -1,7 +1,13 @@
 import assert from "node:assert/strict";
 import { afterEach, describe, it } from "node:test";
-import { hashAdminPassword } from "./adminPassword.js";
-import { isAuthConfigured, verifyPassword } from "./auth.js";
+import {
+  hashAdminPassword,
+  hashPassword,
+  hashScryptPassword,
+  isArgon2PasswordHash,
+  verifyPassword,
+} from "./adminPassword.js";
+import { AUTH_FAILURE_MESSAGE, isAuthConfigured, verifyPassword as verifyAuthPassword } from "./auth.js";
 
 const ENV_KEYS = [
   "SOURCEDRAFT_ADMIN_PASSWORD_HASH",
@@ -38,46 +44,83 @@ describe("studio auth", () => {
     restoreEnv();
   });
 
-  it("accepts valid scrypt hash login and prefers hash over plaintext", () => {
+  it("accepts valid argon2 hash login and prefers hash over plaintext", async () => {
     saveEnv();
     clearAuthEnv();
 
-    const hash = hashAdminPassword("studio-secret");
+    const hash = await hashAdminPassword("studio-secret");
+    assert.equal(isArgon2PasswordHash(hash), true);
     process.env.SOURCEDRAFT_ADMIN_PASSWORD_HASH = hash;
     process.env.SOURCEDRAFT_ADMIN_PASSWORD = "legacy-only";
 
     assert.equal(isAuthConfigured(), true);
-    assert.equal(verifyPassword("studio-secret"), true);
-    assert.equal(verifyPassword("legacy-only"), false);
-    assert.equal(verifyPassword("wrong"), false);
+    assert.equal(await verifyAuthPassword("studio-secret"), true);
+    assert.equal(await verifyAuthPassword("legacy-only"), false);
+    assert.equal(await verifyAuthPassword("wrong"), false);
   });
 
-  it("rejects invalid scrypt hash login", () => {
+  it("accepts legacy scrypt hash login", async () => {
+    saveEnv();
+    clearAuthEnv();
+
+    const hash = hashScryptPassword("studio-secret");
+    process.env.SOURCEDRAFT_ADMIN_PASSWORD_HASH = hash;
+
+    assert.equal(isAuthConfigured(), true);
+    assert.equal(await verifyAuthPassword("studio-secret"), true);
+    assert.equal(await verifyAuthPassword("wrong"), false);
+  });
+
+  it("rejects invalid hash login", async () => {
     saveEnv();
     clearAuthEnv();
 
     process.env.SOURCEDRAFT_ADMIN_PASSWORD_HASH = "scrypt$16384$8$1$invalid$invalid";
 
     assert.equal(isAuthConfigured(), true);
-    assert.equal(verifyPassword("anything"), false);
+    assert.equal(await verifyAuthPassword("anything"), false);
   });
 
-  it("falls back to legacy plaintext password when hash is absent", () => {
+  it("falls back to legacy plaintext password when hash is absent", async () => {
     saveEnv();
     clearAuthEnv();
 
     process.env.SOURCEDRAFT_ADMIN_PASSWORD = "legacy-password";
 
     assert.equal(isAuthConfigured(), true);
-    assert.equal(verifyPassword("legacy-password"), true);
-    assert.equal(verifyPassword("other"), false);
+    assert.equal(await verifyAuthPassword("legacy-password"), true);
+    assert.equal(await verifyAuthPassword("other"), false);
   });
 
-  it("reports missing auth config when no password values are set", () => {
+  it("reports missing auth config when no password values are set", async () => {
     saveEnv();
     clearAuthEnv();
 
     assert.equal(isAuthConfigured(), false);
-    assert.equal(verifyPassword("anything"), false);
+    assert.equal(await verifyAuthPassword("anything"), false);
+  });
+
+  it("uses a generic authentication failure message", () => {
+    assert.equal(AUTH_FAILURE_MESSAGE, "Authentication failed.");
+  });
+});
+
+describe("admin password hashing", () => {
+  it("stores argon2id hashes instead of plaintext", async () => {
+    const hash = await hashPassword("studio-secret");
+    assert.match(hash, /^\$argon2id\$/);
+    assert.notEqual(hash, "studio-secret");
+  });
+
+  it("verifies correct and incorrect passwords", async () => {
+    const hash = await hashPassword("studio-secret");
+    assert.equal(await verifyPassword("studio-secret", hash), true);
+    assert.equal(await verifyPassword("wrong", hash), false);
+  });
+
+  it("rejects empty passwords", async () => {
+    const hash = await hashPassword("studio-secret");
+    assert.equal(await verifyPassword("", hash), false);
+    await assert.rejects(() => hashPassword(""), /Password must not be empty/);
   });
 });
