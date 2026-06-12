@@ -1,6 +1,8 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import {
+  buildConfigFromSuggestion,
+  buildConfigWriteSummary,
   buildSuggestedConfigSnippet,
   detectSetup,
   isSafeToApplySuggestion,
@@ -10,6 +12,8 @@ import {
 export type SetupDetectionResponse = SetupDetectionResult & {
   safeToApply: boolean;
   suggestedConfigSnippet: string | null;
+  configExists: boolean;
+  configPreviewSummary: string | null;
 };
 
 function resolveDetectionRoot(): string {
@@ -44,14 +48,30 @@ function resolveDetectionRoot(): string {
   return process.cwd();
 }
 
+export function resolveSetupDetectionRoot(): string {
+  return resolveDetectionRoot();
+}
+
 export function runSetupDetection(): SetupDetectionResponse {
-  const result = detectSetup(resolveDetectionRoot());
+  const scannedRoot = resolveDetectionRoot();
+  const result = detectSetup(scannedRoot);
   const primary = result.primary;
+  const configPath = resolve(scannedRoot, "sourcedraft.config.json");
+  const configExists = existsSync(configPath);
+  const configPreview =
+    primary !== null
+      ? buildConfigFromSuggestion(primary)
+      : null;
 
   return {
     ...result,
     safeToApply: primary !== null && isSafeToApplySuggestion(primary),
     suggestedConfigSnippet:
       primary !== null ? buildSuggestedConfigSnippet(primary) : null,
+    configExists,
+    configPreviewSummary:
+      configPreview !== null
+        ? buildConfigWriteSummary(configPath, configPreview)
+        : null,
   };
 }

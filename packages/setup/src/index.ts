@@ -62,9 +62,27 @@ export {
   buildSuggestedConfigSnippet,
   detectSetup,
   isSafeToApplySuggestion,
+  type FrontmatterFieldHint,
+  type InferredFrontmatterSchema,
   type SetupDetectionResult,
   type SetupDetectionSuggestion,
 } from "./detectSetup.js";
+
+export { detectContentRoot, type DetectedContentRoot } from "./contentRootDetection.js";
+
+export { inferFrontmatterSchema } from "./inferFrontmatterSchema.js";
+
+export {
+  buildConfigFromSuggestion,
+  generateConfigFromDetection,
+  type GenerateConfigResult,
+} from "./createConfigFromDetection.js";
+
+export {
+  buildConfigWriteSummary,
+  buildOnboardingFailureMessage,
+  buildOnboardingMessage,
+} from "./onboardingCopy.js";
 
 export {
   auditPostFile,

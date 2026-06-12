@@ -23,7 +23,10 @@ describe("detectSetup", () => {
     assert.equal(result.detected, true);
     assert.equal(result.primary?.adapter, "astro-mdx");
     assert.equal(result.primary?.contentDir, "src/content/blog");
+    assert.equal(result.primary?.contentRoot, "src/content/blog");
+    assert.ok((result.primary?.postFileCount ?? 0) >= 1);
     assert.ok((result.primary?.confidence ?? 0) >= 70);
+    assert.ok(result.onboardingMessage?.includes("Astro"));
   });
 
   it("detects Next.js MDX projects", () => {
@@ -48,6 +51,9 @@ describe("detectSetup", () => {
 
     const result = detectSetup(root);
     assert.equal(result.primary?.adapter, "hugo-markdown");
+    assert.equal(result.primary?.contentDir, "content/posts");
+    assert.ok((result.primary?.postFileCount ?? 0) >= 1);
+    assert.ok(result.primary?.frontmatter?.fields.some((field) => field.key === "title"));
     assert.ok((result.primary?.confidence ?? 0) >= 50);
   });
 

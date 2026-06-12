@@ -26,6 +26,7 @@ import { requireSameSiteRequest } from "./requestProtection.js";
 import { initializePlugins } from "./plugins.js";
 import { runContentAudit, runDemoContentAudit } from "./contentAuditHandler.js";
 import { getSetupHealth } from "./setupHealth.js";
+import { runGenerateConfig } from "./generateConfig.js";
 import { runSetupDetection } from "./setupDetection.js";
 import {
   apiLimiter,
@@ -131,6 +132,23 @@ app.get("/api/health/setup", readLimiter, requireAuth, (_req, res) => {
 app.get("/api/setup/detect", readLimiter, requireAuth, (_req, res) => {
   res.json(runSetupDetection());
 });
+
+app.post(
+  "/api/setup/generate-config",
+  writeLimiter,
+  requireSameSiteRequest,
+  requireAuth,
+  (_req, res) => {
+    const result = runGenerateConfig();
+    if (!result.ok) {
+      const status = result.code === "exists" ? 409 : 400;
+      res.status(status).json(result);
+      return;
+    }
+
+    res.status(201).json(result);
+  },
+);
 
 app.get("/api/content/audit", readLimiter, requireAuth, async (req, res) => {
   const demoMode = isRequestDemoSession(req);

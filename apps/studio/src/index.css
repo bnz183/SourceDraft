@@ -2035,6 +2035,46 @@ select.field__input:focus-visible {
   gap: 8px;
 }
 
+.setup-detection__summary {
+  color: var(--text);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  margin: 0 0 12px;
+  padding: 0 12px;
+}
+
+.setup-detection__subtitle {
+  font-size: var(--text-sm);
+  margin: 0 0 6px;
+}
+
+.setup-detection__field-list {
+  font-size: var(--text-sm);
+  margin: 0 0 8px;
+  padding-left: 1.2rem;
+}
+
+.setup-detection__meta {
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+}
+
+.setup-detection__preview {
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  margin: 0 12px 12px;
+  overflow-x: auto;
+  padding: 10px 12px;
+  white-space: pre-wrap;
+}
+
+.setup-detection__frontmatter {
+  margin: 0 12px 12px;
+}
+
 .setup-detection__hint {
   margin: 0;
   font-size: 11px;

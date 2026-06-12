@@ -10,6 +10,13 @@ From the repository root:
 pnpm setup
 ```
 
+On start, the wizard scans your project folder (same rules as [setup detection](setup-detection.md)) and prints a plain-language summary when a framework is recognized. Detected values pre-fill:
+
+- Adapter choice
+- Content and media directories
+- Default git branch
+- Categories (from sample post frontmatter when found)
+
 You will be asked about:
 
 - **Adapter** — which site generator / output format (Astro MDX, Hugo, etc.)
