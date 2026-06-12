@@ -54,10 +54,9 @@ Your static site still builds and deploys exactly as before. SourceDraft creates
 ## What it does not do yet
 
 - Host your website or run your Astro build
-- OAuth, user accounts, or role-based access
+- OAuth, user accounts, role-based access, or hosted multi-tenant Studio
 - Full S3/R2 media upload (`s3-compatible` validates config only; use Cloudinary or git media today)
 - Post list in Studio for Bitbucket, WordPress, and Ghost publishers
-- OAuth, team accounts, or hosted multi-tenant Studio
 
 Eight adapters ship today — see [docs/adapters.md](docs/adapters.md). See [docs/project-status.md](docs/project-status.md) for the full shipped vs experimental list.
 
@@ -187,6 +186,9 @@ Issues and pull requests are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) fo
 - [Architecture](docs/architecture.md)
 - [Adapters](docs/adapters.md)
 - [Project status](docs/project-status.md)
+- [How SourceDraft compares](docs/comparison.md) — Decap, Tina, CloudCannon, WordPress, Ghost
+- [Roadmap](docs/roadmap.md)
+- [Contributing roadmap](docs/contributing-roadmap.md) — good first issues
 - [Manual acceptance test](docs/manual-acceptance-test.md)
 - [Smoke tests (Playwright)](docs/getting-started.md#smoke-tests-playwright)
 - [Release checklist](RELEASE_CHECKLIST.md)

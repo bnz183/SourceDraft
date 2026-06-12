@@ -13,7 +13,7 @@ Publish API (server)
     → validate (@sourcedraft/core)
     → adapt (adapterRegistry / @sourcedraft/adapters)
     → publish (publisherRegistry / @sourcedraft/publishers)
-    → GitHub repository file in contentDir
+    → Git repository file in contentDir, or remote CMS API (WordPress, Ghost)
 Your static site build (outside SourceDraft)
     → deployed site
 ```
@@ -26,8 +26,8 @@ Studio (browser)
 Publish API (server)
     → validate type, size, signature
     → sanitize filename
-    → publisher.uploadMedia (github publisher today)
-    → GitHub repository file in mediaDir
+    → media provider (git repo, Cloudinary) via publisher.uploadMedia or provider API
+    → repository file in mediaDir, or CDN URL
 Studio
     → publicPath for heroImage / Markdown body
 ```
@@ -48,10 +48,13 @@ Publish API (server)
 | Package | Role |
 |---------|------|
 | `@sourcedraft/core` | Article schema and validation |
-| `@sourcedraft/adapter-*` | Platform-specific file output (Astro, Markdown, Next.js, Hugo, Eleventy/Jekyll) |
+| `@sourcedraft/adapter-*` | Platform-specific file output (Astro MDX, Markdown, Next.js MDX, Hugo, Eleventy/Jekyll, Docusaurus, MkDocs, Nuxt Content) |
 | `@sourcedraft/adapters` | `adapterRegistry` — built-in adapter registration and dispatch |
 | `@sourcedraft/github-publisher` | Low-level GitHub Contents API client |
-| `@sourcedraft/publishers` | `publisherRegistry` — typed publish/upload/list/read surface |
+| `@sourcedraft/publishers` | `publisherRegistry` — GitHub, GitLab, Bitbucket, WordPress, Ghost publish/upload/list/read |
+| `@sourcedraft/media-providers` | Git media, Cloudinary, S3-compatible (config validation only) |
+| `@sourcedraft/plugins` | Server-side loader for custom adapters/publishers/media providers |
+| `@sourcedraft/setup` | Setup wizard and `validate:config` CLI |
 | `@sourcedraft/config` | Load `sourcedraft.config.json` |
 
 ## Studio
@@ -72,8 +75,8 @@ See [configuration.md](configuration.md), [adapters.md](adapters.md), [compatibi
 
 ## Adapters and publishers
 
-**Adapters** turn a validated article into platform-specific file content. Registered in `adapterRegistry`.
+**Adapters** turn a validated article into platform-specific file content. Registered in `adapterRegistry`. Eight ship today — see [adapters.md](adapters.md).
 
-**Publishers** send content to a target. Registered in `publisherRegistry`. Shipped: GitHub (`github`).
+**Publishers** send content to a target. Registered in `publisherRegistry`. Shipped: `github`, `gitlab`, `bitbucket` (Git file commits) and `wordpress`, `ghost` (remote CMS APIs) — see [publishers.md](publishers.md) for the capability matrix.
 
-Future publishers (not implemented): WordPress API, Ghost API.
+Custom adapters, publishers, and media providers can register through server-side [plugins](plugins.md).

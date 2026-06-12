@@ -1,6 +1,8 @@
 # SourceDraft release checklist
 
-Use this before tagging a public release or promoting the repository.
+Use this before tagging a public release or promoting the repository. For
+first-time public promotion (announcements, demos, screenshots), also run
+[docs/public-launch-checklist.md](docs/public-launch-checklist.md).
 
 ## Automated checks
 
@@ -32,7 +34,9 @@ pnpm test:e2e
 - [ ] Docs state: early local/private MVP, not hosted SaaS, not production multi-user auth
 - [ ] GitHub Contents API limits documented
 - [ ] `mediaDir` vs `publicMediaPath` documented
-- [ ] Issue templates present under `.github/ISSUE_TEMPLATE/`
+- [ ] Issue templates present under `.github/ISSUE_TEMPLATE/` (bug, feature, adapter, publisher, security hardening)
+- [ ] `.github/pull_request_template.md` present
+- [ ] `SECURITY.md` reporting instructions current
 
 ## Screenshots
 
@@ -88,4 +92,4 @@ Only tag after automated checks pass and manual acceptance is satisfactory.
 - Post list in Studio for Bitbucket, WordPress, and Ghost
 - Git Trees API indexer for very large repos
 
-Roadmap: [docs/compatibility-roadmap.md](docs/compatibility-roadmap.md)
+Roadmap: [docs/roadmap.md](docs/roadmap.md) · [docs/compatibility-roadmap.md](docs/compatibility-roadmap.md)
