@@ -81,6 +81,14 @@ Details: [docs/publishers.md](docs/publishers.md) · [docs/git-publishers.md](do
 
 Full matrices: [adapters](docs/adapters.md) · [publishers](docs/publishers.md) · [media](docs/media.md) · [deploy-hooks](docs/deploy-hooks.md) · [quickstart recipes](docs/quickstart-recipes.md)
 
+## For writers and bloggers
+
+If someone already installed SourceDraft for your publication, you only need the **Studio link** and **password**. You can write articles, upload images, preview the generated file, and send posts to your blog without touching GitHub manually.
+
+If you are setting it up yourself, start with **demo mode** or the guided **`pnpm setup`** wizard. Demo mode lets you explore Studio safely — no real posts are published and sample content resets when the server restarts.
+
+Plain-language overview for non-technical users: [docs/non-technical-overview.md](docs/non-technical-overview.md).
+
 ## Quickstart
 
 Requirements: Node.js 22+, pnpm 11+
@@ -116,7 +124,7 @@ pnpm dev
 
 Sign in, click **New post**, preview the output, publish. The file lands at `contentDir/<slug>.mdx` or `.md` depending on your adapter (default: `src/content/blog/`).
 
-**Try without GitHub:** set `SOURCEDRAFT_DEMO_MODE=true` in `.env`, or leave GitHub vars empty and click **Explore demo mode** on the sign-in screen. Demo content reloads from repository fixtures on each API start. See [docs/demo-mode.md](docs/demo-mode.md).
+**Try without GitHub:** set `SOURCEDRAFT_DEMO_MODE=true` in `.env`, or leave GitHub vars empty and click **Try demo mode** on the sign-in screen. Demo content reloads from repository fixtures on each API start. See [docs/demo-mode.md](docs/demo-mode.md).
 
 Validate config: `pnpm validate:config` · Wizard details: [docs/setup-wizard.md](docs/setup-wizard.md) · Full walkthrough: [docs/getting-started.md](docs/getting-started.md)
 

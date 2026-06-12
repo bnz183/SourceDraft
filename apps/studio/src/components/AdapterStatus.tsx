@@ -43,8 +43,8 @@ export function AdapterStatus({
         </h2>
         <p className="panel__meta">
           {githubReady
-            ? "Connected to your GitHub repository"
-            : "Finish GitHub setup in .env to publish"}
+            ? "Connected to your blog repository"
+            : "Finish blog connection in Settings before sending articles"}
         </p>
       </div>
 

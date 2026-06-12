@@ -47,11 +47,11 @@ function disabledReason(
   }
 
   if (!githubReady && !demoMode) {
-    return "Set GITHUB_OWNER, GITHUB_REPO, and GITHUB_TOKEN in .env, then check Settings.";
+    return "Your blog is not connected yet. Open Settings and review publishing readiness.";
   }
 
   if (!ready) {
-    return "Fix validation issues in Post details before publishing.";
+    return "Complete the required article fields before sending to your blog.";
   }
 
   return null;
@@ -76,18 +76,18 @@ function publishStatusCopy(
   }
 
   if (!ready) {
-    return "Complete required fields to enable publish";
+    return "Complete required fields to send this article to your blog";
   }
 
   if (demoMode) {
     return publishMode === "direct"
-      ? "Demo mode will simulate a direct commit publish"
-      : "Demo mode will simulate a pull request publish";
+      ? "Demo mode will simulate sending this article to your blog"
+      : "Demo mode will simulate opening a review request on your blog repository";
   }
 
   return publishMode === "direct"
-    ? "Your post will be committed to the repository"
-    : "Your post will be committed to a SourceDraft branch and opened as a pull request";
+    ? "This article will be sent to your connected blog"
+    : "This article will be saved on a review branch and opened as a pull request";
 }
 
 function publishButtonLabel(
@@ -96,14 +96,14 @@ function publishButtonLabel(
   publishMode: PublishMode,
 ): string {
   if (publishing) {
-    return "Publishing…";
+    return "Sending…";
   }
 
   if (demoMode) {
-    return publishMode === "direct" ? "Simulate publish" : "Simulate PR publish";
+    return publishMode === "direct" ? "Simulate send to blog" : "Simulate review request";
   }
 
-  return publishMode === "direct" ? "Publish to GitHub" : "Publish as pull request";
+  return publishMode === "direct" ? "Send to your blog" : "Send as review request";
 }
 
 export function PublishGate({
@@ -134,7 +134,7 @@ export function PublishGate({
       <div className="publish-bar__main">
         <div className="publish-bar__copy">
           <h2 className="publish-bar__title" id="publish-bar-title">
-            Publish
+            Send to your blog
           </h2>
           <p className="publish-bar__meta" aria-live="polite">
             {publishStatusCopy(publishing, ready, demoMode, publishMode)}
@@ -153,7 +153,7 @@ export function PublishGate({
 
       <div className="publish-bar__settings">
         <label className="publish-bar__field" htmlFor="publish-mode-select">
-          Publish mode
+          How to send
         </label>
         <select
           id="publish-mode-select"
@@ -200,16 +200,16 @@ export function PublishGate({
 
       {!prModeSupported && publishMode !== "direct" && (
         <p className="publish-bar__hint" role="status">
-          Pull request publish is only available for the GitHub publisher.
+          Review requests are only available when publishing to GitHub.
         </p>
       )}
 
       {publishError && (
         <div className="notice notice--error publish-bar__notice" role="alert">
-          <p className="notice__title">Publish failed</p>
+          <p className="notice__title">Could not send to your blog</p>
           <p className="notice__body">{publishError}</p>
           <p className="notice__hint">
-            Check Settings for GitHub and path configuration, then try again.
+            Open Settings, review publishing readiness, then try again.
           </p>
         </div>
       )}
@@ -219,11 +219,11 @@ export function PublishGate({
           <p className="notice__title">
             {demoMode
               ? publishMode === "direct"
-                ? "Publish simulated"
-                : "Pull request simulated"
+                ? "Send simulated"
+                : "Review request simulated"
               : publishMode === "direct"
-                ? "Published successfully"
-                : "Pull request created"}
+                ? "Sent to your blog"
+                : "Review request created"}
           </p>
           <p className="notice__body">
             {publishSuccessUrl ? (
@@ -237,11 +237,11 @@ export function PublishGate({
           <p className="notice__hint">
             {demoMode
               ? publishMode === "direct"
-                ? "No GitHub commit was made. Configure GitHub in .env for real publishing."
-                : "No GitHub pull request was created. Configure GitHub in .env for real PR publishing."
+                ? "Nothing was sent to a real blog. Connect your blog in Settings when you are ready."
+                : "No review request was created. Connect your blog in Settings when you are ready."
               : publishMode === "direct"
-                ? "Your site build or CI will pick up the file from the repository."
-                : "Merge the pull request to update the base branch and trigger your normal deploy flow."}
+                ? "Your site build or deploy will pick up the new article."
+                : "Merge the review request to publish the article through your normal deploy flow."}
           </p>
         </div>
       )}
