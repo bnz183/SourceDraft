@@ -26,7 +26,7 @@ test.describe("Studio smoke", () => {
   test("overview/post list renders in demo mode", async ({ page }) => {
     await enterDemoMode(page);
     await expect(page.getByRole("heading", { name: "Posts" })).toBeVisible();
-    await expect(page.getByText("Getting started with SourceDraft")).toBeVisible();
+    await expect(page.getByText("AI-assisted publishing with SourceDraft")).toBeVisible();
   });
 
   test("new post form and editor accept text", async ({ page }) => {
@@ -131,7 +131,7 @@ test.describe("Studio smoke", () => {
     await enterDemoMode(page);
     await page.getByRole("button", { name: "New post" }).click();
     await fillPostBody(page, "<CustomBlock />\n\n## Heading");
-    await page.getByRole("button", { name: "Source", exact: true }).click();
+    await page.getByRole("button", { name: "Source mode" }).click();
     const source = page.getByTestId("post-body-source");
     await expect(source).toBeVisible();
     await expect(source).toHaveValue(/<CustomBlock \/>/u);

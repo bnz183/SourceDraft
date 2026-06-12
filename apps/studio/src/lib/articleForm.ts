@@ -1,8 +1,8 @@
-import { DEFAULT_SOURCEDRAFT_CATEGORIES } from "@sourcedraft/config";
 import type { ArticleInput } from "@sourcedraft/core";
 import { createSlug } from "@sourcedraft/core";
+import { DEFAULT_STUDIO_CATEGORIES } from "./defaultCategories.js";
 
-const DEFAULT_FORM_CATEGORY = DEFAULT_SOURCEDRAFT_CATEGORIES[0] ?? "AI-Assisted Publishing";
+const DEFAULT_FORM_CATEGORY = DEFAULT_STUDIO_CATEGORIES[0] ?? "Guides";
 
 export type ArticleFormState = {
   title: string;
