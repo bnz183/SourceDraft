@@ -5,6 +5,8 @@ type InlineToken =
   | { type: "text"; value: string }
   | { type: "bold"; value: string }
   | { type: "italic"; value: string }
+  | { type: "strike"; value: string }
+  | { type: "underline"; value: string }
   | { type: "code"; value: string }
   | { type: "link"; text: string; href: string }
   | { type: "image"; alt: string; src: string };
@@ -47,6 +49,20 @@ function parseInline(text: string): InlineToken[] {
     if (boldMatch) {
       tokens.push({ type: "bold", value: boldMatch[1] ?? "" });
       index += boldMatch[0].length;
+      continue;
+    }
+
+    const strikeMatch = text.slice(index).match(/^~~([^~]+)~~/u);
+    if (strikeMatch) {
+      tokens.push({ type: "strike", value: strikeMatch[1] ?? "" });
+      index += strikeMatch[0].length;
+      continue;
+    }
+
+    const underlineMatch = text.slice(index).match(/^<u>([^<]+)<\/u>/iu);
+    if (underlineMatch) {
+      tokens.push({ type: "underline", value: underlineMatch[1] ?? "" });
+      index += underlineMatch[0].length;
       continue;
     }
 
@@ -97,6 +113,24 @@ function inlineTokensToMarks(tokens: InlineToken[]): JSONContent[] {
         type: "text",
         text: token.value,
         marks: [{ type: "italic" }],
+      });
+      continue;
+    }
+
+    if (token.type === "strike") {
+      nodes.push({
+        type: "text",
+        text: token.value,
+        marks: [{ type: "strike" }],
+      });
+      continue;
+    }
+
+    if (token.type === "underline") {
+      nodes.push({
+        type: "text",
+        text: token.value,
+        marks: [{ type: "underline" }],
       });
       continue;
     }
@@ -275,6 +309,14 @@ function serializeInlineNode(node: JSONContent): string {
 
   if (marks.some((mark) => mark.type === "italic")) {
     value = `*${value}*`;
+  }
+
+  if (marks.some((mark) => mark.type === "strike")) {
+    value = `~~${value}~~`;
+  }
+
+  if (marks.some((mark) => mark.type === "underline")) {
+    value = `<u>${value}</u>`;
   }
 
   const linkMark = marks.find((mark) => mark.type === "link");

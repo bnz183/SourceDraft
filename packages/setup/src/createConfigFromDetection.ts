@@ -1,5 +1,6 @@
 import { existsSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { DEFAULT_SOURCEDRAFT_CATEGORIES } from "@sourcedraft/config";
 import type { SetupDetectionSuggestion } from "./detectSetup.js";
 import { buildConfigWriteSummary } from "./onboardingCopy.js";
 
@@ -18,14 +19,6 @@ export type GenerateConfigFailure = {
 
 export type GenerateConfigResult = GenerateConfigSuccess | GenerateConfigFailure;
 
-const DEFAULT_CATEGORIES = [
-  "Guides",
-  "Notes",
-  "Reviews",
-  "Tutorials",
-  "Reference",
-];
-
 export function buildConfigFromSuggestion(
   suggestion: SetupDetectionSuggestion,
 ): Record<string, unknown> {
@@ -33,7 +26,7 @@ export function buildConfigFromSuggestion(
     suggestion.frontmatter?.suggestedCategories &&
     suggestion.frontmatter.suggestedCategories.length > 0
       ? suggestion.frontmatter.suggestedCategories
-      : DEFAULT_CATEGORIES;
+      : [...DEFAULT_SOURCEDRAFT_CATEGORIES];
 
   return {
     adapter: suggestion.adapter,

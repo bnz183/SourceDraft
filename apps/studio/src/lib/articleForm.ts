@@ -1,5 +1,8 @@
+import { DEFAULT_SOURCEDRAFT_CATEGORIES } from "@sourcedraft/config";
 import type { ArticleInput } from "@sourcedraft/core";
 import { createSlug } from "@sourcedraft/core";
+
+const DEFAULT_FORM_CATEGORY = DEFAULT_SOURCEDRAFT_CATEGORIES[0] ?? "AI-Assisted Publishing";
 
 export type ArticleFormState = {
   title: string;
@@ -22,7 +25,7 @@ export type ArticleFormState = {
 };
 
 export function createInitialFormState(
-  defaultCategory = "Guides",
+  defaultCategory: string = DEFAULT_FORM_CATEGORY,
 ): ArticleFormState {
   return {
     title: "",
@@ -137,7 +140,7 @@ function dateField(value: unknown): string {
 
 export function articleInputToFormState(
   input: ArticleInput,
-  defaultCategory = "Guides",
+  defaultCategory: string = DEFAULT_FORM_CATEGORY,
 ): ArticleFormState {
   const pubDate = dateField(input.pubDate);
 

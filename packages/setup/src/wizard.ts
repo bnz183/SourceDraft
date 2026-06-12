@@ -3,7 +3,10 @@ import { resolve } from "node:path";
 import { createInterface, type Interface } from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
 import { listAdapterIds } from "@sourcedraft/adapters";
-import { derivePublicMediaPath } from "@sourcedraft/config";
+import {
+  DEFAULT_SOURCEDRAFT_CATEGORIES_CSV,
+  derivePublicMediaPath,
+} from "@sourcedraft/config";
 import { listMediaProviderIds } from "@sourcedraft/media-providers";
 import { listPublisherIds } from "@sourcedraft/publishers";
 import {
@@ -233,7 +236,7 @@ export async function runWizard(options: WizardOptions = {}): Promise<WizardResu
       detectedSuggestion?.frontmatter?.suggestedCategories &&
       detectedSuggestion.frontmatter.suggestedCategories.length > 0
         ? detectedSuggestion.frontmatter.suggestedCategories.join(", ")
-        : "Guides, Notes, Reviews, Tutorials, Reference";
+        : DEFAULT_SOURCEDRAFT_CATEGORIES_CSV;
     const categoriesRaw = await askText(
       rl,
       "Default categories (comma-separated)",

@@ -23,7 +23,9 @@ For each match it suggests:
 - **Frontmatter hints** — reads a few sample posts and lists common fields (with mapping to Studio’s universal schema)
 - **Categories** — inferred from existing post frontmatter when available
 
-Plain-language copy in Studio summarizes what was found, for example: “We found a Hugo project… Posts live in `content/posts`… We recommend the Hugo Markdown adapter.”
+Plain-language copy in Studio summarizes what was found for git-backed, AI-assisted publishing workflows, for example: “We found a Hugo project… 8 post files in `content/posts`… We recommend the Hugo Markdown adapter for automation-friendly Markdown output.”
+
+Default categories (when not inferred from posts) focus on AI-assisted publishing, workflow automation, content pipelines, CMS integrations, and developer tooling.
 
 ## API
 

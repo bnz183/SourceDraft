@@ -9,139 +9,153 @@ export const DEMO_POST_FIXTURES: DemoFixturePost[] = [
   {
     summary: {
       path: `${DEMO_CONTENT_DIR}/getting-started-with-sourcedraft.mdx`,
-      title: "Getting started with SourceDraft",
+      title: "AI-assisted publishing with SourceDraft",
       slug: "getting-started-with-sourcedraft",
       pubDate: "2026-06-06",
-      category: "Guides",
+      category: "AI-Assisted Publishing",
       draft: false,
     },
     content: `---
-title: Getting started with SourceDraft
-description: A published guide showing the MDX shape Studio writes to your content folder.
+title: AI-assisted publishing with SourceDraft
+description: How git-backed Studio workflows help teams draft, validate, and publish technical content with automation-friendly Markdown.
 pubDate: 2026-06-06
-category: Guides
+category: AI-Assisted Publishing
 tags:
   - sourcedraft
-  - guides
+  - ai-assisted-publishing
+  - git-backed-cms
 draft: false
 ---
 
-# Getting started with SourceDraft
+# AI-assisted publishing with SourceDraft
 
-This published guide demonstrates how articles look after you validate metadata and body in Studio.
+SourceDraft is built for writers and operators who want **assisted publishing**: validate metadata in Studio, preview adapter output, then commit portable Markdown/MDX to your own repository — ready for CI, deploy hooks, and static-site automation.
 
 ## What you can try in demo mode
 
-- Edit title, description, and body locally
-- Preview adapter output before a real publish
-- Simulate publish without GitHub commits
+- Edit title, description, and body with a rich editor or source view
+- Preview Astro MDX output before a real publish
+- Simulate publish without GitHub commits or tokens
+
+## Automation-friendly by design
+
+Posts stay plain files in \`contentDir\`, so your existing pipelines (GitHub Actions, Cloudflare Pages, Hugo/Astro builds) keep working. No proprietary lock-in.
 
 ## Next steps
 
-Open other sample posts to see drafts, images, and internal links.
+Open the other sample posts to see drafts, media in automated pipelines, and internal links for content ops workflows.
 `,
   },
   {
     summary: {
       path: `${DEMO_CONTENT_DIR}/draft-release-notes.mdx`,
-      title: "Draft release notes",
+      title: "Draft: workflow automation release notes",
       slug: "draft-release-notes",
       pubDate: "2026-06-01",
-      category: "Notes",
+      category: "Workflow Automation",
       draft: true,
     },
     content: `---
-title: Draft release notes
-description: A sample draft post for filters, badges, and unpublished workflow.
+title: Draft: workflow automation release notes
+description: Sample draft for testing publish gates, deploy hooks, and editorial automation before content goes live.
 pubDate: 2026-06-01
-category: Notes
+category: Workflow Automation
 tags:
   - draft
-  - release
+  - automation
+  - deploy-hooks
 draft: true
 ---
 
-# Draft release notes
+# Draft: workflow automation release notes
 
-This post is marked \`draft: true\` in frontmatter. It appears in the post list with a draft badge.
+This post is marked \`draft: true\`. Use it to confirm draft filters, publish checklists, and CI gates behave as expected before your build pipeline promotes content.
 
-Use it to confirm draft filters and publishing gates behave as expected.
+## Planned automation improvements
+
+- Webhook-triggered rebuilds after Studio publish
+- Category-aware RSS and sitemap generation
+- Safer preview URLs for editorial review bots
+
+Nothing here is published until you clear the draft flag and run a real publish.
 `,
   },
   {
     summary: {
       path: `${DEMO_CONTENT_DIR}/publishing-with-images.mdx`,
-      title: "Publishing with images",
+      title: "Content pipelines with media uploads",
       slug: "publishing-with-images",
       pubDate: "2026-05-28",
-      category: "Tutorials",
+      category: "Content Pipelines",
       draft: false,
     },
     content: `---
-title: Publishing with images
-description: Example post with inline image Markdown and a cover image path.
+title: Content pipelines with media uploads
+description: Example post showing hero images and inline assets in a git-backed media workflow for static sites.
 pubDate: 2026-05-28
-category: Tutorials
+category: Content Pipelines
 tags:
-  - images
-  - markdown
+  - media
+  - content-pipelines
+  - static-deploy
 heroImage: /images/sample-cover.png
 draft: false
 ---
 
-# Publishing with images
+# Content pipelines with media uploads
 
-Studio uploads land in your configured media folder. Public paths are inserted into posts.
+Studio uploads images to your configured \`mediaDir\`. Public paths are inserted into posts so Astro, Hugo, or Next.js builds pick them up without a separate DAM.
 
-![Diagram of the write-preview-publish flow](/images/workflow-diagram.png)
+![Diagram of write → preview → commit → build automation](/images/workflow-diagram.png)
 
-## Cover images
+## Hero images
 
-Set a hero image in Post details or reference a path from the media library.
+Set a hero image in Post details or pick a path from the media library after upload.
 
-## Inline images
+## Inline assets in automated builds
 
-Use the toolbar or paste Markdown like the example above.
+Use the editor toolbar or Markdown syntax. Your site generator and CDN workflow treat these like any other static asset in the repo.
 `,
   },
   {
     summary: {
       path: `${DEMO_CONTENT_DIR}/linking-and-outline.mdx`,
-      title: "Linking and document outline",
+      title: "CMS integrations and internal linking",
       slug: "linking-and-outline",
       pubDate: "2026-05-20",
-      category: "Tutorials",
+      category: "CMS Integrations",
       draft: false,
     },
     content: `---
-title: Linking and document outline
-description: Sample post with headings, internal links, and outline-friendly structure.
+title: CMS integrations and internal linking
+description: Structure long-form technical articles with headings, internal links, and outline navigation for editorial automation.
 pubDate: 2026-05-20
-category: Tutorials
+category: CMS Integrations
 tags:
-  - links
-  - outline
+  - cms
+  - internal-links
+  - editorial-workflow
 draft: false
 ---
 
-# Linking and document outline
+# CMS integrations and internal linking
 
-Use headings to structure long articles. The document outline panel lists H1–H3 sections.
+Use headings to structure articles that feed search, RSS, and AI summarization tools. The document outline lists H1–H3 sections for quick navigation.
 
-## Internal links
+## Internal links between posts
 
-Link to other demo posts with the Internal toolbar action or Markdown syntax:
+Link to other demo posts with the Internal toolbar action or Markdown:
 
-- [Getting started with SourceDraft](/getting-started-with-sourcedraft)
-- [Publishing with images](/publishing-with-images)
+- [AI-assisted publishing with SourceDraft](/getting-started-with-sourcedraft)
+- [Content pipelines with media uploads](/publishing-with-images)
 
-## External links
+## External references
 
-External URLs work as usual: [Markdown guide](https://www.markdownguide.org/).
+Automation stacks often combine git CMS with external docs: [Markdown guide](https://www.markdownguide.org/).
 
-### Subsections
+### Subsections for tooling docs
 
-Smaller headings help readers scan technical content without extra UI chrome.
+Smaller headings help readers scan integration guides without extra UI chrome — useful when content is syndicated to help centers or AI assistants.
 `,
   },
 ];

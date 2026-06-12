@@ -1,6 +1,7 @@
 import type { ValidationIssue } from "@sourcedraft/core";
 import type { ArticleFormState } from "../lib/articleForm";
 import type { PostSummary } from "../lib/posts";
+import type { LatestMediaUpload } from "../editor/SourceDraftEditor";
 import { ContentQualityPanel } from "./ContentQualityPanel";
 import { MediaSection } from "./MediaSection";
 import { SeoSharingPanel } from "./SeoSharingPanel";
@@ -21,7 +22,7 @@ type PostDetailsPanelProps = {
   onUseHeroImage: (publicPath: string) => void;
   onInsertImage: (publicPath: string) => void;
   onInsertPdfLink: (publicPath: string, filename: string) => void;
-  onUploadSuccess?: (publicPath: string) => void;
+  onUploadSuccess?: (upload: LatestMediaUpload) => void;
 };
 
 export function PostDetailsPanel({

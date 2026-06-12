@@ -16,11 +16,14 @@ describe("markdownRoundtrip", () => {
     assert.equal(nodes[2]?.attrs?.level, 3);
   });
 
-  it("round-trips bold, italic, and links", () => {
-    const markdown = "Hello **bold** and *italic* with [a link](https://example.com).";
+  it("round-trips bold, italic, strike, underline, and links", () => {
+    const markdown =
+      "Hello **bold**, *italic*, ~~strike~~, <u>underline</u>, and [a link](https://example.com).";
     const serialized = serializeMarkdownNodes(parseMarkdownSegment(markdown));
     assert.match(serialized, /\*\*bold\*\*/u);
     assert.match(serialized, /\*italic\*/u);
+    assert.match(serialized, /~~strike~~/u);
+    assert.match(serialized, /<u>underline<\/u>/iu);
     assert.match(serialized, /\[a link\]\(https:\/\/example.com\)/u);
   });
 

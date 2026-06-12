@@ -4,6 +4,7 @@ import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
 import HorizontalRule from "@tiptap/extension-horizontal-rule";
+import Underline from "@tiptap/extension-underline";
 import {
   useCallback,
   useEffect,
@@ -25,12 +26,16 @@ import {
   type SlashCommandItem,
 } from "./slashCommands.js";
 import { SlashCommandMenu } from "./SlashCommandMenu.js";
-import { EditorToolbar } from "./EditorToolbar.js";
+import { EditorToolbar, type LatestMediaUpload } from "./EditorToolbar.js";
+
+export type { LatestMediaUpload };
 
 type SourceDraftEditorProps = {
   body: string;
   latestImagePath: string | null;
+  latestUpload: LatestMediaUpload | null;
   imageAlt: string;
+  mediaUploadAvailable: boolean;
   posts: PostSummary[];
   editingPath: string | null;
   fieldError?: string;
@@ -49,7 +54,9 @@ type SlashMenuState = {
 export function SourceDraftEditor({
   body,
   latestImagePath,
+  latestUpload,
   imageAlt,
+  mediaUploadAvailable,
   posts,
   editingPath,
   fieldError,
@@ -110,6 +117,7 @@ export function SourceDraftEditor({
         horizontalRule: false,
       }),
       HorizontalRule,
+      Underline,
       Link.configure({
         openOnClick: false,
         autolink: false,
@@ -214,10 +222,14 @@ export function SourceDraftEditor({
         case "image": {
           const path =
             latestImagePath?.trim() ||
+            (latestUpload?.kind === "image" ? latestUpload.publicPath : "") ||
             window.prompt("Image path (public URL or repo path)", "/images/")?.trim() ||
             "";
           if (path.length > 0) {
-            editor.chain().focus().setImage({ src: path, alt: imageAlt, title: imageAlt }).run();
+            const alt =
+              window.prompt("Alt text (for accessibility)", imageAlt)?.trim() ||
+              imageAlt;
+            editor.chain().focus().setImage({ src: path, alt, title: alt }).run();
           }
           break;
         }
@@ -255,7 +267,7 @@ export function SourceDraftEditor({
       syncBodyFromEditor(editor);
       setSlashMenu(null);
     },
-    [editor, imageAlt, insertInternalLink, latestImagePath, posts, syncBodyFromEditor],
+    [editor, imageAlt, insertInternalLink, latestImagePath, latestUpload, posts, syncBodyFromEditor],
   );
 
   useEffect(() => {
@@ -309,7 +321,9 @@ export function SourceDraftEditor({
         editorMode={editorMode}
         bodyFieldId={bodyFieldId}
         latestImagePath={latestImagePath}
+        latestUpload={latestUpload}
         imageAlt={imageAlt}
+        mediaUploadAvailable={mediaUploadAvailable}
         posts={posts}
         editingPath={editingPath}
         onBodyChange={onBodyChange}

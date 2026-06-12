@@ -5,6 +5,11 @@ export {
 } from "./loadConfig.js";
 
 export {
+  DEFAULT_SOURCEDRAFT_CATEGORIES,
+  DEFAULT_SOURCEDRAFT_CATEGORIES_CSV,
+} from "./defaultCategories.js";
+
+export {
   DEFAULT_SOURCEDRAFT_CONFIG,
   type SourceDraftConfig,
 } from "./types.js";

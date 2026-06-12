@@ -1,6 +1,6 @@
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
-import { derivePublicMediaPath } from "@sourcedraft/config";
+import { DEFAULT_SOURCEDRAFT_CATEGORIES, derivePublicMediaPath } from "@sourcedraft/config";
 import { detectContentRoot } from "./contentRootDetection.js";
 import {
   inferFrontmatterSchema,
@@ -537,7 +537,7 @@ export function buildSuggestedConfigSnippet(
     suggestion.frontmatter?.suggestedCategories &&
     suggestion.frontmatter.suggestedCategories.length > 0
       ? suggestion.frontmatter.suggestedCategories
-      : ["Guides", "Notes", "Reviews", "Tutorials", "Reference"];
+      : [...DEFAULT_SOURCEDRAFT_CATEGORIES];
 
   return JSON.stringify(
     {

@@ -22,7 +22,7 @@ const sampleSuggestion: SetupDetectionSuggestion = {
   frontmatter: {
     postsSampled: 2,
     fields: [{ key: "title", frequency: 2, universalField: "title" }],
-    suggestedCategories: ["Guides", "News"],
+    suggestedCategories: ["AI-Assisted Publishing", "Workflow Automation"],
   },
 };
 
@@ -39,7 +39,7 @@ describe("generateConfigFromDetection", () => {
     const config = JSON.parse(readFileSync(result.configPath, "utf8")) as Record<string, unknown>;
     assert.equal(config.adapter, "astro-mdx");
     assert.equal(config.contentDir, "src/content/blog");
-    assert.deepEqual(config.categories, ["Guides", "News"]);
+    assert.deepEqual(config.categories, ["AI-Assisted Publishing", "Workflow Automation"]);
   });
 
   it("does not overwrite an existing config file", () => {

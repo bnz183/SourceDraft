@@ -27,6 +27,7 @@ describe("detectSetup", () => {
     assert.ok((result.primary?.postFileCount ?? 0) >= 1);
     assert.ok((result.primary?.confidence ?? 0) >= 70);
     assert.ok(result.onboardingMessage?.includes("Astro"));
+    assert.ok(result.onboardingMessage?.includes("AI-assisted"));
   });
 
   it("detects Next.js MDX projects", () => {

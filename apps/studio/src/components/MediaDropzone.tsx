@@ -5,13 +5,14 @@ import {
   clientMediaKindForFile,
   uploadMedia,
 } from "../lib/media";
+import type { LatestMediaUpload } from "../editor/SourceDraftEditor";
 
 type MediaDropzoneProps = {
   githubReady: boolean;
   onUseAsHero: (publicPath: string) => void;
   onInsertImage: (publicPath: string) => void;
   onInsertPdfLink: (publicPath: string, filename: string) => void;
-  onUploadSuccess?: (publicPath: string) => void;
+  onUploadSuccess?: (upload: LatestMediaUpload) => void;
   onUploaded?: () => void;
 };
 
@@ -84,9 +85,11 @@ export function MediaDropzone({
       kind: result.kind,
       filename: file.name,
     });
-    if (result.kind === "image") {
-      onUploadSuccess?.(result.publicPath);
-    }
+    onUploadSuccess?.({
+      publicPath: result.publicPath,
+      filename: file.name,
+      kind: result.kind,
+    });
     onUploaded?.();
   }
 

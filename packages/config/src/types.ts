@@ -1,3 +1,4 @@
+import { DEFAULT_SOURCEDRAFT_CATEGORIES } from "./defaultCategories.js";
 import { derivePublicMediaPath } from "./publicMediaPath.js";
 
 export type SourceDraftConfig = {
@@ -27,5 +28,5 @@ export const DEFAULT_SOURCEDRAFT_CONFIG: SourceDraftConfig = {
   mediaDir: "src/assets/images",
   publicMediaPath: derivePublicMediaPath("src/assets/images"),
   defaultBranch: "main",
-  categories: ["Guides", "Notes", "Reviews", "Tutorials", "Reference"],
+  categories: [...DEFAULT_SOURCEDRAFT_CATEGORIES],
 };

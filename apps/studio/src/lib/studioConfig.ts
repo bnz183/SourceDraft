@@ -1,3 +1,4 @@
+import { DEFAULT_SOURCEDRAFT_CATEGORIES } from "@sourcedraft/config";
 import type { PublishMode } from "@sourcedraft/publishers";
 
 export type StudioConfig = {
@@ -23,7 +24,7 @@ export const FALLBACK_STUDIO_CONFIG: StudioConfig = {
   mediaDir: "src/assets/images",
   publicMediaPath: "/images",
   defaultBranch: "main",
-  categories: ["Guides", "Notes", "Reviews", "Tutorials", "Reference"],
+  categories: [...DEFAULT_SOURCEDRAFT_CATEGORIES],
   githubOwner: "",
   githubRepo: "",
   publisher: "github",

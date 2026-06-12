@@ -15,7 +15,7 @@ On start, the wizard scans your project folder (same rules as [setup detection](
 - Adapter choice
 - Content and media directories
 - Default git branch
-- Categories (from sample post frontmatter when found)
+- Categories (from sample post frontmatter when found, otherwise AI-assisted publishing / workflow automation defaults)
 
 You will be asked about:
 
