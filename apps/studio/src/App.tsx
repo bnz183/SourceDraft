@@ -547,12 +547,14 @@ function App() {
               draft={form.draft}
               latestImagePath={latestUploadedImagePath}
               posts={posts}
+              mediaUploadReady={githubReady || demoMode}
               fieldErrors={fieldErrors}
               onTitleChange={(value) => handleFieldChange("title", value)}
               onDescriptionChange={(value) =>
                 handleFieldChange("description", value)
               }
               onBodyChange={handleBodyChange}
+              onImageUploadSuccess={setLatestUploadedImagePath}
             />
 
             <AstroMdxPreview

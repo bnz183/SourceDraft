@@ -12,10 +12,12 @@ type WritingCanvasProps = {
   draft: boolean;
   latestImagePath: string | null;
   posts: PostSummary[];
+  mediaUploadReady: boolean;
   fieldErrors: Record<string, string>;
   onTitleChange: (value: string) => void;
   onDescriptionChange: (value: string) => void;
   onBodyChange: (body: string) => void;
+  onImageUploadSuccess?: (publicPath: string) => void;
 };
 
 export function WritingCanvas({
@@ -26,10 +28,12 @@ export function WritingCanvas({
   draft,
   latestImagePath,
   posts,
+  mediaUploadReady,
   fieldErrors,
   onTitleChange,
   onDescriptionChange,
   onBodyChange,
+  onImageUploadSuccess,
 }: WritingCanvasProps) {
   const editorRef = useRef<Editor | null>(null);
   const sourceTextareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -136,10 +140,12 @@ export function WritingCanvas({
           imageAlt={title.trim() || "Image"}
           posts={posts}
           editingPath={editingPath}
+          mediaUploadReady={mediaUploadReady}
           fieldError={fieldErrors.body}
           onBodyChange={onBodyChange}
           onEditorReady={handleEditorReady}
           onEditorModeChange={setEditorMode}
+          onImageUploadSuccess={onImageUploadSuccess}
           sourceTextareaRef={sourceTextareaRef}
         />
       </div>

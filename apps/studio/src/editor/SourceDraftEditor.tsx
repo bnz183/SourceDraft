@@ -1,9 +1,4 @@
 import { useEditor, EditorContent, type Editor } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
-import Link from "@tiptap/extension-link";
-import Image from "@tiptap/extension-image";
-import Placeholder from "@tiptap/extension-placeholder";
-import HorizontalRule from "@tiptap/extension-horizontal-rule";
 import {
   useCallback,
   useEffect,
@@ -18,7 +13,6 @@ import {
   postToInternalLinkTarget,
 } from "../lib/internalLinks.js";
 import { bodyToEditorDoc, editorDocToBody } from "./markdownRoundtrip.js";
-import { MdxRawBlock } from "./mdxRawBlockExtension.js";
 import {
   createSlashCommandsExtension,
   type SlashCommandId,
@@ -26,6 +20,7 @@ import {
 } from "./slashCommands.js";
 import { SlashCommandMenu } from "./SlashCommandMenu.js";
 import { EditorToolbar } from "./EditorToolbar.js";
+import { createExtensionKit } from "./extensionKit.js";
 
 type SourceDraftEditorProps = {
   body: string;
@@ -33,10 +28,12 @@ type SourceDraftEditorProps = {
   imageAlt: string;
   posts: PostSummary[];
   editingPath: string | null;
+  mediaUploadReady: boolean;
   fieldError?: string;
   onBodyChange: (body: string) => void;
   onEditorReady?: (editor: Editor | null) => void;
   onEditorModeChange?: (mode: "rich" | "source") => void;
+  onImageUploadSuccess?: (publicPath: string) => void;
   sourceTextareaRef?: RefObject<HTMLTextAreaElement | null>;
 };
 
@@ -52,10 +49,12 @@ export function SourceDraftEditor({
   imageAlt,
   posts,
   editingPath,
+  mediaUploadReady,
   fieldError,
   onBodyChange,
   onEditorReady,
   onEditorModeChange,
+  onImageUploadSuccess,
   sourceTextareaRef,
 }: SourceDraftEditorProps) {
   const bodyFieldId = useId();
@@ -104,26 +103,7 @@ export function SourceDraftEditor({
   );
 
   const editor = useEditor({
-    extensions: [
-      StarterKit.configure({
-        heading: { levels: [1, 2, 3] },
-        horizontalRule: false,
-      }),
-      HorizontalRule,
-      Link.configure({
-        openOnClick: false,
-        autolink: false,
-      }),
-      Image.configure({
-        inline: false,
-        allowBase64: false,
-      }),
-      Placeholder.configure({
-        placeholder: "Start writing your article… Type / for commands.",
-      }),
-      MdxRawBlock,
-      slashExtension,
-    ],
+    extensions: createExtensionKit({ slashExtension }),
     content: bodyToEditorDoc(body),
     editorProps: {
       attributes: {
@@ -312,9 +292,11 @@ export function SourceDraftEditor({
         imageAlt={imageAlt}
         posts={posts}
         editingPath={editingPath}
+        mediaUploadReady={mediaUploadReady}
         onBodyChange={onBodyChange}
         onModeChange={switchMode}
         onSelectInternalLink={insertInternalLink}
+        onImageUploadSuccess={onImageUploadSuccess}
       />
 
       {editorMode === "rich" ? (

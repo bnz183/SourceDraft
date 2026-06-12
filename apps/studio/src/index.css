@@ -692,6 +692,75 @@ code {
   color: var(--accent);
 }
 
+.editor-toolbar__group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.editor-toolbar__divider {
+  align-self: stretch;
+  border-left: 1px solid var(--border);
+  margin: 2px 4px;
+  width: 0;
+}
+
+.editor-toolbar__select-wrap {
+  display: inline-flex;
+}
+
+.editor-toolbar__select {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  min-height: 28px;
+  padding: 2px 6px;
+}
+
+.editor-toolbar__color {
+  display: inline-flex;
+  align-items: center;
+}
+
+.editor-toolbar__color input[type="color"] {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  height: 28px;
+  padding: 2px;
+  width: 32px;
+}
+
+.editor-toolbar__error {
+  color: var(--danger, #b42318);
+  font-size: var(--text-xs);
+  margin: 0;
+  padding: 0 12px 8px;
+}
+
+.sourcedraft-editor .ProseMirror table {
+  border-collapse: collapse;
+  margin: 0.8em 0;
+  width: 100%;
+}
+
+.sourcedraft-editor .ProseMirror th,
+.sourcedraft-editor .ProseMirror td {
+  border: 1px solid var(--border-strong);
+  min-width: 80px;
+  padding: 6px 10px;
+  vertical-align: top;
+}
+
+.sourcedraft-editor .ProseMirror th {
+  background: var(--bg-raised);
+  font-weight: 600;
+}
+
 .slash-command-menu-wrap {
   position: fixed;
   z-index: 30;

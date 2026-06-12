@@ -64,4 +64,41 @@ describe("markdownRoundtrip", () => {
     const roundTripped = editorDocToBody(bodyToEditorDoc(body));
     assert.equal(roundTripped.includes("<Chart data={points} />"), true);
   });
+
+  it("parses headings through H6", () => {
+    const nodes = parseMarkdownSegment("#### H4\n##### H5\n###### H6");
+    assert.equal(nodes[0]?.attrs?.level, 4);
+    assert.equal(nodes[1]?.attrs?.level, 5);
+    assert.equal(nodes[2]?.attrs?.level, 6);
+  });
+
+  it("round-trips strikethrough, underline, and sub/superscript", () => {
+    const markdown = "~~removed~~ <u>under</u> H<sub>2</sub>O and E=mc<sup>2</sup>";
+    const serialized = serializeMarkdownNodes(parseMarkdownSegment(markdown));
+    assert.match(serialized, /~~removed~~/u);
+    assert.match(serialized, /<u>under<\/u>/u);
+    assert.match(serialized, /<sub>2<\/sub>/u);
+    assert.match(serialized, /<sup>2<\/sup>/u);
+  });
+
+  it("round-trips GFM tables", () => {
+    const markdown = "| Name | Value |\n| --- | --- |\n| Alpha | 1 |\n| Beta | 2 |";
+    const serialized = serializeMarkdownNodes(parseMarkdownSegment(markdown));
+    assert.match(serialized, /^\| Name \| Value \|$/mu);
+    assert.match(serialized, /^\| Alpha \| 1 \|$/mu);
+    assert.match(serialized, /^\| Beta \| 2 \|$/mu);
+  });
+
+  it("round-trips centered paragraphs through HTML alignment", () => {
+    const markdown = '<p style="text-align: center">Centered text</p>';
+    const roundTripped = serializeMarkdownNodes(parseMarkdownSegment(markdown));
+    assert.match(roundTripped, /text-align: center/u);
+    assert.match(roundTripped, /Centered text/u);
+  });
+
+  it("round-trips attachment-style links", () => {
+    const markdown = "[Quarterly report](/media/report.pdf)";
+    const roundTripped = serializeMarkdownNodes(parseMarkdownSegment(markdown));
+    assert.equal(roundTripped, "[Quarterly report](/media/report.pdf)");
+  });
 });
