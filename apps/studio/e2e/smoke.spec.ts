@@ -193,4 +193,30 @@ test.describe("Studio smoke", () => {
     await expect(source).toBeVisible();
     await expect(source).toHaveValue(/<CustomBlock \/>/u);
   });
+
+  test("formatting controls cannot run in source mode", async ({ page }) => {
+    await enterDemoMode(page);
+    await page.getByRole("button", { name: "New article" }).click();
+    const toolbar = page.getByRole("toolbar", { name: "Editor formatting" });
+    await expect(toolbar.getByRole("button", { name: "Bold", exact: true })).toBeEnabled();
+
+    await page.getByRole("button", { name: "Source", exact: true }).click();
+
+    // In source mode the rich-text controls are not rendered, so none of them
+    // can execute against the hidden editor.
+    for (const name of ["Bold", "Underline", "Insert internal link"]) {
+      await expect(toolbar.getByRole("button", { name, exact: true })).toHaveCount(0);
+    }
+  });
+
+  test("undo and redo stay disabled with nothing to undo", async ({ page }) => {
+    await enterDemoMode(page);
+    await page.getByRole("button", { name: "New article" }).click();
+    const toolbar = page.getByRole("toolbar", { name: "Editor formatting" });
+    const undo = toolbar.getByRole("button", { name: "Undo", exact: true });
+    await expect(undo).toBeDisabled();
+    // Forcing a click past the native disabled state must not run the command.
+    await undo.click({ force: true });
+    await expect(undo).toBeDisabled();
+  });
 });

@@ -220,6 +220,36 @@ export function requireAuth(req: Request, res: Response, next: NextFunction): vo
   res.status(401).json({ ok: false, error: "Authentication required." });
 }
 
+/**
+ * A request is a "hard" demo request when the deployment is forced into demo
+ * mode or the session itself was created through demo entry. This is stricter
+ * than {@link isRequestDemoSession}: a real (non-demo) authenticated user whose
+ * publisher is not configured yet is NOT treated as demo, so they can still run
+ * legitimate setup writes such as config generation.
+ */
+export function isHardDemoRequest(req: Request): boolean {
+  return isDemoModeForced() || isDemoSession(getSessionToken(req));
+}
+
+/**
+ * Guards routes that mutate real files or configuration. Demo mode must stay
+ * read/demo-only, so demo sessions (and forced-demo deployments) are rejected
+ * before any real write happens. Pair with {@link requireAuth}, which rejects
+ * unauthenticated requests first.
+ */
+export function requireNonDemo(req: Request, res: Response, next: NextFunction): void {
+  if (isHardDemoRequest(req)) {
+    res.status(403).json({
+      ok: false,
+      error:
+        "This action is disabled in demo mode. Demo mode never changes real files or configuration.",
+    });
+    return;
+  }
+
+  next();
+}
+
 export async function login(
   req: Request,
   password: string,

@@ -12,6 +12,7 @@ import {
   login,
   logout,
   requireAuth,
+  requireNonDemo,
 } from "./auth.js";
 import { loadPublicConfig, loadPublishEnv } from "./config.js";
 import { listDemoPostsHandler, loadDemoPost } from "./demoPosts.js";
@@ -138,6 +139,7 @@ app.post(
   writeLimiter,
   requireSameSiteRequest,
   requireAuth,
+  requireNonDemo,
   (_req, res) => {
     const result = runGenerateConfig();
     if (!result.ok) {

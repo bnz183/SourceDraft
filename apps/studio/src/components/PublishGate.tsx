@@ -1,6 +1,7 @@
 import type { PublishMode } from "@sourcedraft/publishers";
 import type { ValidationIssue } from "@sourcedraft/core";
 import type { ArticleFormState } from "../lib/articleForm";
+import { canSubmitPublish } from "../lib/publishGate";
 import { PublishChecklist } from "./PublishChecklist";
 
 type PublishGateProps = {
@@ -126,7 +127,7 @@ export function PublishGate({
   onPublishModeChange,
   onPublish,
 }: PublishGateProps) {
-  const canPublish = ready && !publishing && (githubReady || demoMode);
+  const canPublish = canSubmitPublish({ ready, publishing, githubReady, demoMode });
   const reason = disabledReason(ready, githubReady, publishing, demoMode);
 
   return (
