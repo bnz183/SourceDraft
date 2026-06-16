@@ -508,7 +508,7 @@ function App() {
 
   return (
     <div className="studio">
-      {demoMode && <DemoBanner forced={demoModeForced} />}
+      {demoMode && <DemoBanner forced={demoModeForced} onExitDemo={handleLogout} />}
       <AppBar
         adapter={studioConfig.adapter}
         documentStatus={view === "editor" ? documentStatus : null}

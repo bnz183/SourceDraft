@@ -1,15 +1,9 @@
 type WriterWelcomeCardProps = {
   variant?: "login" | "settings";
-  demoAvailable?: boolean;
-  onTryDemo?: () => void;
-  enteringDemo?: boolean;
 };
 
 export function WriterWelcomeCard({
   variant = "login",
-  demoAvailable = false,
-  onTryDemo,
-  enteringDemo = false,
 }: WriterWelcomeCardProps) {
   const isLogin = variant === "login";
 
@@ -51,20 +45,9 @@ export function WriterWelcomeCard({
           <p className="welcome-card__choice-body">
             Explore SourceDraft with sample posts. Nothing is published.
           </p>
-          {demoAvailable && onTryDemo ? (
-            <button
-              type="button"
-              className="button button--primary welcome-card__choice-action"
-              disabled={enteringDemo}
-              onClick={onTryDemo}
-            >
-              {enteringDemo ? "Opening demo…" : "Try demo mode"}
-            </button>
-          ) : (
-            <p className="welcome-card__choice-hint" role="status">
-              Demo mode is not available on this Studio instance yet.
-            </p>
-          )}
+          <p className="welcome-card__choice-hint">
+            Use the <strong>Try demo mode</strong> button above.
+          </p>
         </li>
 
         <li className="welcome-card__choice">

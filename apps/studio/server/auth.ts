@@ -245,7 +245,7 @@ export function enterDemo(
   if (!isDemoModeAvailable()) {
     return {
       ok: false,
-      error: "Demo mode is not available when GitHub is fully configured.",
+      error: "Demo mode is disabled on this Studio instance.",
     };
   }
 

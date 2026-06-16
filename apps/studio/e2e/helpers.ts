@@ -42,7 +42,7 @@ export async function enterDemoMode(page: Page): Promise<void> {
   attachPageErrorLogging(page);
   await waitForStudioRoot(page);
   await expect(page.getByRole("heading", { name: "SourceDraft Studio" })).toBeVisible();
-  await page.getByRole("button", { name: "Try demo mode" }).click();
+  await page.getByTestId("try-demo-mode").click();
   await expect(
     page.getByText("Demo mode — explore without connecting a real blog"),
   ).toBeVisible();
