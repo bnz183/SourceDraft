@@ -17,20 +17,20 @@ export function CompatibilityPanel({ compatibility }: CompatibilityPanelProps) {
     >
       <div className="panel__header">
         <h2 className="panel__title" id="compatibility-panel-title">
-          Compatibility &amp; status
+          Technical compatibility
         </h2>
         <p className="panel__meta">
-          Read-only summary — secrets are never shown in the browser
+          Developer summary — adapter, publisher, and media provider ids
         </p>
       </div>
 
       <dl className="compatibility-panel__grid">
         <div className="compatibility-panel__row">
-          <dt>Adapter</dt>
+          <dt>Blog type (adapter)</dt>
           <dd>{compatibility.adapter}</dd>
         </div>
         <div className="compatibility-panel__row">
-          <dt>Publisher</dt>
+          <dt>Publishing destination (publisher)</dt>
           <dd>{compatibility.publisher}</dd>
         </div>
         <div className="compatibility-panel__row">
@@ -51,10 +51,10 @@ export function CompatibilityPanel({ compatibility }: CompatibilityPanelProps) {
 
       {compatibility.missingEnvVars.length > 0 && (
         <div className="notice notice--warning compatibility-panel__notice" role="status">
-          <p className="notice__title">Missing environment variables</p>
+          <p className="notice__title">Missing server settings</p>
           <p className="notice__body">
-            Set these in <code>.env</code> on the server (or run{" "}
-            <code>pnpm setup</code>):{" "}
+            Ask your technical helper to add these in <code>.env</code> on the
+            server (or run <code>pnpm setup</code>):{" "}
             {compatibility.missingEnvVars.join(", ")}
           </p>
         </div>

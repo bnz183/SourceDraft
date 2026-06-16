@@ -65,19 +65,19 @@ function publisherCredentialChecks(activePublisher: string): SetupHealthCheck[] 
     return [
       {
         id: "gitlab-token",
-        label: "GitLab token (server-side)",
+        label: "GitLab connection",
         ok: tokenOk,
         detail: tokenOk
-          ? "GITLAB_TOKEN is present on the server. The value is never sent to the browser."
-          : "Set GITLAB_TOKEN in .env for GitLab publishing.",
+          ? "GitLab is connected on the server. Credentials never appear in the browser."
+          : "Publishing to GitLab is not connected yet. Add a GitLab token in .env or ask the person who installed SourceDraft.",
       },
       {
         id: "gitlab-project",
         label: "GitLab project",
         ok: projectOk,
         detail: projectOk
-          ? "GITLAB_PROJECT_ID or GITLAB_PROJECT_PATH is configured."
-          : "Set GITLAB_PROJECT_ID or GITLAB_PROJECT_PATH in .env.",
+          ? "SourceDraft knows which GitLab project to update."
+          : "SourceDraft does not know which GitLab project stores your site yet.",
       },
     ];
   }
@@ -89,27 +89,27 @@ function publisherCredentialChecks(activePublisher: string): SetupHealthCheck[] 
     return [
       {
         id: "bitbucket-token",
-        label: "Bitbucket token (server-side)",
+        label: "Bitbucket connection",
         ok: tokenOk,
         detail: tokenOk
-          ? "BITBUCKET_TOKEN is present on the server. The value is never sent to the browser."
-          : "Set BITBUCKET_TOKEN in .env for Bitbucket publishing.",
+          ? "Bitbucket is connected on the server. Credentials never appear in the browser."
+          : "Publishing to Bitbucket is not connected yet. Add a Bitbucket token in .env or ask the person who installed SourceDraft.",
       },
       {
         id: "bitbucket-workspace",
         label: "Bitbucket workspace",
         ok: workspaceOk,
         detail: workspaceOk
-          ? "BITBUCKET_WORKSPACE is configured."
-          : "Set BITBUCKET_WORKSPACE in .env.",
+          ? "SourceDraft knows which Bitbucket workspace owns your blog."
+          : "SourceDraft does not know which Bitbucket workspace to use yet.",
       },
       {
         id: "bitbucket-repo",
         label: "Bitbucket repository",
         ok: repoOk,
         detail: repoOk
-          ? "BITBUCKET_REPO_SLUG is configured."
-          : "Set BITBUCKET_REPO_SLUG in .env.",
+          ? "SourceDraft knows which Bitbucket repository stores your site."
+          : "SourceDraft does not know which Bitbucket repository stores your site yet.",
       },
     ];
   }
@@ -121,27 +121,27 @@ function publisherCredentialChecks(activePublisher: string): SetupHealthCheck[] 
     return [
       {
         id: "wordpress-api-url",
-        label: "WordPress API URL",
+        label: "WordPress site address",
         ok: apiOk,
         detail: apiOk
-          ? "WORDPRESS_API_URL is configured."
-          : "Set WORDPRESS_API_URL in .env (e.g. https://example.com/wp-json).",
+          ? "SourceDraft knows where your WordPress site lives."
+          : "SourceDraft does not know your WordPress site address yet.",
       },
       {
         id: "wordpress-username",
-        label: "WordPress username",
+        label: "WordPress sign-in",
         ok: userOk,
         detail: userOk
-          ? "WORDPRESS_USERNAME is configured."
-          : "Set WORDPRESS_USERNAME in .env.",
+          ? "A WordPress username is configured for publishing."
+          : "SourceDraft needs a WordPress username before it can publish posts.",
       },
       {
         id: "wordpress-app-password",
-        label: "WordPress app password (server-side)",
+        label: "WordPress app password",
         ok: passwordOk,
         detail: passwordOk
-          ? "WORDPRESS_APP_PASSWORD is present on the server. The value is never sent to the browser."
-          : "Set WORDPRESS_APP_PASSWORD in .env.",
+          ? "WordPress publishing credentials are stored on the server only."
+          : "Publishing to WordPress is not connected yet. Add an app password in .env or ask the person who installed SourceDraft.",
       },
     ];
   }
@@ -152,19 +152,19 @@ function publisherCredentialChecks(activePublisher: string): SetupHealthCheck[] 
     return [
       {
         id: "ghost-admin-url",
-        label: "Ghost site URL",
+        label: "Ghost site address",
         ok: urlOk,
         detail: urlOk
-          ? "GHOST_ADMIN_URL is configured."
-          : "Set GHOST_ADMIN_URL in .env (site root, no /ghost path).",
+          ? "SourceDraft knows where your Ghost site lives."
+          : "SourceDraft does not know your Ghost site address yet.",
       },
       {
         id: "ghost-admin-api-key",
-        label: "Ghost Admin API key (server-side)",
+        label: "Ghost Admin connection",
         ok: keyOk,
         detail: keyOk
-          ? "GHOST_ADMIN_API_KEY is present on the server. The value is never sent to the browser."
-          : "Set GHOST_ADMIN_API_KEY in .env.",
+          ? "Ghost publishing credentials are stored on the server only."
+          : "Publishing to Ghost is not connected yet. Add a Ghost Admin API key in .env or ask the person who installed SourceDraft.",
       },
     ];
   }
@@ -175,47 +175,72 @@ function publisherCredentialChecks(activePublisher: string): SetupHealthCheck[] 
   return [
     {
       id: "github-owner",
-      label: "GitHub owner",
+      label: "GitHub account or organization",
       ok: ownerOk,
       detail: ownerOk
-        ? "GITHUB_OWNER is configured."
-        : "Set GITHUB_OWNER in .env.",
+        ? "SourceDraft knows which GitHub account owns your blog."
+        : "SourceDraft does not know which GitHub account owns your blog yet.",
     },
     {
       id: "github-repo",
-      label: "GitHub repository",
+      label: "Blog repository",
       ok: repoOk,
-      detail: repoOk ? "GITHUB_REPO is configured." : "Set GITHUB_REPO in .env.",
+      detail: repoOk
+        ? "SourceDraft knows which repository stores your site."
+        : "SourceDraft does not know which repository stores your site yet.",
     },
     {
       id: "github-token",
-      label: "GitHub token (server-side)",
+      label: "GitHub connection",
       ok: tokenOk,
       detail: tokenOk
-        ? "GITHUB_TOKEN is present on the server. The value is never sent to the browser."
-        : "Set GITHUB_TOKEN in .env for GitHub publishing.",
+        ? "GitHub is connected on the server. Credentials never appear in the browser."
+        : "Publishing to GitHub is not connected yet. Add a GitHub token in .env or ask the person who installed SourceDraft.",
     },
   ];
 }
 
 function publisherSetupMessage(activePublisher: string): string {
   if (activePublisher === "gitlab") {
-    return "Complete GitLab setup in .env (GITLAB_TOKEN, GITLAB_PROJECT_ID or GITLAB_PROJECT_PATH) or use demo mode to explore without GitLab.";
+    return "Finish connecting SourceDraft to your GitLab project, or try demo mode to explore without publishing.";
   }
 
   if (activePublisher === "bitbucket") {
-    return "Complete Bitbucket setup in .env (BITBUCKET_TOKEN, BITBUCKET_WORKSPACE, BITBUCKET_REPO_SLUG) or use demo mode to explore without Bitbucket.";
+    return "Finish connecting SourceDraft to your Bitbucket repository, or try demo mode to explore without publishing.";
   }
 
   if (activePublisher === "wordpress") {
-    return "Complete WordPress setup in .env (WORDPRESS_API_URL, WORDPRESS_USERNAME, WORDPRESS_APP_PASSWORD) or use demo mode to explore without WordPress.";
+    return "Finish connecting SourceDraft to your WordPress site, or try demo mode to explore without publishing.";
   }
 
   if (activePublisher === "ghost") {
-    return "Complete Ghost setup in .env (GHOST_ADMIN_URL, GHOST_ADMIN_API_KEY) or use demo mode to explore without Ghost.";
+    return "Finish connecting SourceDraft to your Ghost site, or try demo mode to explore without publishing.";
   }
 
-  return "Complete GitHub setup in .env (GITHUB_TOKEN, GITHUB_OWNER, GITHUB_REPO) or use demo mode to explore without GitHub.";
+  return "Finish connecting SourceDraft to your GitHub blog repository, or try demo mode to explore without publishing.";
+}
+
+function adapterDisplayName(adapter: string): string {
+  switch (adapter) {
+    case "astro-mdx":
+      return "Astro";
+    case "markdown":
+      return "Markdown";
+    case "nextjs-mdx":
+      return "Next.js";
+    case "hugo-markdown":
+      return "Hugo";
+    case "eleventy-jekyll-markdown":
+      return "Eleventy or Jekyll";
+    case "docusaurus-mdx":
+      return "Docusaurus";
+    case "mkdocs-markdown":
+      return "MkDocs";
+    case "nuxt-content-markdown":
+      return "Nuxt Content";
+    default:
+      return adapter;
+  }
 }
 
 export function getSetupHealth(): SetupHealthReport {
@@ -247,71 +272,71 @@ export function getSetupHealth(): SetupHealthReport {
   const checks: SetupHealthCheck[] = [
     {
       id: "admin-password",
-      label: "Admin password",
+      label: "Studio password",
       ok: adminPasswordConfigured,
       detail: adminPasswordConfigured
-        ? "SOURCEDRAFT_ADMIN_PASSWORD is set on the server."
-        : "Set SOURCEDRAFT_ADMIN_PASSWORD in .env for normal sign-in.",
+        ? "Writers can sign in with the Studio password."
+        : "Add a Studio password on the server, or use demo mode to explore without signing in.",
     },
     ...publisherCredentialChecks(activePublisher),
     {
       id: "content-dir",
-      label: "Content directory",
+      label: "Article folder",
       ok: contentDirConfigured,
       detail: contentDirConfigured
-        ? `contentDir: ${contentDir}`
-        : "Configure contentDir in sourcedraft.config.json.",
+        ? `Articles will be saved in ${contentDir}.`
+        : "SourceDraft does not know where your articles should be saved yet.",
     },
     {
       id: "media-dir",
-      label: "Media directory",
+      label: "Image folder",
       ok: mediaDirConfigured,
       detail: mediaDirConfigured
-        ? `mediaDir: ${mediaDir}`
-        : "Configure mediaDir in sourcedraft.config.json.",
+        ? `Uploaded images will be saved in ${mediaDir}.`
+        : "SourceDraft does not know where uploaded images should be saved yet.",
     },
     {
       id: "public-media-path",
-      label: "Public media path",
+      label: "Public image path",
       ok: publicMediaPathConfigured,
       detail: publicMediaPathConfigured
-        ? `publicMediaPath: ${publicMediaPath}`
-        : "Configure publicMediaPath in sourcedraft.config.json or CMS_PUBLIC_MEDIA_PATH.",
+        ? `Images will appear on your site under ${publicMediaPath}.`
+        : "SourceDraft does not know the web path for images on your site yet.",
     },
     {
       id: "adapter",
-      label: "Adapter",
+      label: "Blog type",
       ok: adapterValid,
       detail: adapterValid
-        ? `Using ${adapter} adapter.`
-        : `Unsupported adapter "${rawAdapter}". Use a built-in adapter id from docs/adapters.md.`,
+        ? `SourceDraft is writing for ${adapterDisplayName(adapter)}.`
+        : "Choose the blog type SourceDraft should write for, such as Astro, Hugo, or Next.js.",
     },
     {
       id: "publisher",
-      label: "Publisher",
+      label: "Publishing destination",
       ok: publisherValid,
       detail: publisherValid
-        ? `Using ${publisher} publisher.`
-        : `Unsupported publisher "${rawPublisher}". Use a built-in publisher id from docs/configuration.md.`,
+        ? `Finished articles are sent through ${publisher}.`
+        : "Choose where SourceDraft should send finished articles.",
     },
     {
       id: "demo-mode",
       label: "Demo mode",
       ok: true,
       detail: demoModeForced
-        ? "SOURCEDRAFT_DEMO_MODE=true — remote commits are disabled."
+        ? "Demo mode is forced on. Explore safely — nothing is sent to a real blog."
         : !isPublisherConfigured()
-          ? "Publisher is not fully configured — Studio uses demo content and simulated publish."
-          : "Demo mode is off. Publishing is enabled when credentials are valid.",
+          ? "Your blog is not fully connected yet. Studio shows sample articles and simulates publishing."
+          : "Publishing to your connected blog is available when the checks above pass.",
     },
   ];
 
   const nextAction = demoModeForced
-    ? "Demo mode is active. Explore Studio locally or configure your publisher and disable SOURCEDRAFT_DEMO_MODE for real publishing."
+    ? "You are in demo mode. Explore Studio safely, then ask your technical helper to connect a real blog when you are ready."
     : !adminPasswordConfigured && demoModeAvailable
-      ? "Enter demo mode from the sign-in screen or set SOURCEDRAFT_ADMIN_PASSWORD for password sign-in."
+      ? "Try demo mode from the sign-in screen, or ask your technical helper to add a Studio password."
       : !adminPasswordConfigured
-        ? "Set SOURCEDRAFT_ADMIN_PASSWORD in .env and restart the API server."
+        ? "Ask your technical helper to add a Studio password on the server."
         : !publisherReady
           ? publisherSetupMessage(activePublisher)
           : null;
@@ -329,25 +354,26 @@ export function getSetupHealth(): SetupHealthReport {
   if (!validation.ok && validation.missingEnvVars.length > 0) {
     checks.push({
       id: "config-validation",
-      label: "Configuration validation",
+      label: "Full setup check",
       ok: false,
-      detail: `Missing: ${validation.missingEnvVars.join(", ")}. Run pnpm validate:config for details.`,
+      detail:
+        "Some server settings are still missing. Ask your technical helper to run the guided setup or check the README.",
     });
   } else if (validation.warnings.length > 0) {
     checks.push({
       id: "config-validation",
-      label: "Configuration validation",
+      label: "Full setup check",
       ok: true,
-      detail: validation.warnings[0] ?? "Configuration validated with warnings.",
+      detail: validation.warnings[0] ?? "Setup looks mostly ready, with a few warnings to review.",
     });
   } else {
     checks.push({
       id: "config-validation",
-      label: "Configuration validation",
+      label: "Full setup check",
       ok: validation.ok,
       detail: validation.ok
-        ? "Adapter, publisher, and media provider look compatible."
-        : "Run pnpm validate:config locally for details.",
+        ? "Blog type, publishing destination, and image storage look compatible."
+        : "Ask your technical helper to review the setup guide in the README.",
     });
   }
 

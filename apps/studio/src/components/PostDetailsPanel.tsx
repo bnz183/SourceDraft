@@ -1,5 +1,6 @@
 import type { ValidationIssue } from "@sourcedraft/core";
 import type { ArticleFormState } from "../lib/articleForm";
+import { fieldLabel } from "../lib/fieldLabels.js";
 import type { PostSummary } from "../lib/posts";
 import type { LatestMediaUpload } from "../editor/SourceDraftEditor";
 import { ContentQualityPanel } from "./ContentQualityPanel";
@@ -53,9 +54,9 @@ export function PostDetailsPanel({
     <aside className="post-details" aria-labelledby="post-details-title">
       <div className="post-details__header">
         <h2 className="post-details__title" id="post-details-title">
-          Post details
+          Article details
         </h2>
-        <p className="post-details__meta">Slug, dates, category, and cover</p>
+        <p className="post-details__meta">URL slug, dates, category, tags, and cover image</p>
       </div>
 
       <div className="post-details__body">
@@ -132,7 +133,7 @@ export function PostDetailsPanel({
         </label>
 
         <label className="field">
-          <span className="field__label">Publish date</span>
+          <span className="field__label">Publication date</span>
           <input
             className={`${fieldClass("pubDate")} field__input--mono`}
             type="date"
@@ -203,12 +204,12 @@ export function PostDetailsPanel({
         </div>
 
         <div className="post-details__section" aria-live="polite">
-          <span className="field__label">Output file</span>
+          <span className="field__label">Article file</span>
           {outputPath ? (
             <code className="post-details__path">{outputPath}</code>
           ) : (
             <p className="post-details__path-empty">
-              Complete required fields to see the file path.
+              Complete required fields to see where this article will be saved.
             </p>
           )}
         </div>
@@ -235,13 +236,15 @@ export function PostDetailsPanel({
           role="status"
         >
           <span className="post-details__validation-label">
-            {valid ? "Ready to publish" : "Needs attention"}
+            {valid ? "Ready to send" : "Needs attention"}
           </span>
           {!valid && issues.length > 0 && (
             <ul className="post-details__issues">
               {issues.slice(0, 4).map((issue) => (
                 <li key={`${issue.field}-${issue.message}`}>
-                  <span className="post-details__issue-field">{issue.field}</span>
+                  <span className="post-details__issue-field">
+                    {fieldLabel(issue.field)}
+                  </span>
                   {issue.message}
                 </li>
               ))}

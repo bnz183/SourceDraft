@@ -42,8 +42,10 @@ export async function enterDemoMode(page: Page): Promise<void> {
   attachPageErrorLogging(page);
   await waitForStudioRoot(page);
   await expect(page.getByRole("heading", { name: "SourceDraft Studio" })).toBeVisible();
-  await page.getByRole("button", { name: "Explore demo mode" }).click();
-  await expect(page.getByText("Demo mode — no GitHub commits are made")).toBeVisible();
+  await page.getByTestId("try-demo-mode").click();
+  await expect(
+    page.getByText("Demo mode — explore without connecting a real blog"),
+  ).toBeVisible();
 }
 
 export function ensureScreenshotDir(): void {

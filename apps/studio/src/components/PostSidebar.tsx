@@ -45,6 +45,7 @@ export function PostSidebar({
   const [filters, setFilters] = useState<PostListFilters>(
     createDefaultPostListFilters,
   );
+  const [expanded, setExpanded] = useState(false);
 
   const categories = useMemo(
     () => extractCategoriesFromPosts(posts),
@@ -63,15 +64,20 @@ export function PostSidebar({
   }
 
   return (
-    <aside className="post-sidebar" aria-label="Posts">
+    <aside
+      className={
+        expanded ? "post-sidebar post-sidebar--expanded" : "post-sidebar"
+      }
+      aria-label="Articles"
+    >
       <div className="post-sidebar__header">
-        <h2 className="post-sidebar__title">Posts</h2>
+        <h2 className="post-sidebar__title">Articles</h2>
         <button
           type="button"
           className="button button--compact"
           disabled={loading}
           onClick={onRefresh}
-          aria-label="Refresh post list"
+          aria-label="Refresh article list"
         >
           Refresh
         </button>
@@ -82,7 +88,7 @@ export function PostSidebar({
         className="button button--primary post-sidebar__new"
         onClick={onNewPost}
       >
-        New post
+        New article
       </button>
 
       {posts.length > 0 && (
@@ -94,7 +100,7 @@ export function PostSidebar({
               type="search"
               value={filters.search}
               placeholder="Title, slug, or path"
-              aria-label="Search posts by title, slug, or path"
+              aria-label="Search articles by title, slug, or path"
               onChange={(event) => updateFilters({ search: event.target.value })}
             />
           </label>
@@ -109,7 +115,7 @@ export function PostSidebar({
                 updateFilters({ draft: event.target.value as DraftFilter })
               }
             >
-              <option value="all">All posts</option>
+              <option value="all">All articles</option>
               <option value="published">Published only</option>
               <option value="draft">Drafts only</option>
             </select>
@@ -141,7 +147,7 @@ export function PostSidebar({
             <select
               className="post-sidebar__control-input"
               value={filters.sort}
-              aria-label="Sort posts"
+              aria-label="Sort articles"
               onChange={(event) =>
                 updateFilters({ sort: event.target.value as PostSort })
               }
@@ -171,37 +177,36 @@ export function PostSidebar({
 
       {!githubReady && !loading && (
         <p className="post-sidebar__hint" role="status">
-          GitHub is not configured. Open Settings to confirm your repository, or
-          write drafts locally.
+          Your blog is not connected yet. Open Settings to check publishing
+          readiness, or keep writing drafts locally.
         </p>
       )}
 
       {loading && (
         <p className="post-sidebar__status" role="status">
-          Loading posts…
+          Loading articles…
         </p>
       )}
 
       {error && (
         <div className="post-sidebar__notice notice notice--error" role="alert">
-          <p className="notice__title">Could not load posts</p>
+          <p className="notice__title">Could not load articles</p>
           <p className="notice__body">{error}</p>
           <p className="notice__hint">
-            Check your token, repository, and content folder in Settings, then
-            refresh.
+            Open Settings and review publishing readiness, then refresh.
           </p>
         </div>
       )}
 
       {!loading && !error && posts.length === 0 && (
         <p className="post-sidebar__empty">
-          No posts yet. Create one with New post, then publish to GitHub.
+          No articles yet. Create one with New article, then send it to your blog.
         </p>
       )}
 
       {!loading && !error && posts.length > 0 && visiblePosts.length === 0 && (
         <p className="post-sidebar__empty" role="status">
-          No posts match the current filters.
+          No articles match the current filters.
         </p>
       )}
 
@@ -243,6 +248,17 @@ export function PostSidebar({
             );
           })}
         </ul>
+      )}
+
+      {!loading && visiblePosts.length > 0 && (
+        <button
+          type="button"
+          className="button button--compact post-sidebar__expand-toggle"
+          aria-expanded={expanded}
+          onClick={() => setExpanded((current) => !current)}
+        >
+          {expanded ? "Collapse posts" : "Show all posts"}
+        </button>
       )}
     </aside>
   );

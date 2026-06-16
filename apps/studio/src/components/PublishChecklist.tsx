@@ -52,7 +52,7 @@ export function PublishChecklist({
   return (
     <div className="publish-checklist" aria-labelledby="publish-checklist-title">
       <h3 className="publish-checklist__title" id="publish-checklist-title">
-        Publish checklist
+        Before you send
       </h3>
       <ul className="publish-checklist__list">
         {checklist.items.map((item) => (

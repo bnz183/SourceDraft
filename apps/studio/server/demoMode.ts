@@ -113,9 +113,10 @@ export function isPublisherConfigured(): boolean {
 }
 
 export function isDemoModeAvailable(): boolean {
-  if (isDemoModeForced()) {
-    return true;
+  const flag = process.env.SOURCEDRAFT_DEMO_MODE?.trim().toLowerCase();
+  if (flag === "false") {
+    return false;
   }
 
-  return !isPublisherConfigured();
+  return true;
 }

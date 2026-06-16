@@ -7,6 +7,7 @@ import { AstroMdxPreview } from "./components/AstroMdxPreview";
 import { DemoBanner } from "./components/DemoBanner";
 import { LoginScreen } from "./components/LoginScreen";
 import { PostDetailsPanel } from "./components/PostDetailsPanel";
+import { PostLoginWelcomeBanner } from "./components/PostLoginWelcomeBanner";
 import { PostSidebar } from "./components/PostSidebar";
 import { PublishGate } from "./components/PublishGate";
 import { RestoreDraftBanner } from "./components/RestoreDraftBanner";
@@ -507,7 +508,7 @@ function App() {
 
   return (
     <div className="studio">
-      {demoMode && <DemoBanner forced={demoModeForced} />}
+      {demoMode && <DemoBanner forced={demoModeForced} onExitDemo={handleLogout} />}
       <AppBar
         adapter={studioConfig.adapter}
         documentStatus={view === "editor" ? documentStatus : null}
@@ -526,7 +527,13 @@ function App() {
           <SettingsPanel config={studioConfig} />
         </main>
       ) : (
-        <div className="studio__workspace">
+        <>
+          <PostLoginWelcomeBanner
+            demoMode={demoMode}
+            githubReady={githubReady}
+            onOpenSettings={() => setView("settings")}
+          />
+          <div className="studio__workspace">
           <PostSidebar
             posts={posts}
             loading={postsLoading}
@@ -620,7 +627,8 @@ function App() {
             onInsertPdfLink={handleInsertPdfLink}
             onUploadSuccess={handleUploadSuccess}
           />
-        </div>
+          </div>
+        </>
       )}
     </div>
   );
