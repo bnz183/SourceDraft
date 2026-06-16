@@ -3,6 +3,7 @@ import { useEditorState, type Editor } from "@tiptap/react";
 import type { PostSummary } from "../lib/posts.js";
 import { InternalLinkPicker } from "../components/InternalLinkPicker.js";
 import { editorDocToBody } from "./markdownRoundtrip.js";
+import { isToolbarButtonEnabled } from "./toolbarButton.js";
 
 export type LatestMediaUpload = {
   publicPath: string;
@@ -422,11 +423,14 @@ export function EditorToolbar({
                 aria-label={button.ariaLabel}
                 aria-pressed={button.active ?? undefined}
                 title={button.title ?? button.label}
-                disabled={button.disabled || editorMode !== "rich"}
+                disabled={!isToolbarButtonEnabled(button.disabled, editorMode)}
                 onMouseDown={(event) => {
                   event.preventDefault();
                 }}
                 onClick={() => {
+                  if (!isToolbarButtonEnabled(button.disabled, editorMode)) {
+                    return;
+                  }
                   runEditorAction(button.action);
                 }}
               >
@@ -440,10 +444,14 @@ export function EditorToolbar({
                 aria-label="Insert internal link"
                 title="Internal link"
                 aria-expanded={internalLinkOpen}
+                disabled={!isToolbarButtonEnabled(false, editorMode)}
                 onMouseDown={(event) => {
                   event.preventDefault();
                 }}
                 onClick={() => {
+                  if (!isToolbarButtonEnabled(false, editorMode)) {
+                    return;
+                  }
                   setInternalLinkOpen(true);
                 }}
               >
