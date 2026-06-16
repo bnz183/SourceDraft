@@ -69,6 +69,7 @@ test.describe("Studio smoke", () => {
       "Heading 1",
       "Bold",
       "Italic",
+      "Underline",
       "Strikethrough",
       "Inline code",
       "Clear formatting",

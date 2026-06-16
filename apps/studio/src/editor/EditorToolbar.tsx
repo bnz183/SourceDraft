@@ -17,6 +17,7 @@ type ToolbarButton = {
   action: () => void;
   active?: boolean;
   disabled?: boolean;
+  title?: string;
 };
 
 type ToolbarState = {
@@ -26,6 +27,7 @@ type ToolbarState = {
   heading3: boolean;
   bold: boolean;
   italic: boolean;
+  underline: boolean;
   strike: boolean;
   code: boolean;
   link: boolean;
@@ -44,6 +46,7 @@ const INACTIVE_STATE: ToolbarState = {
   heading3: false,
   bold: false,
   italic: false,
+  underline: false,
   strike: false,
   code: false,
   link: false,
@@ -100,6 +103,7 @@ export function EditorToolbar({
         heading3: currentEditor.isActive("heading", { level: 3 }),
         bold: currentEditor.isActive("bold"),
         italic: currentEditor.isActive("italic"),
+        underline: currentEditor.isActive("underline"),
         strike: currentEditor.isActive("strike"),
         code: currentEditor.isActive("code"),
         link: currentEditor.isActive("link"),
@@ -253,6 +257,13 @@ export function EditorToolbar({
                 action: () => editor.chain().focus().toggleItalic().run(),
               },
               {
+                label: "Underline",
+                ariaLabel: "Underline",
+                text: "U",
+                active: state.underline,
+                action: () => editor.chain().focus().toggleUnderline().run(),
+              },
+              {
                 label: "Strikethrough",
                 ariaLabel: "Strikethrough",
                 text: "S",
@@ -354,6 +365,9 @@ export function EditorToolbar({
                 ariaLabel: "Insert file link",
                 text: "File",
                 disabled: !mediaUploadAvailable,
+                title: mediaUploadAvailable
+                  ? "Insert a link to an uploaded PDF or file"
+                  : "File attachments are not enabled for this media provider yet.",
                 action: () => insertFileLink(editor),
               },
             ],
@@ -407,7 +421,7 @@ export function EditorToolbar({
                 }
                 aria-label={button.ariaLabel}
                 aria-pressed={button.active ?? undefined}
-                title={button.label}
+                title={button.title ?? button.label}
                 disabled={button.disabled || editorMode !== "rich"}
                 onMouseDown={(event) => {
                   event.preventDefault();

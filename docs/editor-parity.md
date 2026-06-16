@@ -24,7 +24,8 @@ Statuses for the SourceDraft column: **shipped**, **partial**, **planned**,
 | Git-owned content | Plugin-dependent | No | No | No | No | **shipped** (plain `.md`/`.mdx` in your repo) |
 | Comments / collaboration | Yes | Yes | Yes | Yes | Yes | **not shipped** |
 | Track changes / revisions | Yes | Partial | Partial | Yes | Yes | **not shipped** in Studio (Git history covers committed versions) |
-| Underline / text alignment | Yes | Yes | No | Yes | Partial | **not shipped** (no portable Markdown output) |
+| Underline | Yes | Yes | No | Yes | Partial | **shipped** (toolbar button; serialized as `<u>…</u>` HTML passthrough) |
+| Text alignment | Yes | Yes | No | Yes | Partial | **not shipped** (no portable Markdown output) |
 
 ## Reading this honestly
 

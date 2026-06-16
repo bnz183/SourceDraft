@@ -9,7 +9,7 @@ The toolbar groups controls and shows active states for the formatting under the
 | Group | Controls |
 |-------|----------|
 | Text style | Paragraph, Heading 1–3 |
-| Formatting | Bold, italic, strikethrough, inline code, clear formatting |
+| Formatting | Bold, italic, underline, strikethrough, inline code, clear formatting |
 | Blocks | Bullet list, numbered list, blockquote, code block, horizontal rule |
 | Insert | Link (insert/edit/remove), image, file link, internal link |
 | History | Undo, redo (disabled when nothing to undo/redo) |
@@ -34,7 +34,7 @@ Switching back to rich mode re-parses the body string. Complex MDX may appear as
 ## Limitations
 
 - Custom markdown serializer — not full CommonMark; nested or unusual markdown may not round-trip perfectly in rich mode
-- Underline, text alignment, and tables are **not** supported in rich mode because they have no portable Markdown output — see [editor-parity.md](editor-parity.md) for what is planned
+- Underline serializes as an `<u>…</u>` HTML passthrough, which renders in both `.md` and `.mdx`; text alignment and tables are **not** supported in rich mode because they have no portable Markdown output — see [editor-parity.md](editor-parity.md) for what is planned
 - File uploads accept images and PDF only ([media.md](media.md)); other file types must be hosted elsewhere and linked
 - No collaborative editing, comments, or cloud sync
 - Video embeds are not supported in the toolbar — paste embeds in Source mode if your site allows them
