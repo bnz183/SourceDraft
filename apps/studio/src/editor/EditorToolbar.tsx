@@ -168,8 +168,8 @@ export function EditorToolbar({
   }
 
   function insertFileLink(currentEditor: Editor) {
-    let path = "";
-    let filename = "Document";
+    let path: string;
+    let filename: string;
 
     if (latestUpload?.kind === "pdf") {
       path = latestUpload.publicPath;

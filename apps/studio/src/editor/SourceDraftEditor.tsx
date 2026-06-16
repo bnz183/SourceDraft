@@ -72,6 +72,10 @@ export function SourceDraftEditor({
   const bodyVersion = useRef(body);
   const slashHandlerRef = useRef<(command: SlashCommandId) => void>(() => {});
 
+  // Build the slash extension once and dispatch to the latest handler through
+  // slashHandlerRef, so the Tiptap extension is not rebuilt on every render.
+  // The React Compiler flags this intentional latest-ref pattern.
+  /* eslint-disable react-hooks/preserve-manual-memoization, react-hooks/refs */
   const slashExtension = useMemo(
     () =>
       createSlashCommandsExtension(
@@ -109,6 +113,7 @@ export function SourceDraftEditor({
       ),
     [],
   );
+  /* eslint-enable react-hooks/preserve-manual-memoization, react-hooks/refs */
 
   const editor = useEditor({
     extensions: [
