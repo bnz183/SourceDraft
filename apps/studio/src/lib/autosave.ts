@@ -261,7 +261,7 @@ export function autosaveContextLabel(record: AutosaveRecord): string {
     return `Editing ${record.editingPath}`;
   }
 
-  return "New post";
+  return "New article";
 }
 
 export function documentStatusLabel(status: DocumentStatus): string {

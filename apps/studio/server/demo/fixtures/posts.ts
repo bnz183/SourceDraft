@@ -110,7 +110,7 @@ Studio uploads images to your configured \`mediaDir\`. Public paths are inserted
 
 ## Hero images
 
-Set a hero image in Post details or pick a path from the media library after upload.
+Set a hero image in Article details or pick a path from the media library after upload.
 
 ## Inline assets in automated builds
 

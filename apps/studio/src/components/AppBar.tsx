@@ -45,13 +45,13 @@ export function AppBar({
 }: AppBarProps) {
   const repoLabel = githubReady
     ? `${githubOwner}/${githubRepo}`
-    : "GitHub not configured";
+    : "Blog not connected";
 
   return (
     <header className="app-bar">
       <div className="app-bar__brand">
         <span className="app-bar__wordmark">SourceDraft</span>
-        <span className="app-bar__subtitle">Git-backed writing studio</span>
+        <span className="app-bar__subtitle">Writing dashboard</span>
       </div>
 
       <div className="app-bar__meta">
@@ -60,7 +60,7 @@ export function AppBar({
           className={
             githubReady ? "app-bar__badge" : "app-bar__badge app-bar__badge--muted"
           }
-          title={githubReady ? "Target repository" : "Set GITHUB_OWNER and GITHUB_REPO in .env"}
+          title={githubReady ? "Connected blog repository" : "Open Settings to connect your blog"}
         >
           {repoLabel}
         </span>

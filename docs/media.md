@@ -44,6 +44,18 @@ Listing uses the same GitHub session as publish and post listing. Only allowed f
 
 **Not included yet:** delete, folders, or tags.
 
+## File attachments
+
+Upload support covers **images and PDF only**. The editor toolbar's
+**File link** control inserts a Markdown link (`[filename](path)`) at the
+cursor — typically to a PDF uploaded here, or to a file you host elsewhere.
+It does not upload anything itself.
+
+Generic file uploads (doc/xls/csv/zip/…) are **not implemented**: every
+upload is validated against the image/PDF allowlist, including extension and
+file-signature checks. Broader attachment types are a roadmap item, not a
+hidden setting.
+
 ## Media providers
 
 Set `CMS_MEDIA_PROVIDER` in `.env` (default: `github-media`).

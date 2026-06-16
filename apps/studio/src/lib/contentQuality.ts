@@ -1,4 +1,5 @@
 import type { ValidationIssue } from "@sourcedraft/core";
+import { fieldLabel } from "./fieldLabels.js";
 import {
   META_DESCRIPTION_LENGTH_GUIDANCE,
   META_TITLE_LENGTH_GUIDANCE,
@@ -197,7 +198,7 @@ export function buildContentQualityWarnings(
     warnings.push({
       id: `required-${issue.field}`,
       kind: "warn",
-      message: `${issue.field}: ${issue.message}`,
+      message: `${fieldLabel(issue.field)}: ${issue.message}`,
     });
   }
 

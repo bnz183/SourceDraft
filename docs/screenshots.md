@@ -40,8 +40,8 @@ These files are maintained under `docs/assets/`:
 | `media-library.png` | Media library section in **Post details** | Demo or GitHub |
 | `content-quality.png` | Content quality panel with word count / warnings | Demo or GitHub |
 | `preview.png` | MDX/Markdown preview panel with output path | Demo or GitHub |
-| `publish-success.png` | Publish confirmation (GitHub or **Publish simulated** in demo) | Demo or GitHub |
-| `setup-health.png` | Settings → **Setup health** with check rows | Demo or GitHub |
+| `publish-success.png` | Send confirmation (GitHub or **Send simulated** in demo) | Demo or GitHub |
+| `setup-health.png` | Settings → **Publishing readiness** with check rows | Demo or GitHub |
 
 ## Manual capture (optional)
 
@@ -56,7 +56,7 @@ These files are maintained under `docs/assets/`:
 
 1. Set `SOURCEDRAFT_DEMO_MODE=true` in `.env`, or leave GitHub vars empty.
 2. Start Studio: `pnpm dev`.
-3. Click **Explore demo mode** on the sign-in screen.
+3. Click **Try demo mode** on the sign-in screen.
 4. Capture the same views using sample posts and **Simulate publish**.
 
 ### General tips

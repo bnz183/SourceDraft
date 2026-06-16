@@ -30,7 +30,7 @@ export function ContentAuditPanel() {
           Content audit
         </h2>
         <p className="panel__meta">
-          Read-only scan of existing posts — files are never modified
+          For technical helpers — read-only scan of existing articles
         </p>
       </div>
 

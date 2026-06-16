@@ -62,7 +62,7 @@ test.describe("release screenshots", () => {
       path: screenshotPath("preview.png"),
     });
 
-    await page.getByRole("button", { name: "New post" }).click();
+    await page.getByRole("button", { name: "New article" }).click();
     await postTitleInput(page).fill("Screenshot publish example");
     await postDescriptionInput(page).fill(
       "Summary used for automated publish-success screenshot.",
@@ -71,14 +71,14 @@ test.describe("release screenshots", () => {
       page,
       "# Screenshot publish example\n\nBody for release screenshot capture.",
     );
-    await page.getByRole("button", { name: "Simulate publish" }).click();
-    await expect(page.getByText("Publish simulated")).toBeVisible({ timeout: 10_000 });
+    await page.getByRole("button", { name: "Simulate send to blog" }).click();
+    await expect(page.getByText("Send simulated")).toBeVisible({ timeout: 10_000 });
     await page.locator(".publish-bar").screenshot({
       path: screenshotPath("publish-success.png"),
     });
 
     await page.getByRole("button", { name: "Settings" }).click();
-    await expect(page.getByRole("heading", { name: "Setup health" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Publishing readiness" })).toBeVisible();
     await page.locator(".setup-health").screenshot({
       path: screenshotPath("setup-health.png"),
     });

@@ -18,14 +18,14 @@ export type PublishChecklist = {
 
 function publishModeLabel(mode: PublishMode): string {
   if (mode === "direct") {
-    return "Direct commit";
+    return "Send directly";
   }
 
   if (mode === "draft-pull-request") {
-    return "Draft pull request";
+    return "Draft review request";
   }
 
-  return "Pull request";
+  return "Review request";
 }
 
 export function buildPublishChecklist(input: {
@@ -66,14 +66,14 @@ export function buildPublishChecklist(input: {
 
   items.push({
     id: "output-path",
-    label: "Output path",
+    label: "Article file",
     value: input.outputPath ?? "—",
     status: input.outputPath ? "ok" : "warn",
   });
 
   items.push({
     id: "publish-mode",
-    label: "Publish mode",
+    label: "How to send",
     value: publishModeLabel(input.publishMode),
     status: "ok",
   });

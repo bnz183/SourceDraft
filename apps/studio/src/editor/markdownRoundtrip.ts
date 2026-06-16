@@ -76,7 +76,14 @@ function parseInline(text: string): InlineToken[] {
     let end = index + 1;
     while (end < text.length) {
       const char = text[end];
-      if (char === "!" || char === "[" || char === "*" || char === "`") {
+      if (
+        char === "!" ||
+        char === "[" ||
+        char === "*" ||
+        char === "`" ||
+        char === "~" ||
+        char === "<"
+      ) {
         break;
       }
       end += 1;

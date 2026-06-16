@@ -27,6 +27,23 @@ describe("markdownRoundtrip", () => {
     assert.match(serialized, /\[a link\]\(https:\/\/example.com\)/u);
   });
 
+  it("round-trips strikethrough", () => {
+    const markdown = "Keep ~~remove this~~ rest.";
+    const nodes = parseMarkdownSegment(markdown);
+    const strikeNode = nodes[0]?.content?.find((node) =>
+      node.marks?.some((mark) => mark.type === "strike"),
+    );
+    assert.equal(strikeNode?.text, "remove this");
+    const serialized = serializeMarkdownNodes(nodes);
+    assert.equal(serialized, "Keep ~~remove this~~ rest.");
+  });
+
+  it("leaves single tildes alone", () => {
+    const markdown = "Approximately ~5 minutes.";
+    const serialized = serializeMarkdownNodes(parseMarkdownSegment(markdown));
+    assert.equal(serialized, "Approximately ~5 minutes.");
+  });
+
   it("round-trips images with alt text", () => {
     const markdown = "![Diagram alt](/images/diagram.png)";
     const serialized = serializeMarkdownNodes(parseMarkdownSegment(markdown));

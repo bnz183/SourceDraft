@@ -34,8 +34,12 @@ Your static site still builds and deploys exactly as before. SourceDraft creates
 
 ## What it does today
 
-- Edit articles in Studio with a **Tiptap rich editor** (toolbar: headings, bold/italic/underline/strike, lists, links, images, attachments, undo/redo), **slash commands**, and **source mode** for raw Markdown/MDX
-- List and edit existing posts from your GitHub `contentDir`
+**Writer-facing (no Git jargon required):** edit articles in Studio, upload images, preview the generated file, run content-quality checks, and send to your blog when setup is complete. Demo mode works without GitHub or API tokens.
+
+**Developer-facing details:**
+
+- Edit articles in Studio with a **Tiptap rich editor** (grouped toolbar: headings, bold/italic/underline/strike, inline code, lists, links, images, file links, undo/redo), **slash commands**, and **source mode** for raw Markdown/MDX
+- List and edit existing posts from your configured article folder (`contentDir`)
 - Validate fields against a universal article schema
 - **Content QA** — non-blocking warnings for SEO, alt text, headings, links, and body length
 - **Publish checklist** — validation status, output path, publish mode, and warnings before publish
@@ -45,11 +49,11 @@ Your static site still builds and deploys exactly as before. SourceDraft creates
 - Upload images to git `mediaDir`, Cloudinary, or (experimental) S3-compatible storage
 - Optional deploy hooks after publish (Vercel, Netlify, Cloudflare Pages, generic)
 - **Setup detection** — scan local project files and suggest adapter, content, and media paths
-- **Content audit** — read-only scan of existing posts (frontmatter, duplicate slugs, complex MDX)
+- **Content audit** — read-only scan of existing posts (metadata blocks, duplicate slugs, complex MDX)
 - Configure paths, adapter, and categories in `sourcedraft.config.json`
 - Protect Studio with a server-side admin password
 - **Demo mode** — explore Studio with sample posts without GitHub credentials
-- **Setup health** — Settings panel checks for missing config (no secrets exposed)
+- **Publishing readiness** — Settings panel checks for missing config (no secrets exposed)
 
 ## What it does not do yet
 
@@ -80,6 +84,20 @@ Details: [docs/publishers.md](docs/publishers.md) · [docs/git-publishers.md](do
 | **Notes** | Plugin loader for custom adapters | Git: list posts (GH/GL); Bitbucket publish only; WP/Ghost API publish | †S3 upload not implemented yet | Optional `DEPLOY_HOOK_URL` after publish |
 
 Full matrices: [adapters](docs/adapters.md) · [publishers](docs/publishers.md) · [media](docs/media.md) · [deploy-hooks](docs/deploy-hooks.md) · [quickstart recipes](docs/quickstart-recipes.md)
+
+## For writers, bloggers, and builders
+
+**Writers:** If someone already installed SourceDraft, you only need the **Studio link** and **password**. Create articles with title, description, category, tags, body, and images; preview the output; and send posts to your blog without touching GitHub manually. If publishing is disabled, that is a setup issue — you can still write and preview, or use demo mode.
+
+**First visit:** Studio shows five paths on the sign-in screen — **Try demo mode** (safest start), sign in to an already-configured Studio, connect an existing blog, advanced developer setup, or learn about the agent-ready draft/review/publish workflow. Demo mode needs no GitHub or API tokens.
+
+**Developers:** AGPL open-source. Content stays in Git-owned Markdown/MDX. Secrets stay server-side. Adapter/publisher architecture with a structured article schema. See [docs/compatibility-roadmap.md](docs/compatibility-roadmap.md).
+
+**AI/automation builders:** SourceDraft uses structured article fields with validation, preview, and a human-in-the-loop publish checklist — a natural base for future agent-assisted workflows. **Agent API, BYOK AI, MCP, and built-in AI writing are not shipped yet.** See [docs/roadmap.md](docs/roadmap.md#future-agent-ready-publishing-workflows).
+
+If you are setting it up yourself, start with **demo mode** or **`pnpm setup`**. Initial setup usually needs someone comfortable with API tokens and environment files.
+
+Plain-language overview: [docs/non-technical-overview.md](docs/non-technical-overview.md).
 
 ## Quickstart
 
@@ -116,7 +134,7 @@ pnpm dev
 
 Sign in, click **New post**, preview the output, publish. The file lands at `contentDir/<slug>.mdx` or `.md` depending on your adapter (default: `src/content/blog/`).
 
-**Try without GitHub:** set `SOURCEDRAFT_DEMO_MODE=true` in `.env`, or leave GitHub vars empty and click **Explore demo mode** on the sign-in screen. Demo content reloads from repository fixtures on each API start. See [docs/demo-mode.md](docs/demo-mode.md).
+**Try without GitHub:** set `SOURCEDRAFT_DEMO_MODE=true` in `.env`, or leave GitHub vars empty and click **Try demo mode** on the sign-in screen. Demo content reloads from repository fixtures on each API start. See [docs/demo-mode.md](docs/demo-mode.md).
 
 Validate config: `pnpm validate:config` · Wizard details: [docs/setup-wizard.md](docs/setup-wizard.md) · Full walkthrough: [docs/getting-started.md](docs/getting-started.md)
 

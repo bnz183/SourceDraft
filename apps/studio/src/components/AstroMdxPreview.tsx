@@ -7,6 +7,7 @@ import {
   renderAdapterOutput,
 } from "@sourcedraft/adapters";
 import type { Article, ValidationIssue } from "@sourcedraft/core";
+import { fieldLabel } from "../lib/fieldLabels.js";
 
 type AstroMdxPreviewProps = {
   valid: boolean;
@@ -65,8 +66,8 @@ export function AstroMdxPreview({
           </h2>
           <p className="preview-panel__meta">
             {valid
-              ? "File that will be saved to GitHub"
-              : "Complete post details to preview output"}
+              ? "See the generated article file before you send it to your blog"
+              : "Complete article details to preview the generated output"}
           </p>
         </div>
         <button
@@ -85,7 +86,7 @@ export function AstroMdxPreview({
           {valid && resolvedOutputPath && fileOutput ? (
             <>
               <div className="preview-panel__path">
-                <span className="preview-panel__path-label">Output file</span>
+                <span className="preview-panel__path-label">Article file</span>
                 <code>{resolvedOutputPath}</code>
               </div>
               {navHint && (
@@ -112,7 +113,7 @@ export function AstroMdxPreview({
                     {issues.map((issue) => (
                       <li key={`${issue.field}-${issue.message}`}>
                         <span className="validation-panel__field">
-                          {issue.field}
+                          {fieldLabel(issue.field)}
                         </span>
                         {issue.message}
                       </li>

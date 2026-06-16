@@ -4,25 +4,22 @@ Studio uses a **Tiptap**-powered body editor with a formatting toolbar and slash
 
 ## Rich mode toolbar
 
-Formatting controls include:
+The toolbar groups controls and shows active states for the formatting under the cursor:
 
-- **Undo / redo**
-- **Headings** — H1, H2, H3
-- **Inline** — bold, italic, underline, strikethrough, inline code
-- **Blocks** — bullet list, numbered list, blockquote, code block, horizontal rule
-- **Insert** — link, internal link, image (with alt text prompt), attachment link (PDF/file)
-- **Table** — shown as disabled; use Source mode for Markdown table syntax
-- **Mode** — Rich / Source toggle
+| Group | Controls |
+|-------|----------|
+| Text style | Paragraph, Heading 1–3 |
+| Formatting | Bold, italic, strikethrough, inline code, clear formatting |
+| Blocks | Bullet list, numbered list, blockquote, code block, horizontal rule |
+| Insert | Link (insert/edit/remove), image, file link, internal link |
+| History | Undo, redo (disabled when nothing to undo/redo) |
+| Mode | Rich / Source toggle |
 
-Upload an image or PDF in **Post details → Media**, then use **Image** or **Attach** in the toolbar to insert at the cursor. Attachments insert as normal Markdown links (`[filename](/path/to/file.pdf)`).
-
-Underline serializes as HTML `<u>…</u>` in the body string. Strikethrough uses `~~text~~`.
-
-## Slash commands
-
-`/h1`, `/h2`, `/h3`, `/quote`, `/code`, `/image`, `/hr`, `/link`, `/internal`, `/callout`
-
-Unknown MDX JSX blocks render as locked placeholders in rich mode (not deleted).
+- Slash commands: `/h1`, `/h2`, `/h3`, `/quote`, `/code`, `/image`, `/hr`, `/link`, `/internal`, `/callout`
+- Unknown MDX JSX blocks render as locked placeholders in rich mode (not deleted)
+- **Link** edits or removes the link under the cursor; leave the URL empty to remove it
+- **Image** uses the most recently uploaded image when one exists, otherwise asks for a path
+- **File link** inserts a Markdown link to a file path (for example a PDF uploaded in **Images & files**) — it does not upload anything itself
 
 ## Source mode
 
@@ -37,8 +34,9 @@ Switching back to rich mode re-parses the body string. Complex MDX may appear as
 ## Limitations
 
 - Custom markdown serializer — not full CommonMark; nested or unusual markdown may not round-trip perfectly in rich mode
+- Underline, text alignment, and tables are **not** supported in rich mode because they have no portable Markdown output — see [editor-parity.md](editor-parity.md) for what is planned
+- File uploads accept images and PDF only ([media.md](media.md)); other file types must be hosted elsewhere and linked
 - No collaborative editing, comments, or cloud sync
-- Tables are not editable in rich mode yet
 - Video embeds are not supported in the toolbar — paste embeds in Source mode if your site allows them
 - Internal link slash command inserts the first loaded post when the picker is not opened manually
 

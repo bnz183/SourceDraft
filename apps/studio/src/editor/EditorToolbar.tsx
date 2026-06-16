@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { Editor } from "@tiptap/react";
+import { useEditorState, type Editor } from "@tiptap/react";
 import type { PostSummary } from "../lib/posts.js";
 import { InternalLinkPicker } from "../components/InternalLinkPicker.js";
 import { editorDocToBody } from "./markdownRoundtrip.js";
@@ -15,8 +15,44 @@ type ToolbarButton = {
   ariaLabel: string;
   text: string;
   action: () => void;
+  active?: boolean;
   disabled?: boolean;
-  title?: string;
+};
+
+type ToolbarState = {
+  paragraph: boolean;
+  heading1: boolean;
+  heading2: boolean;
+  heading3: boolean;
+  bold: boolean;
+  italic: boolean;
+  strike: boolean;
+  code: boolean;
+  link: boolean;
+  bulletList: boolean;
+  orderedList: boolean;
+  blockquote: boolean;
+  codeBlock: boolean;
+  canUndo: boolean;
+  canRedo: boolean;
+};
+
+const INACTIVE_STATE: ToolbarState = {
+  paragraph: false,
+  heading1: false,
+  heading2: false,
+  heading3: false,
+  bold: false,
+  italic: false,
+  strike: false,
+  code: false,
+  link: false,
+  bulletList: false,
+  orderedList: false,
+  blockquote: false,
+  codeBlock: false,
+  canUndo: false,
+  canRedo: false,
 };
 
 type EditorToolbarProps = {
@@ -34,10 +70,6 @@ type EditorToolbarProps = {
   onSelectInternalLink: (post: PostSummary) => void;
 };
 
-function attachmentLabel(filename: string): string {
-  return filename.replace(/\.pdf$/iu, "") || filename;
-}
-
 export function EditorToolbar({
   editor,
   editorMode,
@@ -54,6 +86,35 @@ export function EditorToolbar({
 }: EditorToolbarProps) {
   const [internalLinkOpen, setInternalLinkOpen] = useState(false);
 
+  const toolbarState = useEditorState({
+    editor,
+    selector: ({ editor: currentEditor }): ToolbarState => {
+      if (!currentEditor) {
+        return INACTIVE_STATE;
+      }
+
+      return {
+        paragraph: currentEditor.isActive("paragraph"),
+        heading1: currentEditor.isActive("heading", { level: 1 }),
+        heading2: currentEditor.isActive("heading", { level: 2 }),
+        heading3: currentEditor.isActive("heading", { level: 3 }),
+        bold: currentEditor.isActive("bold"),
+        italic: currentEditor.isActive("italic"),
+        strike: currentEditor.isActive("strike"),
+        code: currentEditor.isActive("code"),
+        link: currentEditor.isActive("link"),
+        bulletList: currentEditor.isActive("bulletList"),
+        orderedList: currentEditor.isActive("orderedList"),
+        blockquote: currentEditor.isActive("blockquote"),
+        codeBlock: currentEditor.isActive("codeBlock"),
+        canUndo: currentEditor.can().undo(),
+        canRedo: currentEditor.can().redo(),
+      };
+    },
+  });
+
+  const state = toolbarState ?? INACTIVE_STATE;
+
   function runEditorAction(action: () => void) {
     if (!editor || editorMode !== "rich") {
       return;
@@ -63,36 +124,46 @@ export function EditorToolbar({
     onBodyChange(editorDocToBody(editor.getJSON()));
   }
 
-  function promptImageInsert(): void {
-    if (!editor) {
+  function insertOrEditLink(currentEditor: Editor) {
+    const previousHref = currentEditor.getAttributes("link").href as
+      | string
+      | undefined;
+    const input = window.prompt(
+      "Link URL (leave empty to remove the link)",
+      previousHref ?? "https://",
+    );
+    if (input === null) {
       return;
     }
 
-    const path =
-      latestImagePath?.trim() ||
-      (latestUpload?.kind === "image" ? latestUpload.publicPath : "") ||
-      window.prompt("Image path (public URL or repo path)", "/images/")?.trim() ||
-      "";
-
-    if (path.length === 0) {
+    const href = input.trim();
+    if (href.length === 0) {
+      currentEditor.chain().focus().extendMarkRange("link").unsetLink().run();
       return;
     }
 
-    const alt =
-      window.prompt("Alt text (for accessibility)", imageAlt)?.trim() || imageAlt;
+    if (currentEditor.state.selection.empty && !state.link) {
+      currentEditor
+        .chain()
+        .focus()
+        .insertContent({
+          type: "text",
+          text: "link text",
+          marks: [{ type: "link", attrs: { href } }],
+        })
+        .run();
+      return;
+    }
 
-    editor
+    currentEditor
       .chain()
       .focus()
-      .setImage({ src: path, alt, title: alt })
+      .extendMarkRange("link")
+      .setLink({ href })
       .run();
   }
 
-  function promptAttachmentInsert(): void {
-    if (!editor) {
-      return;
-    }
-
+  function insertFileLink(currentEditor: Editor) {
     let path = "";
     let filename = "Document";
 
@@ -100,18 +171,21 @@ export function EditorToolbar({
       path = latestUpload.publicPath;
       filename = latestUpload.filename;
     } else {
-      path =
-        window.prompt("File path (public URL or repo path)", "/files/")?.trim() ||
-        "";
-      if (path.length === 0) {
+      const prompted = window
+        .prompt(
+          "File path or URL — upload PDFs in “Images & files” first, then paste the path here",
+          "/files/",
+        )
+        ?.trim();
+      if (!prompted) {
         return;
       }
-      const segments = path.split("/");
-      filename = segments[segments.length - 1] || "Document";
+      path = prompted;
+      filename = path.split("/").pop() || path;
     }
 
-    const label = attachmentLabel(filename);
-    editor
+    const label = filename.replace(/\.pdf$/iu, "") || filename;
+    currentEditor
       .chain()
       .focus()
       .insertContent({
@@ -122,149 +196,186 @@ export function EditorToolbar({
       .run();
   }
 
-  const richDisabled = editorMode !== "rich" || !editor;
-
-  const formattingButtons: ToolbarButton[] =
+  const groups: { name: string; buttons: ToolbarButton[] }[] =
     editor && editorMode === "rich"
       ? [
           {
-            label: "Undo",
-            ariaLabel: "Undo",
-            text: "Undo",
-            action: () => editor.chain().focus().undo().run(),
-            disabled: !editor.can().undo(),
+            name: "Text style",
+            buttons: [
+              {
+                label: "Paragraph",
+                ariaLabel: "Paragraph",
+                text: "¶",
+                active: state.paragraph,
+                action: () => editor.chain().focus().setParagraph().run(),
+              },
+              {
+                label: "Heading 1",
+                ariaLabel: "Heading 1",
+                text: "H1",
+                active: state.heading1,
+                action: () =>
+                  editor.chain().focus().toggleHeading({ level: 1 }).run(),
+              },
+              {
+                label: "Heading 2",
+                ariaLabel: "Heading 2",
+                text: "H2",
+                active: state.heading2,
+                action: () =>
+                  editor.chain().focus().toggleHeading({ level: 2 }).run(),
+              },
+              {
+                label: "Heading 3",
+                ariaLabel: "Heading 3",
+                text: "H3",
+                active: state.heading3,
+                action: () =>
+                  editor.chain().focus().toggleHeading({ level: 3 }).run(),
+              },
+            ],
           },
           {
-            label: "Redo",
-            ariaLabel: "Redo",
-            text: "Redo",
-            action: () => editor.chain().focus().redo().run(),
-            disabled: !editor.can().redo(),
+            name: "Formatting",
+            buttons: [
+              {
+                label: "Bold",
+                ariaLabel: "Bold",
+                text: "B",
+                active: state.bold,
+                action: () => editor.chain().focus().toggleBold().run(),
+              },
+              {
+                label: "Italic",
+                ariaLabel: "Italic",
+                text: "I",
+                active: state.italic,
+                action: () => editor.chain().focus().toggleItalic().run(),
+              },
+              {
+                label: "Strikethrough",
+                ariaLabel: "Strikethrough",
+                text: "S",
+                active: state.strike,
+                action: () => editor.chain().focus().toggleStrike().run(),
+              },
+              {
+                label: "Inline code",
+                ariaLabel: "Inline code",
+                text: "</>",
+                active: state.code,
+                action: () => editor.chain().focus().toggleCode().run(),
+              },
+              {
+                label: "Clear formatting",
+                ariaLabel: "Clear formatting",
+                text: "Clear",
+                action: () =>
+                  editor.chain().focus().unsetAllMarks().clearNodes().run(),
+              },
+            ],
           },
           {
-            label: "Heading 1",
-            ariaLabel: "Heading 1",
-            text: "H1",
-            action: () => editor.chain().focus().toggleHeading({ level: 1 }).run(),
+            name: "Blocks",
+            buttons: [
+              {
+                label: "Bullet list",
+                ariaLabel: "Bullet list",
+                text: "• List",
+                active: state.bulletList,
+                action: () => editor.chain().focus().toggleBulletList().run(),
+              },
+              {
+                label: "Numbered list",
+                ariaLabel: "Numbered list",
+                text: "1. List",
+                active: state.orderedList,
+                action: () => editor.chain().focus().toggleOrderedList().run(),
+              },
+              {
+                label: "Blockquote",
+                ariaLabel: "Blockquote",
+                text: "Quote",
+                active: state.blockquote,
+                action: () => editor.chain().focus().toggleBlockquote().run(),
+              },
+              {
+                label: "Code block",
+                ariaLabel: "Code block",
+                text: "```",
+                active: state.codeBlock,
+                action: () => editor.chain().focus().toggleCodeBlock().run(),
+              },
+              {
+                label: "Horizontal rule",
+                ariaLabel: "Horizontal rule",
+                text: "HR",
+                action: () => editor.chain().focus().setHorizontalRule().run(),
+              },
+            ],
           },
           {
-            label: "Heading 2",
-            ariaLabel: "Heading 2",
-            text: "H2",
-            action: () => editor.chain().focus().toggleHeading({ level: 2 }).run(),
+            name: "Insert",
+            buttons: [
+              {
+                label: "Link",
+                ariaLabel: "Insert or edit link",
+                text: "Link",
+                active: state.link,
+                action: () => insertOrEditLink(editor),
+              },
+              {
+                label: "Image",
+                ariaLabel: "Insert image",
+                text: "Image",
+                action: () => {
+                  const path =
+                    latestImagePath?.trim() ||
+                    (latestUpload?.kind === "image" ? latestUpload.publicPath : "") ||
+                    window
+                      .prompt("Image path (public URL or repo path)", "/images/")
+                      ?.trim() ||
+                    "";
+                  if (path.length === 0) {
+                    return;
+                  }
+                  const alt =
+                    window.prompt("Alt text (for accessibility)", imageAlt)?.trim() ||
+                    imageAlt;
+                  editor
+                    .chain()
+                    .focus()
+                    .setImage({ src: path, alt, title: alt })
+                    .run();
+                },
+              },
+              {
+                label: "File link",
+                ariaLabel: "Insert file link",
+                text: "File",
+                disabled: !mediaUploadAvailable,
+                action: () => insertFileLink(editor),
+              },
+            ],
           },
           {
-            label: "Heading 3",
-            ariaLabel: "Heading 3",
-            text: "H3",
-            action: () => editor.chain().focus().toggleHeading({ level: 3 }).run(),
-          },
-          {
-            label: "Bold",
-            ariaLabel: "Bold",
-            text: "B",
-            action: () => editor.chain().focus().toggleBold().run(),
-          },
-          {
-            label: "Italic",
-            ariaLabel: "Italic",
-            text: "I",
-            action: () => editor.chain().focus().toggleItalic().run(),
-          },
-          {
-            label: "Underline",
-            ariaLabel: "Underline",
-            text: "U",
-            action: () => editor.chain().focus().toggleUnderline().run(),
-          },
-          {
-            label: "Strikethrough",
-            ariaLabel: "Strikethrough",
-            text: "S",
-            action: () => editor.chain().focus().toggleStrike().run(),
-          },
-          {
-            label: "Inline code",
-            ariaLabel: "Inline code",
-            text: "`",
-            action: () => editor.chain().focus().toggleCode().run(),
-          },
-          {
-            label: "Bullet list",
-            ariaLabel: "Bullet list",
-            text: "• List",
-            action: () => editor.chain().focus().toggleBulletList().run(),
-          },
-          {
-            label: "Numbered list",
-            ariaLabel: "Numbered list",
-            text: "1. List",
-            action: () => editor.chain().focus().toggleOrderedList().run(),
-          },
-          {
-            label: "Blockquote",
-            ariaLabel: "Blockquote",
-            text: "Quote",
-            action: () => editor.chain().focus().toggleBlockquote().run(),
-          },
-          {
-            label: "Code block",
-            ariaLabel: "Code block",
-            text: "```",
-            action: () => editor.chain().focus().toggleCodeBlock().run(),
-          },
-          {
-            label: "Insert link",
-            ariaLabel: "Insert link",
-            text: "Link",
-            action: () => {
-              const href =
-                window.prompt("Link URL", "https://")?.trim() || "https://";
-              editor
-                .chain()
-                .focus()
-                .insertContent({
-                  type: "text",
-                  text: "link text",
-                  marks: [{ type: "link", attrs: { href } }],
-                })
-                .run();
-            },
-          },
-          {
-            label: "Insert image",
-            ariaLabel: "Insert image",
-            text: "Image",
-            action: () => {
-              promptImageInsert();
-            },
-          },
-          {
-            label: "Insert attachment",
-            ariaLabel: "Insert attachment",
-            text: "Attach",
-            action: () => {
-              promptAttachmentInsert();
-            },
-            disabled: !mediaUploadAvailable,
-            title: mediaUploadAvailable
-              ? "Insert a download link for an uploaded PDF or file"
-              : "Upload media in Post details after GitHub or demo mode is configured",
-          },
-          {
-            label: "Horizontal rule",
-            ariaLabel: "Horizontal rule",
-            text: "HR",
-            action: () => editor.chain().focus().setHorizontalRule().run(),
-          },
-          {
-            label: "Table",
-            ariaLabel: "Table",
-            text: "Table",
-            action: () => {},
-            disabled: true,
-            title:
-              "Tables are not supported in rich mode yet. Use Source mode for Markdown table syntax.",
+            name: "History",
+            buttons: [
+              {
+                label: "Undo",
+                ariaLabel: "Undo",
+                text: "Undo",
+                disabled: !state.canUndo,
+                action: () => editor.chain().focus().undo().run(),
+              },
+              {
+                label: "Redo",
+                ariaLabel: "Redo",
+                text: "Redo",
+                disabled: !state.canRedo,
+                action: () => editor.chain().focus().redo().run(),
+              },
+            ],
           },
         ]
       : [];
@@ -277,69 +388,87 @@ export function EditorToolbar({
         aria-label="Editor formatting"
         aria-controls={bodyFieldId}
       >
-        {formattingButtons.map((button) => (
-          <button
-            key={button.ariaLabel}
-            type="button"
-            className="editor-toolbar__button"
-            aria-label={button.ariaLabel}
-            title={button.title ?? button.label}
-            disabled={richDisabled || button.disabled === true}
-            onMouseDown={(event) => {
-              event.preventDefault();
-            }}
-            onClick={() => {
-              runEditorAction(button.action);
-            }}
+        {groups.map((group, groupIndex) => (
+          <div
+            key={group.name}
+            className="editor-toolbar__group"
+            role="group"
+            aria-label={group.name}
+            data-group-index={groupIndex}
           >
-            <span aria-hidden="true">{button.text}</span>
-          </button>
+            {group.buttons.map((button) => (
+              <button
+                key={button.ariaLabel}
+                type="button"
+                className={
+                  button.active
+                    ? "editor-toolbar__button editor-toolbar__button--active"
+                    : "editor-toolbar__button"
+                }
+                aria-label={button.ariaLabel}
+                aria-pressed={button.active ?? undefined}
+                title={button.label}
+                disabled={button.disabled || editorMode !== "rich"}
+                onMouseDown={(event) => {
+                  event.preventDefault();
+                }}
+                onClick={() => {
+                  runEditorAction(button.action);
+                }}
+              >
+                <span aria-hidden="true">{button.text}</span>
+              </button>
+            ))}
+            {group.name === "Insert" && (
+              <button
+                type="button"
+                className="editor-toolbar__button"
+                aria-label="Insert internal link"
+                title="Internal link"
+                aria-expanded={internalLinkOpen}
+                onMouseDown={(event) => {
+                  event.preventDefault();
+                }}
+                onClick={() => {
+                  setInternalLinkOpen(true);
+                }}
+              >
+                <span aria-hidden="true">Internal</span>
+              </button>
+            )}
+          </div>
         ))}
-        <button
-          type="button"
-          className="editor-toolbar__button"
-          aria-label="Insert internal link"
-          title="Internal link"
-          aria-expanded={internalLinkOpen}
-          disabled={richDisabled}
-          onMouseDown={(event) => {
-            event.preventDefault();
-          }}
-          onClick={() => {
-            setInternalLinkOpen(true);
-          }}
-        >
-          <span aria-hidden="true">Internal</span>
-        </button>
         <div className="editor-toolbar__spacer" />
-        <button
-          type="button"
-          className={
-            editorMode === "rich"
-              ? "editor-toolbar__button editor-toolbar__button--active"
-              : "editor-toolbar__button"
-          }
-          aria-pressed={editorMode === "rich"}
-          aria-label="Rich text mode"
-          title="Rich text mode"
-          onClick={() => onModeChange("rich")}
+        <div
+          className="editor-toolbar__group"
+          role="group"
+          aria-label="Editing mode"
         >
-          Rich
-        </button>
-        <button
-          type="button"
-          className={
-            editorMode === "source"
-              ? "editor-toolbar__button editor-toolbar__button--active"
-              : "editor-toolbar__button"
-          }
-          aria-pressed={editorMode === "source"}
-          aria-label="Source mode"
-          title="Source mode — edit raw Markdown or MDX"
-          onClick={() => onModeChange("source")}
-        >
-          Source
-        </button>
+          <button
+            type="button"
+            className={
+              editorMode === "rich"
+                ? "editor-toolbar__button editor-toolbar__button--active"
+                : "editor-toolbar__button"
+            }
+            aria-pressed={editorMode === "rich"}
+            onClick={() => onModeChange("rich")}
+          >
+            Rich
+          </button>
+          <button
+            type="button"
+            className={
+              editorMode === "source"
+                ? "editor-toolbar__button editor-toolbar__button--active"
+                : "editor-toolbar__button"
+            }
+            aria-pressed={editorMode === "source"}
+            onClick={() => onModeChange("source")}
+          >
+            Source
+          </button>
+        </div>
       </div>
 
       {internalLinkOpen && (

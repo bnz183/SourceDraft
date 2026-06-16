@@ -50,6 +50,21 @@ Candidates, listed for transparency:
 None of this exists, none of it is scheduled, and none of it will remove
 functionality from the open-source version.
 
+## Future: agent-ready publishing workflows
+
+SourceDraft’s structured article schema, validation, preview, and publish
+checklist make it a natural base for future AI-assisted workflows where
+external agents or automation tools can prepare drafts and humans review
+before publishing.
+
+That model is **draft → review → preview → publish**, with human-in-the-loop
+editorial control — not autonomous publishing.
+
+**Not shipped today:** Agent API, BYOK AI providers, MCP support, automation
+endpoints, and built-in AI writing tools. These are future work. The current
+Studio gives you structured article fields, content QA, and a controlled
+publish gate that external systems could integrate with later.
+
 ## Explicitly not now
 
 Deliberately out of scope in the current phase:
@@ -59,16 +74,9 @@ Deliberately out of scope in the current phase:
 - OAuth / user accounts / RBAC implementations
 - Hosted or multi-tenant Studio
 - Plugin marketplace
-- AI writing tools
-- Agent API, BYOK AI providers, MCP support, and automation endpoints
+- AI writing tools, Agent API, BYOK AI, MCP, automation endpoints
 - Site hosting or running your static-site build
 - Large UI redesigns
-
-## Future: agent-ready publishing workflows
-
-SourceDraft's structured article schema, validation, preview, and publish checklist make it a natural base for AI-assisted workflows where external agents prepare drafts and humans review before publishing.
-
-Agent API, BYOK AI providers, MCP support, and automation endpoints are **future work**, not current shipped features.
 
 ## Influence the roadmap
 

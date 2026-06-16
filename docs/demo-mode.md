@@ -4,9 +4,11 @@ Demo mode lets you explore SourceDraft Studio without GitHub credentials. It is 
 
 ## How to enable
 
-1. **Sign-in screen:** click **Explore demo mode** on the **Try demo mode** card — sample posts only, nothing is published, or
-2. **Environment flag:** set `SOURCEDRAFT_DEMO_MODE=true` in `.env` and restart the API, or
-3. **Opt-in:** leave `GITHUB_TOKEN`, `GITHUB_OWNER`, and `GITHUB_REPO` unset and use **Explore demo mode**.
+Click **Try demo mode** on the sign-in screen — it is shown at the top of the welcome screen whenever demo mode is allowed.
+
+Demo mode is **on by default**. To turn it off on a server, set `SOURCEDRAFT_DEMO_MODE=false` in `.env` and restart the API.
+
+To force demo for every request (smoke tests, screenshots), set `SOURCEDRAFT_DEMO_MODE=true`.
 
 Start Studio with:
 
@@ -21,7 +23,7 @@ Use `pnpm dev` from the repository root so both the Vite UI and publish API run 
 - Loads **stable seed content** from fixture files in the repository
 - Lets you open, edit, and preview sample posts in the browser
 - Simulates media upload paths and publish success
-- Shows a banner: **Demo mode — no GitHub commits are made**
+- Shows a banner: **Demo mode — explore without connecting a real blog**
 - Never calls the GitHub API for posts or media, even if credentials exist while `SOURCEDRAFT_DEMO_MODE=true`
 
 ## Seed content (fixtures)

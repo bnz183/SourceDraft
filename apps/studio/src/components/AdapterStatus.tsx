@@ -21,16 +21,16 @@ export function AdapterStatus({
     githubOwner.trim().length > 0 && githubRepo.trim().length > 0;
 
   const rows: StatusRow[] = [
-    { label: "Output format", value: adapter, state: "ok" },
-    { label: "Content folder", value: contentDir, state: "ok" },
+    { label: "Blog type", value: adapter, state: "ok" },
+    { label: "Article folder", value: contentDir, state: "ok" },
     {
-      label: "GitHub repository",
+      label: "Blog repository",
       value: githubReady ? `${githubOwner}/${githubRepo}` : "Not configured",
       state: githubReady ? "idle" : "off",
     },
     {
-      label: "GitHub token",
-      value: "Used on the server when you publish",
+      label: "Blog connection",
+      value: "Checked on the server when you send articles",
       state: githubReady ? "idle" : "off",
     },
   ];
@@ -43,8 +43,8 @@ export function AdapterStatus({
         </h2>
         <p className="panel__meta">
           {githubReady
-            ? "Connected to your GitHub repository"
-            : "Finish GitHub setup in .env to publish"}
+            ? "Connected to your blog repository"
+            : "Finish blog connection in Settings before sending articles"}
         </p>
       </div>
 

@@ -91,7 +91,8 @@ export function SetupDetectionPanel() {
           Setup detection
         </h2>
         <p className="panel__meta">
-          Detects content folders, adapters, and frontmatter for AI-assisted publishing workflows
+          Scans your project and suggests where posts and images should go — for
+          technical helpers; nothing is changed automatically.
         </p>
       </div>
 
