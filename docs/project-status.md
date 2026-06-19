@@ -8,7 +8,8 @@ Early open-source MVP — usable for solo writing and publishing to Git or remot
 
 | Area | Status |
 |------|--------|
-| **Studio** | Tiptap editor + slash commands + source mode, post list (git publishers), media library (git-backed), preview, SEO panel, content QA, publish checklist, setup detection, content audit, setup/compatibility health |
+| **Studio** | Tiptap editor + slash commands + source mode, inline link/image/file dialogs, post list (git publishers), media library (git-backed), preview, SEO panel, content QA, publish checklist, setup detection, content audit, setup/compatibility health |
+| **Studio UI** | Tokenized design system with light **and** dark themes (system default + manual toggle, persisted), left navigation rail, sticky top bar, anchored primary Publish action, and staged settings/onboarding — targeting WCAG 2.2 AA |
 | **Adapters** | `astro-mdx`, `markdown`, `nextjs-mdx`, `hugo-markdown`, `eleventy-jekyll-markdown`, `docusaurus-mdx`, `mkdocs-markdown`, `nuxt-content-markdown` |
 | **Publishers** | `github`, `gitlab`, `bitbucket`, `wordpress`, `ghost` (GitHub PR publish modes: direct, pull-request, draft-pull-request) |
 | **Media** | `github-media` (images + PDF), `cloudinary` (images) |

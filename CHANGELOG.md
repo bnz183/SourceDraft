@@ -25,6 +25,10 @@ All notable changes to SourceDraft are documented here. The project uses [Semant
   obvious first action, with advanced configuration behind progressive
   disclosure. Tokenized the onboarding/settings surfaces (spacing, radius, and
   off-scale font sizes) onto the design system.
+- **Final UX QA (Phase 4d)** — regenerated the Studio screenshots in
+  `docs/assets/` for the refreshed UI (and repaired the screenshot script's
+  stale selectors), and updated `docs/project-status.md` to reflect the shipped
+  Studio UI (themes, navigation rail, inline insert dialogs, staged settings).
 
 ## v0.1.0
 
