@@ -181,14 +181,29 @@ test.describe("Studio smoke", () => {
     await expect(page.getByRole("heading", { name: "Content quality" })).toBeVisible();
   });
 
-  test("settings setup health renders", async ({ page }) => {
+  test("settings is staged with readiness as the first step", async ({ page }) => {
     await enterDemoMode(page);
     await page.getByRole("button", { name: "Settings", exact: true }).click();
+
+    // Page is oriented: a clear title and staged steps.
     await expect(
-      page.getByRole("heading", { name: "Status & configuration" }),
+      page.getByRole("heading", { name: "Settings", level: 1 }),
     ).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Welcome to SourceDraft" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Publishing readiness" })).toBeVisible();
+    await expect(page.getByText("Step 1 · Publishing")).toBeVisible();
+    await expect(page.getByText("Step 2 · How it works")).toBeVisible();
+
+    // Publishing readiness (step 1) appears before the explainer (step 2).
+    const readiness = page.getByRole("heading", { name: "Publishing readiness" });
+    const welcome = page.getByRole("heading", { name: "Welcome to SourceDraft" });
+    await expect(readiness).toBeVisible();
+    await expect(welcome).toBeVisible();
+    const readinessBox = await readiness.boundingBox();
+    const welcomeBox = await welcome.boundingBox();
+    expect(readinessBox && welcomeBox).toBeTruthy();
+    expect(readinessBox!.y).toBeLessThan(welcomeBox!.y);
+
+    // Advanced config stays behind progressive disclosure.
+    await expect(page.getByRole("heading", { name: "Diagnostics" })).toBeHidden();
     await page.locator("summary.settings-view__advanced-summary").click();
     await expect(page.getByRole("heading", { name: "Diagnostics" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Setup detection" })).toBeVisible();
@@ -204,7 +219,7 @@ test.describe("Studio smoke", () => {
 
     await nav.getByRole("button", { name: "Settings", exact: true }).click();
     await expect(
-      page.getByRole("heading", { name: "Status & configuration" }),
+      page.getByRole("heading", { name: "Settings", level: 1 }),
     ).toBeVisible();
     await expect(
       nav.getByRole("button", { name: "Settings", exact: true }),
