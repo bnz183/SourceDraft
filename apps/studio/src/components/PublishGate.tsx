@@ -143,7 +143,7 @@ export function PublishGate({
         </div>
         <button
           type="button"
-          className="button button--primary publish-bar__button"
+          className="button button--primary button--lg publish-bar__button"
           disabled={!canPublish}
           aria-describedby={reason ? "publish-disabled-reason" : undefined}
           onClick={onPublish}

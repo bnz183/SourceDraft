@@ -2,6 +2,20 @@
 
 All notable changes to SourceDraft are documented here. The project uses [Semantic Versioning](https://semver.org/) where practical.
 
+## Unreleased
+
+### Changed
+
+- **Studio design-system foundation (Phase 4a)** — added an 8px spacing scale,
+  a radius/elevation scale, and a regularized modular type scale as CSS tokens.
+- **Tokenized color palette in light and dark**, tuned for WCAG 2.2 AA. Dark
+  follows the OS by default and is overridable by an explicit light/dark/system
+  choice persisted across reloads (new app-bar theme toggle).
+- **App shell** — sticky top bar, a persistent left navigation rail for Posts
+  and Settings, a consistent button system, and the Publish action as a large,
+  anchored, high-contrast primary button. Reduced visual noise via tokens.
+- Added `.claude/rules/ui-standards.md` as the authoritative Studio UI bar.
+
 ## v0.1.0
 
 First public open-source MVP for local/private Git-backed publishing.
