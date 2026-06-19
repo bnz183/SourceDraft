@@ -30,7 +30,7 @@ test.describe("release screenshots", () => {
       fullPage: false,
     });
 
-    await page.getByRole("button", { name: "Getting started with SourceDraft" }).click();
+    await page.getByRole("button", { name: "New article" }).click();
     await expect(postBodyEditor(page)).toBeVisible();
 
     await page.screenshot({
@@ -77,7 +77,7 @@ test.describe("release screenshots", () => {
       path: screenshotPath("publish-success.png"),
     });
 
-    await page.getByRole("button", { name: "Settings" }).click();
+    await page.getByRole("button", { name: "Settings", exact: true }).click();
     await expect(page.getByRole("heading", { name: "Publishing readiness" })).toBeVisible();
     await page.locator(".setup-health").screenshot({
       path: screenshotPath("setup-health.png"),
