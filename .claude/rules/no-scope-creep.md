@@ -15,7 +15,10 @@ Do not implement, scaffold, stub, or document as available:
 - Hosted / multi-tenant Studio
 - Plugin marketplace
 - AI writing tools
-- Large UI redesigns
+- Large UI redesigns — **except** the sanctioned, sequenced Phase 4 UX/UI
+  quality pass in `docs/roadmap.md`, which is polish and accessibility work on
+  existing features (no new product surface) measured against
+  `.claude/rules/ui-standards.md`. It adds no forbidden feature above.
 
 Also forbidden: fake screenshots, fake metrics, fake benchmarks, and
 production/enterprise overclaims in any doc or UI string.

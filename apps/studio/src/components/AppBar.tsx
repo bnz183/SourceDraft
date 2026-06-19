@@ -1,5 +1,6 @@
 import { DocumentStatusIndicator } from "./DocumentStatus";
 import type { DocumentStatus } from "../lib/autosave.js";
+import { themeLabel, type ThemePreference } from "../lib/theme";
 
 type AppBarProps = {
   adapter: string;
@@ -7,10 +8,20 @@ type AppBarProps = {
   githubOwner: string;
   githubRepo: string;
   githubReady: boolean;
-  settingsActive: boolean;
-  onOpenSettings: () => void;
-  onLogout: () => void;
+  theme: ThemePreference;
+  onToggleTheme: () => void;
 };
+
+function themeIcon(theme: ThemePreference): string {
+  switch (theme) {
+    case "light":
+      return "☀";
+    case "dark":
+      return "☾";
+    default:
+      return "◐";
+  }
+}
 
 function adapterLabel(adapter: string): string {
   switch (adapter) {
@@ -39,9 +50,8 @@ export function AppBar({
   githubOwner,
   githubRepo,
   githubReady,
-  settingsActive,
-  onOpenSettings,
-  onLogout,
+  theme,
+  onToggleTheme,
 }: AppBarProps) {
   const repoLabel = githubReady
     ? `${githubOwner}/${githubRepo}`
@@ -72,23 +82,13 @@ export function AppBar({
       <div className="app-bar__actions">
         <button
           type="button"
-          className={
-            settingsActive
-              ? "button button--compact app-bar__action app-bar__action--active"
-              : "button button--compact app-bar__action"
-          }
-          aria-current={settingsActive ? "page" : undefined}
-          aria-expanded={settingsActive}
-          onClick={onOpenSettings}
+          className="button button--compact app-bar__theme-toggle"
+          aria-label={`Theme: ${themeLabel(theme)}. Switch theme.`}
+          title={`Theme: ${themeLabel(theme)}`}
+          onClick={onToggleTheme}
         >
-          {settingsActive ? "Back to editor" : "Settings"}
-        </button>
-        <button
-          type="button"
-          className="button button--compact app-bar__action"
-          onClick={onLogout}
-        >
-          Log out
+          <span aria-hidden="true">{themeIcon(theme)}</span>
+          <span className="app-bar__theme-label">{themeLabel(theme)}</span>
         </button>
       </div>
     </header>

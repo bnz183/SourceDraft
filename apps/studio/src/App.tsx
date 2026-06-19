@@ -6,6 +6,7 @@ import { AppBar } from "./components/AppBar";
 import { AstroMdxPreview } from "./components/AstroMdxPreview";
 import { DemoBanner } from "./components/DemoBanner";
 import { LoginScreen } from "./components/LoginScreen";
+import { NavRail } from "./components/NavRail";
 import { PostDetailsPanel } from "./components/PostDetailsPanel";
 import { PostLoginWelcomeBanner } from "./components/PostLoginWelcomeBanner";
 import { PostSidebar } from "./components/PostSidebar";
@@ -29,6 +30,12 @@ import {
   type ArticleFormState,
 } from "./lib/articleForm";
 import { fetchPost, fetchPosts, type PostSummary } from "./lib/posts";
+import {
+  applyTheme,
+  getStoredTheme,
+  nextTheme,
+  type ThemePreference,
+} from "./lib/theme";
 import { previewPrBranch } from "./lib/prBranch";
 import { publishArticle as publishArticleToGitHub } from "./lib/publish";
 import {
@@ -58,6 +65,7 @@ function App() {
   const [demoModeForced, setDemoModeForced] = useState(false);
   const [demoModeAvailable, setDemoModeAvailable] = useState(false);
   const [view, setView] = useState<View>("editor");
+  const [theme, setTheme] = useState<ThemePreference>(() => getStoredTheme());
   const [studioConfig, setStudioConfig] = useState<StudioConfig>(
     FALLBACK_STUDIO_CONFIG,
   );
@@ -240,6 +248,10 @@ function App() {
     publishing,
     enabled: authenticated && view === "editor",
   });
+
+  function handleToggleTheme() {
+    setTheme((current) => applyTheme(nextTheme(current)));
+  }
 
   function resetEditor(defaultCategory?: string) {
     setEditingPath(null);
@@ -515,25 +527,26 @@ function App() {
         githubOwner={studioConfig.githubOwner}
         githubRepo={studioConfig.githubRepo}
         githubReady={githubReady}
-        settingsActive={view === "settings"}
-        onOpenSettings={() =>
-          setView((current) => (current === "settings" ? "editor" : "settings"))
-        }
-        onLogout={handleLogout}
+        theme={theme}
+        onToggleTheme={handleToggleTheme}
       />
 
-      {view === "settings" ? (
-        <main className="studio__settings">
-          <SettingsPanel config={studioConfig} />
-        </main>
-      ) : (
-        <>
-          <PostLoginWelcomeBanner
-            demoMode={demoMode}
-            githubReady={githubReady}
-            onOpenSettings={() => setView("settings")}
-          />
-          <div className="studio__workspace">
+      <div className="studio__body">
+        <NavRail view={view} onNavigate={setView} onLogout={handleLogout} />
+
+        <div className="studio__content">
+          {view === "settings" ? (
+            <main className="studio__settings">
+              <SettingsPanel config={studioConfig} />
+            </main>
+          ) : (
+            <>
+              <PostLoginWelcomeBanner
+                demoMode={demoMode}
+                githubReady={githubReady}
+                onOpenSettings={() => setView("settings")}
+              />
+              <div className="studio__workspace">
           <PostSidebar
             posts={posts}
             loading={postsLoading}
@@ -627,9 +640,11 @@ function App() {
             onInsertPdfLink={handleInsertPdfLink}
             onUploadSuccess={handleUploadSuccess}
           />
-          </div>
-        </>
-      )}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

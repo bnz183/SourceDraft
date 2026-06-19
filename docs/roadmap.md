@@ -24,6 +24,69 @@ Improvements to the existing local/private workflow:
 - **More adapters via community** — see
   [contributing-roadmap.md](contributing-roadmap.md)
 
+## Phase 4 — Studio UX/UI hardening (current focus)
+
+A pre-distribution quality pass so the Studio reads as a finished product, not
+a prototype. This is polish and accessibility work on **existing** features —
+no new product surface, no scope creep. Every PR below is single-purpose, on
+its own branch, opened as a PR (never pushed to `main`), adds or updates tests,
+adds **no new dependencies** unless justified in the PR description, keeps
+secrets server-side, stays AGPL-3.0-or-later, and must pass
+`pnpm build && pnpm test && pnpm test:e2e`.
+
+The pass is sequenced foundation-first so later PRs build on shared tokens.
+
+### 4a — Design-system foundation (`feat/design-system-foundation`)
+
+Shared visual language and app shell. No behavioural changes to publishing.
+
+- 8px spacing scale and radius scale as CSS tokens; replace ad-hoc spacing in
+  touched shell components.
+- Modular type scale tokens (tighten the existing `--text-*` set; remove
+  off-scale `10px`/`11px` usage in touched components).
+- Tokenized colour palette meeting WCAG 2.2 AA in **light and dark**
+  (`prefers-color-scheme`), including fixing low-contrast `--text-dim` and
+  placeholder values.
+- Fix the four undefined CSS variables (`--radius-md`, `--surface-raised`,
+  `--border-subtle`, `--bg-subtle`).
+- Consistent button system; the Publish action becomes a large, anchored,
+  high-contrast primary button.
+- Sticky top bar and a persistent left nav for Posts/Settings.
+- Reduced visual noise; replace ad-hoc hex/spacing in touched components with
+  tokens.
+- Tests: unit-test any extracted nav/token logic; keep all existing e2e green.
+
+### 4b — Editor (`feat/editor-conventions`)
+
+Bring the editor up to Google-Docs/Notion conventions.
+
+- Replace `window.prompt` link/image/file flows with in-Studio inline UI.
+- Consistent icon/label system in the toolbar; stable grouping at all widths;
+  ensure ≥24px targets.
+- Apply 4a tokens throughout the editor and canvas.
+- Tests: extend e2e for the new link/image/file flows; unit-test extracted
+  helpers.
+
+### 4c — Onboarding / config (`feat/onboarding-staging`)
+
+Progressive disclosure and one-thing-per-page setup.
+
+- Stage Settings into clear sections/steps; surface publishing readiness as the
+  obvious next action.
+- Tighten first-run guidance so a new user is oriented within seconds and the
+  zero-credential demo path stays front-and-centre.
+- Apply 4a tokens to all onboarding/settings surfaces.
+- Tests: e2e for the staged settings flow.
+
+### 4d — Final polish / QA (`feat/ux-final-qa`)
+
+- Cross-screen consistency sweep; remove any remaining ad-hoc hex/spacing.
+- Verify the success criteria: oriented within seconds, zero-credential first
+  run, editor feels complete, WCAG 2.2 AA across light/dark, obvious reachable
+  primary actions, shippable look.
+- Regenerate screenshots if UI changed (`pnpm screenshots:generate`); update
+  `docs/project-status.md` and `CHANGELOG.md` if anything user-visible shifted.
+
 ## Later (self-hosted hardening)
 
 For people running Studio beyond a single laptop — still open source:

@@ -141,6 +141,59 @@ test.describe("Studio smoke", () => {
     await expect(page.getByText("GitHub connection", { exact: true })).toBeVisible();
   });
 
+  test("left nav switches between Posts and Settings", async ({ page }) => {
+    await enterDemoMode(page);
+    const nav = page.getByRole("navigation", { name: "Primary" });
+    await expect(nav.getByRole("button", { name: "Posts", exact: true })).toBeVisible();
+
+    await nav.getByRole("button", { name: "Settings", exact: true }).click();
+    await expect(
+      page.getByRole("heading", { name: "Status & configuration" }),
+    ).toBeVisible();
+    await expect(
+      nav.getByRole("button", { name: "Settings", exact: true }),
+    ).toHaveAttribute("aria-current", "page");
+
+    await nav.getByRole("button", { name: "Posts", exact: true }).click();
+    await expect(page.getByRole("heading", { name: "Articles" })).toBeVisible();
+  });
+
+  test("theme toggle cycles and persists across reload", async ({ page }) => {
+    await enterDemoMode(page);
+    const html = page.locator("html");
+    await expect(html).not.toHaveAttribute("data-theme", /.+/);
+
+    const toggle = page.getByRole("button", { name: /Switch theme/ });
+    await toggle.click();
+    await expect(html).toHaveAttribute("data-theme", "light");
+    await toggle.click();
+    await expect(html).toHaveAttribute("data-theme", "dark");
+
+    await page.reload();
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  });
+
+  test("publish action is a large anchored primary button", async ({ page }) => {
+    await enterDemoMode(page);
+    await page.getByRole("button", { name: "New article" }).click();
+    await postTitleInput(page).fill("Anchored publish test");
+    await postDescriptionInput(page).fill("Summary for anchored publish test.");
+    await fillPostBody(page, "# Anchored\n\nBody content.");
+
+    const publish = page.getByRole("button", { name: "Simulate send to blog" });
+    await publish.scrollIntoViewIfNeeded();
+    await expect(publish).toBeVisible();
+    await expect(publish).toHaveClass(/button--primary/);
+    await expect(publish).toHaveClass(/button--lg/);
+
+    // The publish bar is anchored (sticky) so the primary action stays
+    // reachable while scrolling the editor.
+    const position = await page
+      .locator(".publish-bar")
+      .evaluate((el) => getComputedStyle(el).position);
+    expect(position).toBe("sticky");
+  });
+
   test("publish checklist renders in demo mode", async ({ page }) => {
     await enterDemoMode(page);
     await page.getByRole("button", { name: "New article" }).click();
