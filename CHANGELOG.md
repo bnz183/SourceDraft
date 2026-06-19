@@ -20,6 +20,11 @@ All notable changes to SourceDraft are documented here. The project uses [Semant
   with an accessible in-Studio dialog (labelled fields, Enter to submit, Escape
   to cancel, bare-domain URLs gain `https://`). Removed the unused legacy
   `MarkdownToolbar`.
+- **Onboarding / settings staging (Phase 4c)** — Settings now opens with a clear
+  title and is staged into steps that surface publishing readiness as the
+  obvious first action, with advanced configuration behind progressive
+  disclosure. Tokenized the onboarding/settings surfaces (spacing, radius, and
+  off-scale font sizes) onto the design system.
 
 ## v0.1.0
 

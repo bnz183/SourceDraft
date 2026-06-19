@@ -10,15 +10,34 @@ type SettingsPanelProps = {
 };
 
 export function SettingsPanel({ config }: SettingsPanelProps) {
+  const connected =
+    config.githubOwner.trim().length > 0 && config.githubRepo.trim().length > 0;
+
   return (
     <div className="settings-view">
+      <header className="settings-view__intro">
+        <h1 className="settings-view__heading">Settings</h1>
+        <p className="settings-view__subhead">
+          {connected
+            ? "Your blog is connected. Check publishing readiness below before you send."
+            : "Connect your blog and confirm publishing is ready. Prefer to explore first? Demo mode needs no setup."}
+        </p>
+      </header>
+
       <section
-        className="settings-view__group"
-        aria-label="Status and configuration"
+        className="settings-view__step"
+        aria-labelledby="setup-health-title"
       >
-        <h2 className="settings-view__group-title">Status &amp; configuration</h2>
-        <WriterWelcomeCard variant="settings" />
+        <p className="settings-view__step-eyebrow">Step 1 · Publishing</p>
         <SetupHealthPanel />
+      </section>
+
+      <section
+        className="settings-view__step"
+        aria-labelledby="welcome-card-title"
+      >
+        <p className="settings-view__step-eyebrow">Step 2 · How it works</p>
+        <WriterWelcomeCard variant="settings" />
       </section>
 
       <details className="settings-view__advanced">
