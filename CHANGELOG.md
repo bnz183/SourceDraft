@@ -15,6 +15,11 @@ All notable changes to SourceDraft are documented here. The project uses [Semant
   and Settings, a consistent button system, and the Publish action as a large,
   anchored, high-contrast primary button. Reduced visual noise via tokens.
 - Added `.claude/rules/ui-standards.md` as the authoritative Studio UI bar.
+- **Editor link/image/file insertion (Phase 4b)** — replaced the blocking
+  `window.prompt` link, image, and file-link flows (toolbar and slash commands)
+  with an accessible in-Studio dialog (labelled fields, Enter to submit, Escape
+  to cancel, bare-domain URLs gain `https://`). Removed the unused legacy
+  `MarkdownToolbar`.
 
 ## v0.1.0
 

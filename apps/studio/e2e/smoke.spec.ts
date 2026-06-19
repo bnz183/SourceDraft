@@ -110,6 +110,62 @@ test.describe("Studio smoke", () => {
     await expect(page.getByRole("button", { name: "Insert file link" })).toBeVisible();
   });
 
+  test("link toolbar button opens an inline dialog and inserts a link", async ({
+    page,
+  }) => {
+    await enterDemoMode(page);
+    await page.getByRole("button", { name: "New article" }).click();
+    await fillPostBody(page, "Intro paragraph.");
+
+    await page.getByRole("button", { name: "Insert or edit link" }).click();
+    const dialog = page.getByRole("dialog", { name: "Insert link" });
+    await expect(dialog).toBeVisible();
+
+    await dialog.getByLabel("Link URL").fill("example.com");
+    await dialog.getByLabel("Link text").fill("Example site");
+    await dialog.getByRole("button", { name: "Insert link" }).click();
+
+    await expect(dialog).toBeHidden();
+    const link = postBodyEditor(page).getByRole("link", { name: "Example site" });
+    await expect(link).toBeVisible();
+    await expect(link).toHaveAttribute("href", "https://example.com");
+  });
+
+  test("image toolbar button opens an inline dialog and inserts an image", async ({
+    page,
+  }) => {
+    await enterDemoMode(page);
+    await page.getByRole("button", { name: "New article" }).click();
+    await fillPostBody(page, "Before image.");
+
+    await page.getByRole("button", { name: "Insert image", exact: true }).click();
+    const dialog = page.getByRole("dialog", { name: "Insert image" });
+    await expect(dialog).toBeVisible();
+
+    await dialog.getByLabel("Image path or URL").fill("/images/example.jpg");
+    await dialog.getByLabel("Alt text (for accessibility)").fill("Example");
+    await dialog.getByRole("button", { name: "Insert image" }).click();
+
+    await expect(dialog).toBeHidden();
+    await expect(postBodyEditor(page).locator("img")).toHaveAttribute(
+      "src",
+      "/images/example.jpg",
+    );
+  });
+
+  test("insert dialog closes on Escape without inserting", async ({ page }) => {
+    await enterDemoMode(page);
+    await page.getByRole("button", { name: "New article" }).click();
+    await fillPostBody(page, "Body text.");
+
+    await page.getByRole("button", { name: "Insert or edit link" }).click();
+    const dialog = page.getByRole("dialog", { name: "Insert link" });
+    await expect(dialog).toBeVisible();
+    await dialog.getByLabel("Link URL").press("Escape");
+    await expect(dialog).toBeHidden();
+    await expect(postBodyEditor(page).getByRole("link")).toHaveCount(0);
+  });
+
   test("autosave status appears after edits", async ({ page }) => {
     await enterDemoMode(page);
     await page.getByRole("button", { name: "New article" }).click();

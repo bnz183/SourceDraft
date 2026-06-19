@@ -27,8 +27,22 @@ import {
 } from "./slashCommands.js";
 import { SlashCommandMenu } from "./SlashCommandMenu.js";
 import { EditorToolbar, type LatestMediaUpload } from "./EditorToolbar.js";
+import {
+  EditorInsertDialog,
+  type EditorInsertValues,
+} from "./EditorInsertDialog.js";
+import { fileLabelFromPath, normalizeUrl } from "./editorInsert.js";
 
 export type { LatestMediaUpload };
+
+type DialogState = {
+  kind: "link" | "image" | "file";
+  initialUrl: string;
+  initialText: string;
+  initialAlt: string;
+  showTextField: boolean;
+  allowRemove: boolean;
+};
 
 type SourceDraftEditorProps = {
   body: string;
@@ -69,6 +83,7 @@ export function SourceDraftEditor({
   const [editorMode, setEditorMode] = useState<"rich" | "source">("rich");
   const [sourceValue, setSourceValue] = useState(body);
   const [slashMenu, setSlashMenu] = useState<SlashMenuState | null>(null);
+  const [dialog, setDialog] = useState<DialogState | null>(null);
   const bodyVersion = useRef(body);
   const slashHandlerRef = useRef<(command: SlashCommandId) => void>(() => {});
 
@@ -186,6 +201,110 @@ export function SourceDraftEditor({
     [editor, syncBodyFromEditor],
   );
 
+  const openLinkDialog = useCallback(() => {
+    if (!editor) {
+      return;
+    }
+    const linkActive = editor.isActive("link");
+    const previousHref =
+      (editor.getAttributes("link").href as string | undefined) ?? "";
+    const selectionEmpty = editor.state.selection.empty;
+    setDialog({
+      kind: "link",
+      initialUrl: previousHref,
+      initialText: "",
+      initialAlt: "",
+      showTextField: selectionEmpty && !linkActive,
+      allowRemove: linkActive,
+    });
+  }, [editor]);
+
+  const openImageDialog = useCallback(() => {
+    if (!editor) {
+      return;
+    }
+    const defaultSrc =
+      latestImagePath?.trim() ||
+      (latestUpload?.kind === "image" ? latestUpload.publicPath : "") ||
+      "";
+    setDialog({
+      kind: "image",
+      initialUrl: defaultSrc,
+      initialText: "",
+      initialAlt: imageAlt,
+      showTextField: false,
+      allowRemove: false,
+    });
+  }, [editor, imageAlt, latestImagePath, latestUpload]);
+
+  const openFileDialog = useCallback(() => {
+    if (!editor) {
+      return;
+    }
+    const defaultPath =
+      latestUpload?.kind === "pdf" ? latestUpload.publicPath : "/files/";
+    setDialog({
+      kind: "file",
+      initialUrl: defaultPath,
+      initialText: "",
+      initialAlt: "",
+      showTextField: false,
+      allowRemove: false,
+    });
+  }, [editor, latestUpload]);
+
+  const handleDialogSubmit = useCallback(
+    (values: EditorInsertValues) => {
+      if (!editor || !dialog) {
+        return;
+      }
+
+      if (dialog.kind === "link") {
+        const href = normalizeUrl(values.url);
+        if (href.length === 0) {
+          editor.chain().focus().extendMarkRange("link").unsetLink().run();
+        } else if (dialog.showTextField) {
+          const text = values.text?.trim() || href;
+          editor
+            .chain()
+            .focus()
+            .insertContent({
+              type: "text",
+              text,
+              marks: [{ type: "link", attrs: { href } }],
+            })
+            .run();
+        } else {
+          editor.chain().focus().extendMarkRange("link").setLink({ href }).run();
+        }
+      } else if (dialog.kind === "image") {
+        const src = normalizeUrl(values.url);
+        if (src.length > 0) {
+          const alt = values.alt?.trim() || imageAlt;
+          editor.chain().focus().setImage({ src, alt, title: alt }).run();
+        }
+      } else {
+        const path = values.url.trim();
+        if (path.length > 0) {
+          const label = fileLabelFromPath(path);
+          editor
+            .chain()
+            .focus()
+            .insertContent({
+              type: "text",
+              text: label,
+              marks: [{ type: "link", attrs: { href: path } }],
+            })
+            .run();
+        }
+      }
+
+      syncBodyFromEditor(editor);
+      setDialog(null);
+    },
+    [dialog, editor, imageAlt, syncBodyFromEditor],
+  );
+
   const handleSlashCommand = useCallback(
     (command: SlashCommandId) => {
       if (!editor) {
@@ -212,31 +331,14 @@ export function SourceDraftEditor({
           editor.chain().focus().setHorizontalRule().run();
           break;
         case "link": {
-          const href = window.prompt("Link URL", "https://")?.trim() || "https://";
-          editor
-            .chain()
-            .focus()
-            .insertContent({
-              type: "text",
-              text: "link text",
-              marks: [{ type: "link", attrs: { href } }],
-            })
-            .run();
-          break;
+          setSlashMenu(null);
+          openLinkDialog();
+          return;
         }
         case "image": {
-          const path =
-            latestImagePath?.trim() ||
-            (latestUpload?.kind === "image" ? latestUpload.publicPath : "") ||
-            window.prompt("Image path (public URL or repo path)", "/images/")?.trim() ||
-            "";
-          if (path.length > 0) {
-            const alt =
-              window.prompt("Alt text (for accessibility)", imageAlt)?.trim() ||
-              imageAlt;
-            editor.chain().focus().setImage({ src: path, alt, title: alt }).run();
-          }
-          break;
+          setSlashMenu(null);
+          openImageDialog();
+          return;
         }
         case "internal": {
           const firstPost = posts[0];
@@ -272,7 +374,7 @@ export function SourceDraftEditor({
       syncBodyFromEditor(editor);
       setSlashMenu(null);
     },
-    [editor, imageAlt, insertInternalLink, latestImagePath, latestUpload, posts, syncBodyFromEditor],
+    [editor, insertInternalLink, openImageDialog, openLinkDialog, posts, syncBodyFromEditor],
   );
 
   useEffect(() => {
@@ -325,15 +427,15 @@ export function SourceDraftEditor({
         editor={editor}
         editorMode={editorMode}
         bodyFieldId={bodyFieldId}
-        latestImagePath={latestImagePath}
-        latestUpload={latestUpload}
-        imageAlt={imageAlt}
         mediaUploadAvailable={mediaUploadAvailable}
         posts={posts}
         editingPath={editingPath}
         onBodyChange={onBodyChange}
         onModeChange={switchMode}
         onSelectInternalLink={insertInternalLink}
+        onRequestLink={openLinkDialog}
+        onRequestImage={openImageDialog}
+        onRequestFile={openFileDialog}
       />
 
       {editorMode === "rich" ? (
@@ -386,6 +488,19 @@ export function SourceDraftEditor({
         <p className="writing-canvas__body-error field__error" role="alert">
           {fieldError}
         </p>
+      )}
+
+      {dialog && (
+        <EditorInsertDialog
+          kind={dialog.kind}
+          initialUrl={dialog.initialUrl}
+          initialText={dialog.initialText}
+          initialAlt={dialog.initialAlt}
+          showTextField={dialog.showTextField}
+          allowRemove={dialog.allowRemove}
+          onSubmit={handleDialogSubmit}
+          onClose={() => setDialog(null)}
+        />
       )}
     </div>
   );

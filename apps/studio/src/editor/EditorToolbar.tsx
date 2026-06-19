@@ -63,30 +63,30 @@ type EditorToolbarProps = {
   editor: Editor | null;
   editorMode: "rich" | "source";
   bodyFieldId: string;
-  latestImagePath: string | null;
-  latestUpload: LatestMediaUpload | null;
-  imageAlt: string;
   mediaUploadAvailable: boolean;
   posts: PostSummary[];
   editingPath: string | null;
   onBodyChange: (body: string) => void;
   onModeChange: (mode: "rich" | "source") => void;
   onSelectInternalLink: (post: PostSummary) => void;
+  onRequestLink: () => void;
+  onRequestImage: () => void;
+  onRequestFile: () => void;
 };
 
 export function EditorToolbar({
   editor,
   editorMode,
   bodyFieldId,
-  latestImagePath,
-  latestUpload,
-  imageAlt,
   mediaUploadAvailable,
   posts,
   editingPath,
   onBodyChange,
   onModeChange,
   onSelectInternalLink,
+  onRequestLink,
+  onRequestImage,
+  onRequestFile,
 }: EditorToolbarProps) {
   const [internalLinkOpen, setInternalLinkOpen] = useState(false);
 
@@ -127,78 +127,6 @@ export function EditorToolbar({
 
     action();
     onBodyChange(editorDocToBody(editor.getJSON()));
-  }
-
-  function insertOrEditLink(currentEditor: Editor) {
-    const previousHref = currentEditor.getAttributes("link").href as
-      | string
-      | undefined;
-    const input = window.prompt(
-      "Link URL (leave empty to remove the link)",
-      previousHref ?? "https://",
-    );
-    if (input === null) {
-      return;
-    }
-
-    const href = input.trim();
-    if (href.length === 0) {
-      currentEditor.chain().focus().extendMarkRange("link").unsetLink().run();
-      return;
-    }
-
-    if (currentEditor.state.selection.empty && !state.link) {
-      currentEditor
-        .chain()
-        .focus()
-        .insertContent({
-          type: "text",
-          text: "link text",
-          marks: [{ type: "link", attrs: { href } }],
-        })
-        .run();
-      return;
-    }
-
-    currentEditor
-      .chain()
-      .focus()
-      .extendMarkRange("link")
-      .setLink({ href })
-      .run();
-  }
-
-  function insertFileLink(currentEditor: Editor) {
-    let path: string;
-    let filename: string;
-
-    if (latestUpload?.kind === "pdf") {
-      path = latestUpload.publicPath;
-      filename = latestUpload.filename;
-    } else {
-      const prompted = window
-        .prompt(
-          "File path or URL — upload PDFs in “Images & files” first, then paste the path here",
-          "/files/",
-        )
-        ?.trim();
-      if (!prompted) {
-        return;
-      }
-      path = prompted;
-      filename = path.split("/").pop() || path;
-    }
-
-    const label = filename.replace(/\.pdf$/iu, "") || filename;
-    currentEditor
-      .chain()
-      .focus()
-      .insertContent({
-        type: "text",
-        text: label,
-        marks: [{ type: "link", attrs: { href: path } }],
-      })
-      .run();
   }
 
   const groups: { name: string; buttons: ToolbarButton[] }[] =
@@ -334,32 +262,13 @@ export function EditorToolbar({
                 ariaLabel: "Insert or edit link",
                 text: "Link",
                 active: state.link,
-                action: () => insertOrEditLink(editor),
+                action: onRequestLink,
               },
               {
                 label: "Image",
                 ariaLabel: "Insert image",
                 text: "Image",
-                action: () => {
-                  const path =
-                    latestImagePath?.trim() ||
-                    (latestUpload?.kind === "image" ? latestUpload.publicPath : "") ||
-                    window
-                      .prompt("Image path (public URL or repo path)", "/images/")
-                      ?.trim() ||
-                    "";
-                  if (path.length === 0) {
-                    return;
-                  }
-                  const alt =
-                    window.prompt("Alt text (for accessibility)", imageAlt)?.trim() ||
-                    imageAlt;
-                  editor
-                    .chain()
-                    .focus()
-                    .setImage({ src: path, alt, title: alt })
-                    .run();
-                },
+                action: onRequestImage,
               },
               {
                 label: "File link",
@@ -369,7 +278,7 @@ export function EditorToolbar({
                 title: mediaUploadAvailable
                   ? "Insert a link to an uploaded PDF or file"
                   : "File attachments are not enabled for this media provider yet.",
-                action: () => insertFileLink(editor),
+                action: onRequestFile,
               },
             ],
           },
