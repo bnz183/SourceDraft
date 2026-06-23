@@ -41,6 +41,7 @@ Early open-source MVP — usable for solo writing and publishing to Git or remot
 | Markdown → HTML converter | Remote CMS publishers send body as-is |
 | Media delete/rename in Studio | Upload + list only |
 | Git Trees API indexer | Future improvement for very large repos |
+| Guided onboarding wizard & dashboard | Planned (roadmap Phase 5). The site-detection engine exists (`packages/setup/src/detectSetup.ts`) and is reachable today via Advanced Settings; a first-run wizard and status-first dashboard that surface and auto-apply it are **not built yet** |
 | Hotlinked connector screenshots | Official doc links only; see [assets/screenshots/ATTRIBUTION.md](assets/screenshots/ATTRIBUTION.md) |
 
 ## Comparison (why SourceDraft vs …)

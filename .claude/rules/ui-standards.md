@@ -45,6 +45,21 @@ shippable product, never a prototype.
 - **One thing per page/step** — configuration is staged, not dumped as one dense
   form. First run must work with **zero credentials** (demo mode).
 
+### Onboarding wizard & dashboard (Phase 5)
+
+The sanctioned Phase 5 surfaces (`docs/roadmap.md`) hold to the same bars:
+
+- The **first-run wizard** is staged one-thing-per-step, speaks plain language
+  (no `adapter`/`frontmatter`/`MDX`/`contentDir` outside Advanced), keeps the
+  zero-credential demo path reachable from every step, and reports detected
+  site type from the existing detection engine rather than inventing results.
+- Auto-applying detected config is a **risky action**: only when the existing
+  safety check passes, and never overwrites a valid existing config without
+  explicit confirmation (see "reversible or confirmed" actions).
+- The **dashboard** is a status-first landing: detected site type, connection
+  state, recent posts, and an obvious primary action — built from existing
+  status/readiness pieces, no new status mechanisms.
+
 ## Accessibility — WCAG 2.2 AA (required)
 
 - **Contrast**: body text ≥ **4.5:1**; large text (≥ 18px regular / 14px bold)

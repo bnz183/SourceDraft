@@ -87,6 +87,60 @@ Progressive disclosure and one-thing-per-page setup.
 - Regenerate screenshots if UI changed (`pnpm screenshots:generate`); update
   `docs/project-status.md` and `CHANGELOG.md` if anything user-visible shifted.
 
+## Phase 5 — Plug-and-play onboarding & guided Studio (next focus)
+
+A sanctioned, sequenced UX phase that follows Phase 4. Where Phase 4 polishes
+existing surfaces, Phase 5 makes first run **self-configuring and friendly for
+nontechnical writers** by surfacing capabilities the codebase already has. It
+adds **no** forbidden feature (no billing, telemetry, OAuth, RBAC, hosted
+Studio, plugin marketplace, or AI writing) and is measured against
+`.claude/rules/ui-standards.md`. Same gates as Phase 4: single-purpose PRs on
+their own branches (never pushed to `main`), tests added/updated, no new
+dependencies unless justified, secrets server-side, AGPL-3.0-or-later, and
+`pnpm build && pnpm test && pnpm test:e2e` green.
+
+This phase reuses the existing detection engine
+(`packages/setup/src/detectSetup.ts`) — it surfaces and auto-applies its
+results; it does **not** add a new detection system.
+
+### 5a — First-run onboarding wizard (`feat/onboarding-wizard`)
+
+A guided, plain-language first-run flow (new product surface, sanctioned here).
+
+- Staged "one thing per step" wizard shown on first run / when unconfigured.
+- Runs existing site detection and reports the result in plain language
+  ("We found an Astro site"), with alternatives when ambiguous.
+- **Auto-applies** the detected configuration only when the existing
+  `isSafeToApplySuggestion()` check passes (confidence ≥70, no warnings), via
+  the existing config-generation path — never overwriting a valid existing
+  `sourcedraft.config.json` without explicit confirmation.
+- Zero-credential demo path stays reachable from every step.
+- Tests: Playwright e2e in demo mode; unit tests for extracted first-run/step
+  logic.
+
+### 5b — Dashboard destination (`feat/studio-dashboard`)
+
+A status-first landing so users see what is connected before editing.
+
+- New Dashboard destination in the left nav: detected site type, connection
+  state (reusing readiness checks), recent posts, and clear primary actions.
+- Tests: extend e2e smoke for the new destination and default landing.
+
+### 5c — Plain-language pass (`feat/plain-language`)
+
+- Replace developer jargon (adapter, frontmatter, MDX, repository, contentDir,
+  config) in user-facing copy with plain words; keep technical terms behind
+  Advanced disclosure. Copy-only; no behavioural change.
+- Tests: update affected e2e selectors in the same PR.
+
+### 5d — System status & accessibility verification (`feat/ux-status-a11y`)
+
+- Visible system status on the new surfaces (detected type, connection,
+  unsaved, validation, last saved, publish) reusing existing status pieces.
+- Verify WCAG 2.2 AA across light **and** dark for the new wizard and
+  dashboard; regenerate screenshots; sync `docs/project-status.md` and
+  `CHANGELOG.md`.
+
 ## Later (self-hosted hardening)
 
 For people running Studio beyond a single laptop — still open source:
@@ -139,7 +193,9 @@ Deliberately out of scope in the current phase:
 - Plugin marketplace
 - AI writing tools, Agent API, BYOK AI, MCP, automation endpoints
 - Site hosting or running your static-site build
-- Large UI redesigns
+- Large UI redesigns — **except** the sanctioned, sequenced Phase 4 and Phase 5
+  UX work above (polish, onboarding, and a guided dashboard on existing
+  features; no new forbidden surface)
 
 ## Influence the roadmap
 

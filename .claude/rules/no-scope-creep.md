@@ -15,10 +15,15 @@ Do not implement, scaffold, stub, or document as available:
 - Hosted / multi-tenant Studio
 - Plugin marketplace
 - AI writing tools
-- Large UI redesigns — **except** the sanctioned, sequenced Phase 4 UX/UI
-  quality pass in `docs/roadmap.md`, which is polish and accessibility work on
-  existing features (no new product surface) measured against
-  `.claude/rules/ui-standards.md`. It adds no forbidden feature above.
+- Large UI redesigns — **except** the sanctioned, sequenced Phase 4 and Phase 5
+  UX/UI work in `docs/roadmap.md`, measured against
+  `.claude/rules/ui-standards.md`. Phase 4 is polish and accessibility work on
+  existing features. Phase 5 is a guided first-run onboarding wizard and a
+  status-first dashboard that surface and auto-apply the **existing** site
+  detection (`packages/setup/src/detectSetup.ts`) — a sanctioned new UX surface,
+  not a new product capability. Both add no forbidden feature above (no billing,
+  telemetry, OAuth, RBAC, team accounts, hosted/multi-tenant Studio, plugin
+  marketplace, or AI writing).
 
 Also forbidden: fake screenshots, fake metrics, fake benchmarks, and
 production/enterprise overclaims in any doc or UI string.

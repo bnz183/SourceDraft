@@ -58,7 +58,10 @@ Run `pnpm build` and `pnpm test` before finishing any code change. Run
 2. **License is AGPL-3.0-or-later** everywhere. No MIT references.
 3. **No scope creep** — see `.claude/rules/no-scope-creep.md`. No billing,
    paywalls, telemetry, OAuth, RBAC, team accounts, hosted/multi-tenant
-   Studio, plugin marketplace, or AI writing features.
+   Studio, plugin marketplace, or AI writing features. The only sanctioned new
+   UI surface is the sequenced Phase 4/Phase 5 UX work in `docs/roadmap.md`
+   (polish, plus a guided onboarding wizard and dashboard that surface the
+   existing site detection).
 4. **No fabrication.** No fake screenshots, metrics, benchmarks, testimonials,
    or placeholder features. Docs must describe what the code actually does.
 5. **No new dependencies** unless absolutely necessary and justified in the
