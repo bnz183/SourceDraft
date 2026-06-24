@@ -27,7 +27,7 @@ import { requireSameSiteRequest } from "./requestProtection.js";
 import { initializePlugins } from "./plugins.js";
 import { runContentAudit, runDemoContentAudit } from "./contentAuditHandler.js";
 import { getSetupHealth } from "./setupHealth.js";
-import { runGenerateConfig } from "./generateConfig.js";
+import { runGenerateConfig, type GenerateConfigInput } from "./generateConfig.js";
 import { runSetupDetection } from "./setupDetection.js";
 import {
   apiLimiter,
@@ -140,8 +140,9 @@ app.post(
   requireSameSiteRequest,
   requireAuth,
   requireNonDemo,
-  (_req, res) => {
-    const result = runGenerateConfig();
+  (req, res) => {
+    const body = req.body as GenerateConfigInput | undefined;
+    const result = runGenerateConfig(body);
     if (!result.ok) {
       const status = result.code === "exists" ? 409 : 400;
       res.status(status).json(result);

@@ -40,6 +40,11 @@ export type SetupDetectionReport = {
   configPreviewSummary: string | null;
 };
 
+export type GenerateConfigRequest = {
+  adapter?: string;
+  contentRoot?: string;
+};
+
 export type GenerateConfigResult =
   | { ok: true; configPath: string; summary: string }
   | { ok: false; code: string; error: string };
@@ -57,7 +62,9 @@ export async function fetchSetupDetection(): Promise<SetupDetectionReport | null
   }
 }
 
-export async function generateSetupConfig(): Promise<GenerateConfigResult> {
+export async function generateSetupConfig(
+  request?: GenerateConfigRequest,
+): Promise<GenerateConfigResult> {
   try {
     const response = await fetch("/api/setup/generate-config", {
       method: "POST",
@@ -65,6 +72,7 @@ export async function generateSetupConfig(): Promise<GenerateConfigResult> {
       headers: {
         "Content-Type": "application/json",
       },
+      body: JSON.stringify(request ?? {}),
     });
 
     return (await response.json()) as GenerateConfigResult;

@@ -1,6 +1,14 @@
 import { resolve } from "node:path";
-import { generateConfigFromDetection } from "@sourcedraft/setup";
+import {
+  generateConfigFromDetection,
+  resolveDetectionSuggestion,
+} from "@sourcedraft/setup";
 import { resolveSetupDetectionRoot, runSetupDetection } from "./setupDetection.js";
+
+export type GenerateConfigInput = {
+  adapter?: string;
+  contentRoot?: string;
+};
 
 export type GenerateConfigResponse =
   | {
@@ -14,10 +22,14 @@ export type GenerateConfigResponse =
       error: string;
     };
 
-export function runGenerateConfig(): GenerateConfigResponse {
+export function runGenerateConfig(input?: GenerateConfigInput): GenerateConfigResponse {
   const detection = runSetupDetection();
   const root = resolveSetupDetectionRoot();
-  const result = generateConfigFromDetection(root, detection.primary);
+  const suggestion = resolveDetectionSuggestion(detection, {
+    adapter: input?.adapter ?? null,
+    contentRoot: input?.contentRoot ?? null,
+  });
+  const result = generateConfigFromDetection(root, suggestion);
 
   if (!result.ok) {
     return {

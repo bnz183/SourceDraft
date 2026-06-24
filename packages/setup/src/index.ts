@@ -73,6 +73,12 @@ export { detectContentRoot, type DetectedContentRoot } from "./contentRootDetect
 export { inferFrontmatterSchema } from "./inferFrontmatterSchema.js";
 
 export {
+  applySuggestionOverrides,
+  pickDetectionSuggestionFromResult,
+  resolveDetectionSuggestion,
+} from "./resolveDetectionSuggestion.js";
+
+export {
   buildConfigFromSuggestion,
   generateConfigFromDetection,
   type GenerateConfigResult,
