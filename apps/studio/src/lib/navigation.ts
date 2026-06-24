@@ -8,6 +8,7 @@ export type NavItem = {
 };
 
 export const NAV_ITEMS: readonly NavItem[] = [
+  { view: "dashboard", label: "Dashboard" },
   { view: "editor", label: "Posts" },
   { view: "settings", label: "Settings" },
 ];

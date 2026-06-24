@@ -68,7 +68,7 @@ export function SettingsPanel({ config }: SettingsPanelProps) {
 
           <div className="settings-panel__grid">
             <label className="field">
-              <span className="field__label">Article folder (contentDir)</span>
+              <span className="field__label">Article folder</span>
               <input
                 className="field__input field__input--mono"
                 type="text"
@@ -78,7 +78,7 @@ export function SettingsPanel({ config }: SettingsPanelProps) {
             </label>
 
             <label className="field">
-              <span className="field__label">Blog type (adapter)</span>
+              <span className="field__label">Site format (adapter)</span>
               <input
                 className="field__input field__input--mono"
                 type="text"

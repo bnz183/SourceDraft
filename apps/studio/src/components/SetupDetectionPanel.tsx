@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
 import {
+  friendlyConfidenceLabel,
+  friendlyDetectionHeadline,
+  friendlyPostsLocation,
+  friendlySchemaSummary,
+  friendlyWhyWeThinkSo,
+} from "../lib/detectionCopy.js";
+import {
   fetchSetupDetection,
   generateSetupConfig,
   type SetupDetectionReport,
@@ -10,29 +17,27 @@ function plainLanguageSummary(report: SetupDetectionReport): string | null {
     return null;
   }
 
-  const { primary } = report;
-  const adapterName = primary.adapter.replace(/-mdx$|-markdown$/u, "").replace(/-/gu, " ");
-  const postsHint =
-    primary.postFileCount > 0
-      ? `${primary.postFileCount} post file(s) in \`${primary.contentDir}\``
-      : `articles expected in \`${primary.contentDir}\``;
-  return `We found a ${primary.framework} project for git-backed, AI-assisted publishing. Detected ${postsHint}. SourceDraft recommends the ${adapterName} adapter (${primary.confidence}% confidence) for automation-friendly Markdown/MDX workflows.`;
+  return [
+    friendlyDetectionHeadline(report.primary),
+    friendlyPostsLocation(report.primary),
+    `${friendlyConfidenceLabel(report.primary.confidence)} — ${friendlyWhyWeThinkSo(report.primary)}`,
+  ].join(" ");
 }
 
 function nextAction(report: SetupDetectionReport): string {
   if (report.configExists) {
-    return "Your config file already exists. Review Settings → Setup health, then edit sourcedraft.config.json if content paths or adapter settings need adjusting for your publish pipeline.";
+    return "Your site settings file already exists. Review Settings → Publishing readiness, then adjust folders only if something looks wrong.";
   }
 
   if (report.primary && report.safeToApply) {
-    return "Next step: generate a starter config for your content pipeline, or copy the values into sourcedraft.config.json manually before wiring deploy hooks.";
+    return 'Next step: click "Use these settings" in the setup wizard, or generate a starter config below for your technical helper.';
   }
 
   if (report.primary) {
-    return "Next step: review the warnings below, then copy or generate config only if the detected folders match your CMS and automation setup.";
+    return "Next step: review the warnings below, then confirm folders match your site before applying anything.";
   }
 
-  return "Next step: run pnpm setup from the SourceDraft folder, or ask your technical contact to configure git publishing and workflow tooling.";
+  return "Next step: run the setup wizard from the Dashboard, or ask your technical contact to finish connecting your blog.";
 }
 
 export function SetupDetectionPanel() {
@@ -91,8 +96,8 @@ export function SetupDetectionPanel() {
           Setup detection
         </h2>
         <p className="panel__meta">
-          Scans your project and suggests where posts and images should go — for
-          technical helpers; nothing is changed automatically.
+          Scans your project and suggests where posts and images should go. For
+          technical helpers — nothing is changed automatically.
         </p>
       </div>
 
@@ -150,7 +155,8 @@ export function SetupDetectionPanel() {
                 <div>
                   <dt>Recommended format</dt>
                   <dd>
-                    <code>{report.primary.adapter}</code>
+                    <span className="visually-hidden">{report.primary.adapter}</span>
+                    {report.primary.framework}
                   </dd>
                 </div>
                 <div>
@@ -211,8 +217,7 @@ export function SetupDetectionPanel() {
                 <div className="setup-detection__frontmatter">
                   <h3 className="setup-detection__subtitle">Fields found in sample posts</h3>
                   <p className="setup-detection__hint">
-                    Studio maps these to its article form when you edit or create posts — useful
-                    for automated and assisted publishing pipelines.
+                    {friendlySchemaSummary(report.primary)}
                   </p>
                   <ul className="setup-detection__field-list">
                     {report.primary.frontmatter.fields.map((field) => (

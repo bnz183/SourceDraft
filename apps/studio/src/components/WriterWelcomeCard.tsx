@@ -70,9 +70,9 @@ export function WriterWelcomeCard({
             images should go.
           </p>
           <p className="welcome-card__choice-hint">
-            After sign-in, open <strong>Settings</strong> →{" "}
-            <strong>Advanced configuration</strong>. A technical helper can
-            finish connecting your blog from there.
+            After sign-in, open the <strong>Dashboard</strong> setup wizard or{" "}
+            <strong>Settings</strong> → <strong>Advanced configuration</strong>.
+            A technical helper can finish connecting your blog from there.
           </p>
         </li>
 

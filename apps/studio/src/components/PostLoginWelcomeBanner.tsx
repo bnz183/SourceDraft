@@ -41,8 +41,8 @@ export function PostLoginWelcomeBanner({
         </p>
         <ul className="post-login-welcome__tips">
           <li>
-            <strong>Connect a blog:</strong> open Settings → Advanced
-            configuration to inspect your project and finish setup.
+            <strong>Connect a blog:</strong> open the Dashboard or Settings to
+            run the setup wizard and finish connecting your site.
           </li>
           <li>
             <strong>Agent-ready workflow:</strong> structured article fields,

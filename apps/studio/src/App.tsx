@@ -4,9 +4,11 @@ import type { PublishMode } from "@sourcedraft/publishers";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AppBar } from "./components/AppBar";
 import { AstroMdxPreview } from "./components/AstroMdxPreview";
+import { DashboardPanel } from "./components/DashboardPanel";
 import { DemoBanner } from "./components/DemoBanner";
 import { LoginScreen } from "./components/LoginScreen";
 import { NavRail } from "./components/NavRail";
+import { OnboardingWizard } from "./components/OnboardingWizard";
 import { PostDetailsPanel } from "./components/PostDetailsPanel";
 import { PostLoginWelcomeBanner } from "./components/PostLoginWelcomeBanner";
 import { PostSidebar } from "./components/PostSidebar";
@@ -43,6 +45,13 @@ import {
   fetchStudioConfig,
   type StudioConfig,
 } from "./lib/studioConfig";
+import {
+  createTestDraftDefaults,
+  isOnboardingComplete,
+  markOnboardingComplete,
+  shouldShowOnboarding,
+} from "./lib/onboardingWizard";
+import { fetchSetupDetection } from "./lib/setupDetection";
 import type { View } from "./types/view";
 
 function issuesByField(
@@ -64,7 +73,11 @@ function App() {
   const [demoMode, setDemoMode] = useState(false);
   const [demoModeForced, setDemoModeForced] = useState(false);
   const [demoModeAvailable, setDemoModeAvailable] = useState(false);
-  const [view, setView] = useState<View>("editor");
+  const [view, setView] = useState<View>("dashboard");
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [onboardingComplete, setOnboardingComplete] = useState(() =>
+    isOnboardingComplete(),
+  );
   const [theme, setTheme] = useState<ThemePreference>(() => getStoredTheme());
   const [studioConfig, setStudioConfig] = useState<StudioConfig>(
     FALLBACK_STUDIO_CONFIG,
@@ -116,6 +129,21 @@ function App() {
     setPostsLoading(false);
   }, []);
 
+  const reloadStudioConfig = useCallback(async () => {
+    const config = await fetchStudioConfig();
+    setStudioConfig(config);
+    setPublishMode(config.publishMode);
+    setDemoMode(config.demoMode === true);
+    setForm((current) => {
+      if (current.title.length > 0 || current.body.length > 0) {
+        return current;
+      }
+
+      return createInitialFormState(config.categories[0] ?? "AI-Assisted Publishing");
+    });
+    await refreshPosts();
+  }, [refreshPosts]);
+
   useEffect(() => {
     fetchAuthStatus().then((status) => {
       setAuthConfigured(status.configured);
@@ -163,6 +191,38 @@ function App() {
       window.clearTimeout(postsTimer);
     };
   }, [authenticated, refreshPosts]);
+
+  useEffect(() => {
+    if (!authenticated || demoMode || onboardingComplete) {
+      return;
+    }
+
+    let cancelled = false;
+
+    void fetchSetupDetection().then((report) => {
+      if (cancelled) {
+        return;
+      }
+
+      if (report?.configExists) {
+        markOnboardingComplete();
+        setOnboardingComplete(true);
+        setShowOnboarding(false);
+        return;
+      }
+
+      setShowOnboarding(
+        shouldShowOnboarding({
+          demoMode,
+          complete: onboardingComplete,
+        }),
+      );
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authenticated, demoMode, onboardingComplete]);
 
   const githubReady = useMemo(
     () =>
@@ -418,7 +478,57 @@ function App() {
     setEditingPath(null);
     setPublishError(null);
     setPublishSuccess(null);
-    setView("editor");
+    setView("dashboard");
+    setShowOnboarding(false);
+  }
+
+  function handleOnboardingComplete(options: {
+    openEditor: boolean;
+    testDraft: boolean;
+  }) {
+    markOnboardingComplete();
+    setOnboardingComplete(true);
+    setShowOnboarding(false);
+    setView(options.openEditor ? "editor" : "dashboard");
+  }
+
+  function handleApplyTestDraft(draft: ReturnType<typeof createTestDraftDefaults>) {
+    const nextForm: ArticleFormState = {
+      ...createInitialFormState(draft.category),
+      title: draft.title,
+      description: draft.description,
+      body: draft.body,
+      draft: draft.draft,
+      category: draft.category,
+      slug: slugFromTitle(draft.title),
+    };
+    setForm(nextForm);
+    setSlugAuto(true);
+    setEditingPath(null);
+    setLoadPostError(null);
+    setPublishError(null);
+    setPublishSuccess(null);
+    commitBaseline(
+      {
+        form: nextForm,
+        editingPath: null,
+        slugAuto: true,
+      },
+      {
+        remoteSync: false,
+        clearLocalDraft: false,
+      },
+    );
+  }
+
+  async function handleEnterDemoFromWizard() {
+    const result = await handleEnterDemo();
+    if (result.ok) {
+      markOnboardingComplete();
+      setOnboardingComplete(true);
+      setShowOnboarding(false);
+      setView("dashboard");
+    }
   }
 
   async function handlePublish() {
@@ -535,11 +645,44 @@ function App() {
         <NavRail view={view} onNavigate={setView} onLogout={handleLogout} />
 
         <div className="studio__content">
-          {view === "settings" ? (
+          {showOnboarding && (
+            <OnboardingWizard
+              demoAvailable={demoModeAvailable}
+              defaultCategory={studioConfig.categories[0]}
+              onComplete={handleOnboardingComplete}
+              onConfigApplied={reloadStudioConfig}
+              onEnterDemo={() => {
+                void handleEnterDemoFromWizard();
+              }}
+              onApplyTestDraft={handleApplyTestDraft}
+            />
+          )}
+
+          {!showOnboarding && view === "dashboard" ? (
+            <DashboardPanel
+              config={studioConfig}
+              demoMode={demoMode}
+              githubReady={githubReady}
+              posts={posts}
+              postsLoading={postsLoading}
+              onboardingComplete={onboardingComplete}
+              onOpenPosts={() => setView("editor")}
+              onOpenSettings={() => setView("settings")}
+              onStartSetup={() => setShowOnboarding(true)}
+              onEditPost={(path) => {
+                void handleEditPost(path);
+              }}
+              onNewPost={() => resetEditor()}
+            />
+          ) : null}
+
+          {!showOnboarding && view === "settings" ? (
             <main className="studio__settings">
               <SettingsPanel config={studioConfig} />
             </main>
-          ) : (
+          ) : null}
+
+          {!showOnboarding && view === "editor" ? (
             <>
               <PostLoginWelcomeBanner
                 demoMode={demoMode}
@@ -642,7 +785,7 @@ function App() {
           />
               </div>
             </>
-          )}
+          ) : null}
         </div>
       </div>
     </div>
