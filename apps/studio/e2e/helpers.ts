@@ -48,6 +48,25 @@ export async function enterDemoMode(page: Page): Promise<void> {
   ).toBeVisible();
 }
 
+export async function openPostsView(page: Page): Promise<void> {
+  await page
+    .getByRole("navigation", { name: "Primary" })
+    .getByRole("button", { name: "Posts", exact: true })
+    .click();
+  await expect(page.getByRole("heading", { name: "Articles" })).toBeVisible();
+  const dismiss = page.getByRole("button", { name: "Dismiss" });
+  if ((await dismiss.count()) > 0 && (await dismiss.isVisible())) {
+    await dismiss.click();
+  }
+}
+
+/** Demo mode lands on Dashboard; New article lives on the Posts view when sample posts exist. */
+export async function startNewArticle(page: Page): Promise<void> {
+  await openPostsView(page);
+  await page.getByRole("button", { name: "New article" }).click();
+  await expect(postBodyEditor(page)).toBeVisible();
+}
+
 export function ensureScreenshotDir(): void {
   mkdirSync(SCREENSHOT_DIR, { recursive: true });
 }

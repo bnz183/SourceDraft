@@ -16,7 +16,7 @@ export default defineConfig({
     viewport: { width: 1280, height: 900 },
   },
   webServer: {
-    command: "SOURCEDRAFT_DEMO_MODE=true STUDIO_API_PORT=8787 pnpm --dir apps/studio exec concurrently -n web,api -c blue,gray --kill-others \"pnpm exec vite --host 127.0.0.1\" \"pnpm exec tsx server/index.ts\"",
+    command: "SOURCEDRAFT_DEMO_MODE=true STUDIO_API_PORT=8787 SOURCEDRAFT_REPO_ROOT=. pnpm --dir apps/studio exec concurrently -n web,api -c blue,gray --kill-others \"pnpm exec vite --host 127.0.0.1\" \"pnpm exec tsx server/index.ts\"",
     cwd: repoRoot,
     url: "http://127.0.0.1:5173",
     reuseExistingServer: !process.env.CI,

@@ -3,9 +3,11 @@ import {
   attachPageErrorLogging,
   enterDemoMode,
   fillPostBody,
+  openPostsView,
   postBodyEditor,
   postDescriptionInput,
   postTitleInput,
+  startNewArticle,
   waitForStudioRoot,
 } from "./helpers.js";
 
@@ -28,8 +30,29 @@ test.describe("Studio smoke", () => {
     ).toBeVisible();
   });
 
+  test("dashboard renders as default landing in demo mode", async ({ page }) => {
+    await enterDemoMode(page);
+    await expect(page.getByRole("heading", { name: "Dashboard", level: 1 })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Connection" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Your content" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Next actions" })).toBeVisible();
+    await expect(page.getByText("Demo mode", { exact: true })).toBeVisible();
+  });
+
+  test("dashboard next actions navigate to Posts", async ({ page }) => {
+    await enterDemoMode(page);
+    await page
+      .getByRole("button", { name: /Write a sample article/ })
+      .click();
+    await expect(page.getByRole("heading", { name: "Articles" })).toBeVisible();
+  });
+
   test("overview/post list renders in demo mode", async ({ page }) => {
     await enterDemoMode(page);
+    await page
+      .getByRole("navigation", { name: "Primary" })
+      .getByRole("button", { name: "Posts", exact: true })
+      .click();
     await expect(page.getByText("Quick start")).toBeVisible();
     await page.getByRole("button", { name: "Dismiss" }).click();
     await expect(page.getByRole("heading", { name: "Articles" })).toBeVisible();
@@ -38,7 +61,7 @@ test.describe("Studio smoke", () => {
 
   test("new post form and editor accept text", async ({ page }) => {
     await enterDemoMode(page);
-    await page.getByRole("button", { name: "New article" }).click();
+    await startNewArticle(page);
     await postTitleInput(page).fill("Smoke test post");
     await postDescriptionInput(page).fill(
       "A short summary for the smoke test post.",
@@ -49,7 +72,7 @@ test.describe("Studio smoke", () => {
 
   test("toolbar inserts Markdown", async ({ page }) => {
     await enterDemoMode(page);
-    await page.getByRole("button", { name: "New article" }).click();
+    await startNewArticle(page);
     await fillPostBody(page, "Selected text");
     await page.keyboard.press("Control+A");
     await page.getByRole("button", { name: "Bold", exact: true }).click();
@@ -62,7 +85,7 @@ test.describe("Studio smoke", () => {
 
   test("toolbar renders grouped formatting controls", async ({ page }) => {
     await enterDemoMode(page);
-    await page.getByRole("button", { name: "New article" }).click();
+    await startNewArticle(page);
     const toolbar = page.getByRole("toolbar", { name: "Editor formatting" });
     for (const name of [
       "Paragraph",
@@ -92,6 +115,7 @@ test.describe("Studio smoke", () => {
   test("mobile sidebar can expand and collapse", async ({ page }) => {
     await page.setViewportSize({ width: 800, height: 900 });
     await enterDemoMode(page);
+    await openPostsView(page);
     const toggle = page.getByRole("button", { name: "Show all posts" });
     await expect(toggle).toBeVisible();
     await expect(toggle).toHaveAttribute("aria-expanded", "false");
@@ -102,7 +126,7 @@ test.describe("Studio smoke", () => {
 
   test("editor toolbar exposes core formatting controls", async ({ page }) => {
     await enterDemoMode(page);
-    await page.getByRole("button", { name: "New article" }).click();
+    await startNewArticle(page);
     await expect(page.getByRole("toolbar", { name: "Editor formatting" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Undo" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Italic" })).toBeVisible();
@@ -114,7 +138,7 @@ test.describe("Studio smoke", () => {
     page,
   }) => {
     await enterDemoMode(page);
-    await page.getByRole("button", { name: "New article" }).click();
+    await startNewArticle(page);
     await fillPostBody(page, "Intro paragraph.");
 
     await page.getByRole("button", { name: "Insert or edit link" }).click();
@@ -135,7 +159,7 @@ test.describe("Studio smoke", () => {
     page,
   }) => {
     await enterDemoMode(page);
-    await page.getByRole("button", { name: "New article" }).click();
+    await startNewArticle(page);
     await fillPostBody(page, "Before image.");
 
     await page.getByRole("button", { name: "Insert image", exact: true }).click();
@@ -155,7 +179,7 @@ test.describe("Studio smoke", () => {
 
   test("insert dialog closes on Escape without inserting", async ({ page }) => {
     await enterDemoMode(page);
-    await page.getByRole("button", { name: "New article" }).click();
+    await startNewArticle(page);
     await fillPostBody(page, "Body text.");
 
     await page.getByRole("button", { name: "Insert or edit link" }).click();
@@ -168,7 +192,7 @@ test.describe("Studio smoke", () => {
 
   test("autosave status appears after edits", async ({ page }) => {
     await enterDemoMode(page);
-    await page.getByRole("button", { name: "New article" }).click();
+    await startNewArticle(page);
     await postTitleInput(page).fill("Autosave smoke test");
     await expect(page.getByText("Unsaved changes", { exact: false })).toBeVisible({
       timeout: 5000,
@@ -177,13 +201,17 @@ test.describe("Studio smoke", () => {
 
   test("media library and content quality panels render", async ({ page }) => {
     await enterDemoMode(page);
+    await startNewArticle(page);
     await expect(page.getByRole("heading", { name: "Media library" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Content quality" })).toBeVisible();
   });
 
   test("settings is staged with readiness as the first step", async ({ page }) => {
     await enterDemoMode(page);
-    await page.getByRole("button", { name: "Settings", exact: true }).click();
+    await page
+      .getByRole("navigation", { name: "Primary" })
+      .getByRole("button", { name: "Settings", exact: true })
+      .click();
 
     // Page is oriented: a clear title and staged steps.
     await expect(
@@ -212,10 +240,16 @@ test.describe("Studio smoke", () => {
     await expect(page.getByText("GitHub connection", { exact: true })).toBeVisible();
   });
 
-  test("left nav switches between Posts and Settings", async ({ page }) => {
+  test("left nav switches between Dashboard, Posts, and Settings", async ({ page }) => {
     await enterDemoMode(page);
     const nav = page.getByRole("navigation", { name: "Primary" });
-    await expect(nav.getByRole("button", { name: "Posts", exact: true })).toBeVisible();
+    await expect(nav.getByRole("button", { name: "Dashboard", exact: true })).toBeVisible();
+    await expect(
+      nav.getByRole("button", { name: "Dashboard", exact: true }),
+    ).toHaveAttribute("aria-current", "page");
+
+    await nav.getByRole("button", { name: "Posts", exact: true }).click();
+    await expect(page.getByRole("heading", { name: "Articles" })).toBeVisible();
 
     await nav.getByRole("button", { name: "Settings", exact: true }).click();
     await expect(
@@ -225,8 +259,28 @@ test.describe("Studio smoke", () => {
       nav.getByRole("button", { name: "Settings", exact: true }),
     ).toHaveAttribute("aria-current", "page");
 
-    await nav.getByRole("button", { name: "Posts", exact: true }).click();
-    await expect(page.getByRole("heading", { name: "Articles" })).toBeVisible();
+    await nav.getByRole("button", { name: "Dashboard", exact: true }).click();
+    await expect(page.getByRole("heading", { name: "Dashboard", level: 1 })).toBeVisible();
+  });
+
+  test("setup wizard opens from dashboard and scans the project", async ({ page }) => {
+    await enterDemoMode(page);
+    await page
+      .getByRole("button", { name: /Run setup wizard|Review setup wizard/ })
+      .click();
+    await expect(page.getByRole("dialog")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Welcome", level: 1 })).toBeVisible();
+    await page.getByRole("button", { name: "Continue" }).click();
+    await expect(page.getByRole("heading", { name: "Your site", level: 1 })).toBeVisible();
+
+    const scanning = page.getByText("Scanning your project…");
+    const detected = page.getByText(/We found an? /);
+    const notDetected = page.getByText("We could not detect your site");
+    await expect(scanning.or(detected).or(notDetected)).toBeVisible({
+      timeout: 15_000,
+    });
+    await expect(detected.or(notDetected)).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole("button", { name: "Try demo mode" })).toBeVisible();
   });
 
   test("theme toggle cycles and persists across reload", async ({ page }) => {
@@ -246,7 +300,7 @@ test.describe("Studio smoke", () => {
 
   test("publish action is a large anchored primary button", async ({ page }) => {
     await enterDemoMode(page);
-    await page.getByRole("button", { name: "New article" }).click();
+    await startNewArticle(page);
     await postTitleInput(page).fill("Anchored publish test");
     await postDescriptionInput(page).fill("Summary for anchored publish test.");
     await fillPostBody(page, "# Anchored\n\nBody content.");
@@ -267,7 +321,7 @@ test.describe("Studio smoke", () => {
 
   test("publish checklist renders in demo mode", async ({ page }) => {
     await enterDemoMode(page);
-    await page.getByRole("button", { name: "New article" }).click();
+    await startNewArticle(page);
     await postTitleInput(page).fill("Checklist smoke test");
     await postDescriptionInput(page).fill("Summary for checklist smoke test.");
     await fillPostBody(page, "# Checklist\n\nBody content.");
@@ -279,7 +333,7 @@ test.describe("Studio smoke", () => {
 
   test("publish success can be simulated in demo mode", async ({ page }) => {
     await enterDemoMode(page);
-    await page.getByRole("button", { name: "New article" }).click();
+    await startNewArticle(page);
     await postTitleInput(page).fill("Demo publish smoke test");
     await postDescriptionInput(page).fill(
       "Summary for demo publish smoke test.",
@@ -291,7 +345,7 @@ test.describe("Studio smoke", () => {
 
   test("publish mode selector renders in demo mode", async ({ page }) => {
     await enterDemoMode(page);
-    await page.getByRole("button", { name: "New article" }).click();
+    await startNewArticle(page);
     await postTitleInput(page).fill("Publish mode smoke test");
     await postDescriptionInput(page).fill(
       "Summary for publish mode smoke test.",
@@ -310,7 +364,7 @@ test.describe("Studio smoke", () => {
 
   test("source mode toggle preserves raw body", async ({ page }) => {
     await enterDemoMode(page);
-    await page.getByRole("button", { name: "New article" }).click();
+    await startNewArticle(page);
     await fillPostBody(page, "<CustomBlock />\n\n## Heading");
     await page.getByRole("button", { name: "Source", exact: true }).click();
     const source = page.getByTestId("post-body-source");
@@ -320,7 +374,7 @@ test.describe("Studio smoke", () => {
 
   test("formatting controls cannot run in source mode", async ({ page }) => {
     await enterDemoMode(page);
-    await page.getByRole("button", { name: "New article" }).click();
+    await startNewArticle(page);
     const toolbar = page.getByRole("toolbar", { name: "Editor formatting" });
     await expect(toolbar.getByRole("button", { name: "Bold", exact: true })).toBeEnabled();
 
@@ -335,7 +389,7 @@ test.describe("Studio smoke", () => {
 
   test("undo and redo stay disabled with nothing to undo", async ({ page }) => {
     await enterDemoMode(page);
-    await page.getByRole("button", { name: "New article" }).click();
+    await startNewArticle(page);
     const toolbar = page.getByRole("toolbar", { name: "Editor formatting" });
     const undo = toolbar.getByRole("button", { name: "Undo", exact: true });
     await expect(undo).toBeDisabled();

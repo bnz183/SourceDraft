@@ -8,6 +8,7 @@ import {
   postDescriptionInput,
   postTitleInput,
   screenshotPath,
+  startNewArticle,
   STUDIO_VIEWPORT,
 } from "./helpers.js";
 
@@ -30,8 +31,7 @@ test.describe("release screenshots", () => {
       fullPage: false,
     });
 
-    await page.getByRole("button", { name: "New article" }).click();
-    await expect(postBodyEditor(page)).toBeVisible();
+    await startNewArticle(page);
 
     await page.screenshot({
       path: screenshotPath("editor.png"),
@@ -62,7 +62,7 @@ test.describe("release screenshots", () => {
       path: screenshotPath("preview.png"),
     });
 
-    await page.getByRole("button", { name: "New article" }).click();
+    await startNewArticle(page);
     await postTitleInput(page).fill("Screenshot publish example");
     await postDescriptionInput(page).fill(
       "Summary used for automated publish-success screenshot.",
@@ -77,7 +77,10 @@ test.describe("release screenshots", () => {
       path: screenshotPath("publish-success.png"),
     });
 
-    await page.getByRole("button", { name: "Settings", exact: true }).click();
+    await page
+      .getByRole("navigation", { name: "Primary" })
+      .getByRole("button", { name: "Settings", exact: true })
+      .click();
     await expect(page.getByRole("heading", { name: "Publishing readiness" })).toBeVisible();
     await page.locator(".setup-health").screenshot({
       path: screenshotPath("setup-health.png"),
