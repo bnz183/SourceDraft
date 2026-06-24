@@ -43,7 +43,9 @@ export function OnboardingWizard({
 }: OnboardingWizardProps) {
   const [step, setStep] = useState<OnboardingStepId>("welcome");
   const [report, setReport] = useState<SetupDetectionReport | null>(null);
-  const [loadingDetection, setLoadingDetection] = useState(false);
+  const [detectionError, setDetectionError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+  const [resolvedAttempt, setResolvedAttempt] = useState(-1);
   const [selectedAdapter, setSelectedAdapter] = useState<string | null>(null);
   const [selectedContentRoot, setSelectedContentRoot] = useState<string | null>(
     null,
@@ -64,21 +66,47 @@ export function OnboardingWizard({
     activeSuggestion?.contentDir ??
     null;
 
+  // "attempted" is tracked by resolvedAttempt (set only when a fetch settles),
+  // kept distinct from the result so a failed scan does not re-arm the effect.
+  const detectionStatus: "idle" | "loading" | "loaded" | "error" =
+    step !== "detect-site"
+      ? "idle"
+      : resolvedAttempt !== retryCount
+        ? "loading"
+        : detectionError
+          ? "error"
+          : "loaded";
+
   useEffect(() => {
-    if (step !== "detect-site" || report !== null || loadingDetection) {
+    if (step !== "detect-site" || resolvedAttempt === retryCount) {
       return;
     }
 
-    setLoadingDetection(true);
+    let ignore = false;
     void fetchSetupDetection().then((next) => {
+      if (ignore) {
+        return;
+      }
+
+      if (next === null) {
+        setDetectionError(true);
+        setResolvedAttempt(retryCount);
+        return;
+      }
+
       setReport(next);
-      setLoadingDetection(false);
-      if (next?.primary) {
+      setDetectionError(false);
+      setResolvedAttempt(retryCount);
+      if (next.primary) {
         setSelectedAdapter(next.primary.adapter);
         setSelectedContentRoot(next.primary.contentRoot);
       }
     });
-  }, [step, report, loadingDetection]);
+
+    return () => {
+      ignore = true;
+    };
+  }, [step, retryCount, resolvedAttempt]);
 
   const choices = detectionChoices(report);
   const ambiguous = report?.primary !== null && report?.safeToApply !== true;
@@ -209,22 +237,29 @@ export function OnboardingWizard({
 
           {step === "detect-site" && (
             <>
-              {loadingDetection && (
+              {detectionStatus === "loading" && (
                 <p className="onboarding-wizard__status" role="status">
                   Scanning your project…
                 </p>
               )}
 
-              {!loadingDetection && report === null && (
+              {detectionStatus === "error" && (
                 <div className="notice notice--error" role="alert">
                   <p className="notice__title">Could not scan your project</p>
                   <p className="notice__body">
                     Confirm the publish service is running, then try again.
                   </p>
+                  <button
+                    type="button"
+                    className="button button--compact"
+                    onClick={() => setRetryCount((count) => count + 1)}
+                  >
+                    Try again
+                  </button>
                 </div>
               )}
 
-              {!loadingDetection && report && !report.primary && (
+              {detectionStatus === "loaded" && report && !report.primary && (
                 <div className="notice notice--warning" role="status">
                   <p className="notice__title">We could not detect your site</p>
                   <p className="notice__body">
@@ -234,7 +269,7 @@ export function OnboardingWizard({
                 </div>
               )}
 
-              {report && activeSuggestion && (
+              {detectionStatus === "loaded" && report && activeSuggestion && (
                 <>
                   <p className="onboarding-wizard__lead">
                     {friendlyDetectionHeadline(activeSuggestion)}
@@ -489,7 +524,9 @@ export function OnboardingWizard({
                 disabled={
                   applying ||
                   (step === "detect-site" &&
-                    (loadingDetection || (report !== null && !report.primary)))
+                    (detectionStatus === "loading" ||
+                      detectionStatus === "error" ||
+                      (report !== null && !report.primary)))
                 }
                 onClick={() => {
                   void handleNext();
